@@ -1,0 +1,9 @@
+{
+  "feedback_url": "https://wj.qq.com/s2/27342859/4455",
+  "owner_email": "tjhjxhlin@163.com",
+  "project_name": "双碳领域知识库",
+  "description": "面向双碳领域研究与管理人员，自动采集并入库政策法规/标准/碳市场/减污降碳协同/行业节能/技术产品/研究文献/国际与区域动态，按部门优先级与质量等级呈现，支持全文检索、RAG问答与报告生成。",
+  "public_url": "https://fc16e78fef304e37a5fffdd77c048f54.app.codebuddy.work",
+  "public_url_type": "cloudstudio-临时链接(授权edgeone-pages后切换为固定链接)",
+  "update_note": "每日自动采集更新；当前为CloudStudio临时公开链接，授权 edgeone-pages 连接器后将切换为固定链接并由每日任务自动部署。优化需求须经负责人（tjhjxhlin@163.com）确认后实施。"
+}

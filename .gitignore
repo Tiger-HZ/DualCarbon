@@ -1,0 +1,15 @@
+# Python 缓存
+__pycache__/
+*.pyc
+*.pyo
+
+# 临时探测文件
+probe_*.html
+check_*.html
+
+# 系统
+.DS_Store
+Thumbs.db
+
+# 不提交知识库原始采集箱（运行期生成）
+kb/inbox.json
