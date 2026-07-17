@@ -34,9 +34,11 @@ QUAL_NAME = {"A": "高", "B": "中", "C": "一般"}
 
 # 部门优先级维度：生态环境条线优先，发改/经信(工信)/市场监管/商务为重点，其余一般
 PRIORITY = [
-    ("生态环境优先", "#1a7f5a", ("生态", "环境")),
-    ("重点部门", "#b45309", ("发改", "经信", "工信", "市场监管", "商务")),
-    ("其他部门", "#64748b", ()),
+    ("生态环境部门", "#1a7f5a", ("生态", "环境")),
+    ("发展改革委", "#0f766e", ("发改",)),
+    ("经信(工信)", "#2563eb", ("经信", "工信")),
+    ("市场监管局", "#b45309", ("市场监管",)),
+    ("其他相关部门", "#64748b", ()),
 ]
 
 
@@ -45,7 +47,16 @@ def scope_of(dept):
     for name, color, keys in PRIORITY:
         if any(k in d for k in keys):
             return name, color
-    return "其他部门", "#64748b"
+    return PRIORITY[-1][0], PRIORITY[-1][1]
+
+
+def priority_rank(dept):
+    """部门优先级排序：生态环境部门(0) > 发展改革委(1) > 经信(工信)(2) > 市场监管局(3) > 其他(4)。"""
+    d = dept or ""
+    for idx, (name, color, keys) in enumerate(PRIORITY):
+        if any(k in d for k in keys):
+            return idx
+    return len(PRIORITY) - 1
 
 
 def load_kb():
@@ -301,7 +312,8 @@ def build_index(kb, days):
             len(kb), full_n, len(days), "、".join(sorted(ys.keys())))
         + (('<div class="statbar">%s</div>' % ychips) if ychips else '')
         + '<div class="bar"><div class="inner">%s'
-          '<a href="archive.html" style="margin-left:auto;font-size:13px">全部知识库 / 时间轴 →</a>'
+          '<a href="archive.html" style="font-size:13px">全部知识库 / 时间轴 →</a>'
+          '<a href="rag.html" style="margin-left:auto;font-size:13px;font-weight:700;color:#1a7f5a">🧠 RAG 智能检索（向量+关键词+元数据）→</a>'
           '</div></div>' % build_filters(with_window=False, with_cat=True)
         + '<div class="count" id="count"></div>'
         + '<div class="phead"><h2>最新推送</h2><span class="sub">%s · 当日新增 %d 条</span></div>'
@@ -321,6 +333,7 @@ def build_push_day(day, items, days):
     for cid, cname, _ in CATS:
         sub = sorted([i for i in items if i.get("category") == cid],
                      key=lambda x: x.get("date", ""), reverse=True)
+        sub.sort(key=lambda x: priority_rank(x.get("department", "")), reverse=False)
         if not sub:
             continue
         sections += ('<section class="block"><h2>%s<span class="cnt">%d 条</span></h2>'
@@ -352,7 +365,7 @@ def build_archive(kb):
     dates = sorted(by_date.keys(), reverse=True)
     sections = ""
     for dt in dates:
-        sub = sorted(by_date[dt], key=lambda x: CAT_ORDER.get(x.get("category"), 99))
+        sub = sorted(by_date[dt], key=lambda x: (CAT_ORDER.get(x.get("category"), 99), priority_rank(x.get("department", ""))))
         sections += ('<section class="block"><h2>%s<span class="cnt">%d 条</span></h2>'
                      '<div class="grid">%s</div></section>') % (dt, len(sub), "".join(card(i) for i in sub))
     body = (
@@ -378,7 +391,7 @@ def shell(subtitle, body):
           '<div class="up">%s</div></div></header>' % (PNAME, CONFIG.get("description", ""), subtitle, up)
         + '<div class="wrap">' + body + '</div>'
         + '<button class="fab" onclick="location.href=\'%s\'">💬 留言反馈</button>' % FEEDBACK
-        + '<footer>双碳领域知识库 · 自动采集更新（内容入库，支持 RAG 检索 / 报告生成）｜ 团队反馈：'
+        + '<footer>双碳领域知识库 · 自动采集更新（内容入库，支持 <a href="rag.html" style="color:#fff;text-decoration:underline">RAG 智能检索</a> / 报告生成）｜ 团队反馈：'
           '<a href="%s" target="_blank" rel="noopener">填写问卷</a> ｜ 负责人邮箱 '
           '<a href="mailto:%s">%s</a><br>%s</footer>' % (
             FEEDBACK, OWNER, OWNER, CONFIG.get("update_note", ""))
