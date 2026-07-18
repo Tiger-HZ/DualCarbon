@@ -21,7 +21,7 @@ if not TOKEN:
 
 FILES = [
     "kb/kb.json",
-    "rag.html", "rag.py", "rag_cli.py", "fetch_fulltext.py", "README_RAG.md",
+    "rag.html", "rag.py", "rag_cli.py", "fetch_fulltext.py", "ingest_url.py", "README_RAG.md",
     ".gitignore", "update.py", "render.py", "config.json", "gh_deploy.py",
     "index.html", "feed.html", "archive.html", "2026-07-17.html",
 ]
