@@ -418,12 +418,14 @@ def main():
         key = i.get("added_at") or i.get("date") or "未知日期"
         PUSHES.setdefault(key, []).append(i)
     days = sorted(PUSHES.keys(), reverse=True)
-    open(os.path.join(BASE, "index.html"), "w", encoding="utf-8").write(build_index(kb, days))
+    # index.html 现为一体化门户 SPA（手写、运行时读取 kb/kb.json），render 不再覆盖它。
+    # 服务端渲染的静态首页写入 feed.html，作为无 JS 环境/深链回退。
+    open(os.path.join(BASE, "feed.html"), "w", encoding="utf-8").write(build_index(kb, days))
     for day in days:
         open(os.path.join(BASE, "push-%s.html" % day), "w", encoding="utf-8").write(
             build_push_day(day, PUSHES[day], days))
     open(os.path.join(BASE, "archive.html"), "w", encoding="utf-8").write(build_archive(kb))
-    print("rendered: index.html, %d push pages, archive.html (kb total=%d)" % (len(days), len(kb)))
+    print("rendered: feed.html (fallback), %d push pages, archive.html (kb total=%d) | index.html=SPA门户(未覆盖)" % (len(days), len(kb)))
 
 
 if __name__ == "__main__":
