@@ -4,7 +4,7 @@
 【安全】Token 绝不写在本文件。从环境变量 GH_TOKEN 或本地未跟踪文件 .deploy_token 读取。
 用法：python gh_deploy.py
 """
-import os, json, base64, time, urllib.request, urllib.error
+import os, json, base64, time, urllib.request, urllib.error, urllib.parse
 
 BASE = os.path.dirname(os.path.abspath(__file__))
 REPO = "Tiger-HZ/DualCarbon"
@@ -47,7 +47,7 @@ def req(method, url, data=None):
 
 def get_remote(path):
     try:
-        with req("GET", API % path) as r:
+        with req("GET", API % urllib.parse.quote(path, safe="/")) as r:
             d = json.load(r)
             return d.get("sha"), base64.b64decode(d.get("content", "")).decode("utf-8", "ignore")
     except urllib.error.HTTPError as e:
@@ -70,7 +70,7 @@ def upload(path):
             body = {"message": "deploy: %s" % path, "content": b64, "branch": BRANCH}
             if sha:
                 body["sha"] = sha
-            with req("PUT", API % path, json.dumps(body)) as r:
+            with req("PUT", API % urllib.parse.quote(path, safe="/"), json.dumps(body)) as r:
                 print(("OK %d " % r.status) + path)
                 return True
         except urllib.error.HTTPError as e:
