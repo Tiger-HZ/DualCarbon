@@ -23,7 +23,7 @@ FILES = [
     "kb/kb.json",
     "rag.html", "rag.py", "rag_cli.py", "fetch_fulltext.py", "README_RAG.md",
     ".gitignore", "update.py", "render.py", "config.json", "gh_deploy.py",
-    "index.html", "archive.html", "2026-07-17.html",
+    "index.html", "feed.html", "archive.html", "2026-07-17.html",
 ]
 for f in sorted(os.listdir(BASE)):
     if f.startswith("push-") and f.endswith(".html"):
