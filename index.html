@@ -222,8 +222,8 @@
     </div>
     <div class="statbar" id="feedStat"></div>
     <div class="grid" id="feedGrid"></div>
-    <div class="datenav" id="feedDates"><span class="lbl">按收录日期：</span></div>
     <div class="muted" id="feedPage" style="margin-top:10px"></div>
+    <div class="datenav" id="feedDates" style="margin-top:14px"><span class="lbl">按收录日期：</span></div>
   </section>
 
   <!-- 知识库 -->
@@ -562,7 +562,11 @@ async function loadFeed(){
     if(q) arr = arr.filter(r=>(r.title+' '+(r.summary||'')+' '+(r.content||'')).toLowerCase().includes(q.toLowerCase()));
     if(dept) arr=arr.filter(r=>r.department===dept);
     if(cat) arr=arr.filter(r=>r.category===cat);
-    arr.sort((a,b)=> (b.date||'').localeCompare(a.date||''));
+    if(sort==='importance'){
+      arr.sort((a,b)=> (Number(b.importance)||0)-(Number(a.importance)||0) || (b.date||'').localeCompare(a.date||''));
+    } else {
+      arr.sort((a,b)=> (b.date||'').localeCompare(a.date||''));
+    }
     $('#feedStat').innerHTML='<span class="chip">共 <b>'+arr.length+'</b> 条 · 静态只读</span>';
     const slice=arr.slice((App.feedPage-1)*30,App.feedPage*30);
     $('#feedGrid').innerHTML = slice.length? slice.map(recCard).join('') : '<div class="empty">暂无匹配结果</div>';
@@ -620,7 +624,7 @@ async function loadKB(){
     if(cat) arr=arr.filter(r=>r.category===cat);
     if(region) arr=arr.filter(r=>r.region===region);
     if(quality) arr=arr.filter(r=>r.quality===quality);
-    arr.sort((a,b)=>(b.date||'').localeCompare(a.date||''));
+    arr.sort((a,b)=> (Number(b.importance)||0)-(Number(a.importance)||0) || (b.date||'').localeCompare(a.date||''));
     $('#kbStat').innerHTML='<span class="chip">共 <b>'+arr.length+'</b> 条 · 静态只读</span>';
     const slice=arr.slice((App.kbPage-1)*30,App.kbPage*30);
     $('#kbGrid').innerHTML = slice.length? slice.map(recCard).join('') : '<div class="empty">暂无匹配结果</div>';
