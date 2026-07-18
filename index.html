@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>双碳领域知识库 · 一体化门户</title>
+<title>双碳领域知识中台 · 一体化门户</title>
 <style>
   :root{
     --bg:#f5f7f6; --card:#fff; --ink:#1e2b25; --sub:#5c6b63; --line:#e4eae7;
@@ -17,17 +17,25 @@
   a{color:var(--blue);text-decoration:none}
   a:hover{text-decoration:underline}
   /* header */
-  header.top{background:linear-gradient(120deg,#0f766e,#1a7f5a);color:#fff;padding:20px 22px 0}
-  header .inner{max-width:1180px;margin:0 auto}
-  header h1{margin:0;font-size:21px;font-weight:700;letter-spacing:.4px}
+  header.top{background:linear-gradient(120deg,#0f766e,#1a7f5a);color:#fff;padding:18px 22px 0}
+  header .inner{max-width:1200px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap}
+  header h1{margin:0;font-size:20px;font-weight:700;letter-spacing:.4px}
   header p{margin:5px 0 0;font-size:12.5px;opacity:.9}
-  .tabs{display:flex;gap:4px;max-width:1180px;margin:14px auto 0;flex-wrap:wrap}
-  .tab{padding:10px 18px;cursor:pointer;color:rgba(255,255,255,.82);font-size:14px;font-weight:600;
+  .acct{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+  .pill-mode{font-size:11.5px;background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.3);
+            padding:4px 11px;border-radius:20px;color:#fff}
+  .acct .who{font-size:12.5px;background:rgba(255,255,255,.15);padding:5px 12px;border-radius:20px}
+  .acct .who b{font-weight:700}
+  .tabs{display:flex;gap:4px;max-width:1200px;margin:14px auto 0;flex-wrap:wrap}
+  .tab{padding:10px 16px;cursor:pointer;color:rgba(255,255,255,.82);font-size:13.5px;font-weight:600;
        border-radius:10px 10px 0 0;user-select:none;border:1px solid transparent;border-bottom:none}
-  .tab.on{background:var(--bg);color:var(--green);}
-  .wrap{max-width:1180px;margin:0 auto;padding:18px}
+  .tab.on{background:var(--bg);color:var(--green)}
+  .wrap{max-width:1200px;margin:0 auto;padding:18px}
   .view{display:none}
   .view.on{display:block}
+  .banner{background:#fff7ed;border:1px solid #fed7aa;color:#9a3412;border-radius:11px;
+          padding:10px 14px;font-size:12.8px;margin-bottom:14px}
+  .banner.ok{background:#ecfdf5;border-color:#a7f3d0;color:#065f46}
   /* bars & chips */
   .statbar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
   .chip{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:5px 13px;
@@ -36,8 +44,9 @@
   .toolbar{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 14px;
            box-shadow:var(--shadow);margin-bottom:14px;display:flex;gap:10px;flex-wrap:wrap;align-items:center}
   input[type=text],select,textarea{padding:9px 11px;border:1px solid var(--line);border-radius:9px;
-        font-size:13.5px;outline:none;background:#fff;font-family:inherit}
+        font-size:13.5px;outline:none;background:#fff;font-family:inherit;color:var(--ink)}
   input[type=text]:focus,select:focus,textarea:focus{border-color:var(--green)}
+  textarea{resize:vertical}
   .grow{flex:1;min-width:200px}
   button{cursor:pointer;border:none;border-radius:9px;padding:9px 16px;font-size:13.5px;font-weight:600;
          background:var(--green);color:#fff}
@@ -56,7 +65,7 @@
   .card h3{margin:0 0 7px;font-size:14.5px;line-height:1.45}
   .card .sum{font-size:12.8px;color:var(--sub);flex:1;
              display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
-  .badges{display:flex;gap:5px;flex-wrap:wrap;margin-top:9px}
+  .badges{display:flex;gap:5px;flex-wrap:wrap;margin-top:9px;align-items:center}
   .badge{display:inline-block;padding:1.5px 9px;border-radius:20px;font-size:11px;font-weight:600}
   .b-dept{background:#e7f0ec;color:#0f766e}
   .b-cat{background:#eef2ff;color:#2563eb}
@@ -64,24 +73,46 @@
   .b-full{background:#e8f7ef;color:#1a7f5a}
   .b-region{background:#f1f5f9;color:#475569}
   .b-none{background:#f3f4f6;color:#9ca3af}
+  .b-imp{background:#fde8f0;color:#be185d}
+  .imp-star{color:#be185d;font-weight:700;font-size:12px}
   .block h2{font-size:15px;margin:20px 0 10px;padding-bottom:6px;border-bottom:2px solid var(--line);
             display:flex;align-items:center;gap:8px}
   .block h2 .cnt{font-size:12px;color:var(--sub);font-weight:500}
-  .datenav{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:14px}
+  .datenav{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:14px;margin-top:18px;
+           padding-top:14px;border-top:2px dashed var(--line)}
+  .datenav .lbl{font-size:12.5px;color:var(--sub);align-self:center;margin-right:4px}
   .dpill{padding:6px 12px;border-radius:8px;background:var(--card);border:1px solid var(--line);
          font-size:12.5px;cursor:pointer;color:var(--sub)}
   .dpill.on{background:var(--green);color:#fff;border-color:var(--green)}
   .muted{color:var(--sub);font-size:12.5px}
   .empty{text-align:center;color:var(--sub);padding:36px}
-  /* RAG */
+  /* ai */
   .result{background:var(--card);border:1px solid var(--line);border-radius:11px;padding:13px 15px;margin-bottom:11px}
   .result h3{margin:0 0 5px;font-size:14.5px}
   .chunk{font-size:13.3px;margin:7px 0;max-height:120px;overflow:hidden;position:relative}
   .chunk.open{max-height:none}
   .chunk em{background:#fff3bf;font-style:normal;border-radius:3px;padding:0 1px}
   .more{font-size:12px;color:var(--blue);cursor:pointer;user-select:none}
-  #ragReport{white-space:pre-wrap;font-size:13px;background:var(--card);border:1px solid var(--line);
-             border-radius:11px;padding:16px;max-height:600px;overflow:auto;display:none}
+  /* markdown */
+  .md{font-size:13.6px;line-height:1.78;color:var(--ink)}
+  .md h1{font-size:21px;margin:14px 0 10px;border-bottom:2px solid var(--line);padding-bottom:6px}
+  .md h2{font-size:17px;margin:18px 0 8px;color:var(--green-d)}
+  .md h3{font-size:15px;margin:14px 0 6px}
+  .md h4,.md h5,.md h6{margin:12px 0 5px}
+  .md p{margin:9px 0}
+  .md ul,.md ol{margin:9px 0;padding-left:24px}
+  .md li{margin:4px 0}
+  .md blockquote{margin:10px 0;padding:8px 14px;background:#f0f5f3;border-left:4px solid var(--green);
+                border-radius:0 8px 8px 0;color:var(--sub)}
+  .md code{background:#eef2f0;padding:1px 6px;border-radius:5px;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12.5px}
+  .md pre{background:#0f172a;color:#e2e8f0;padding:13px 15px;border-radius:10px;overflow:auto;font-size:12.6px}
+  .md pre code{background:none;color:inherit;padding:0}
+  .md table{border-collapse:collapse;margin:12px 0;width:100%;font-size:13px}
+  .md th,.md td{border:1px solid var(--line);padding:7px 10px;text-align:left}
+  .md th{background:#f0f5f3;color:var(--sub)}
+  .md hr{border:none;border-top:1px solid var(--line);margin:16px 0}
+  .md a{color:var(--blue)}
+  .srcbox{background:#f8faf9;border:1px solid var(--line);border-radius:10px;padding:11px 13px;margin-top:10px;font-size:12.5px}
   /* manage */
   table{width:100%;border-collapse:collapse;background:var(--card);border-radius:11px;overflow:hidden;
         box-shadow:var(--shadow);font-size:13px}
@@ -102,13 +133,13 @@
   .mask{position:fixed;inset:0;background:rgba(16,30,24,.5);display:none;z-index:50;
         align-items:flex-start;justify-content:center;padding:40px 16px;overflow:auto}
   .mask.on{display:flex}
-  .modal{background:#fff;border-radius:14px;max-width:760px;width:100%;box-shadow:var(--shadow-l);
+  .modal{background:#fff;border-radius:14px;max-width:840px;width:100%;box-shadow:var(--shadow-l);
          padding:22px 24px;position:relative}
   .modal h2{margin:0 6px 4px 0;font-size:18px;line-height:1.4}
   .modal .x{position:absolute;top:14px;right:16px;font-size:22px;cursor:pointer;color:var(--sub);
             background:none;padding:0;width:30px}
   .modal .content{white-space:pre-wrap;font-size:13.6px;line-height:1.75;color:var(--ink);
-                  max-height:52vh;overflow:auto;margin-top:12px;padding-top:12px;border-top:1px solid var(--line)}
+                  max-height:46vh;overflow:auto;margin-top:12px;padding-top:12px;border-top:1px solid var(--line)}
   .fld{margin:9px 0}
   .fld label{display:block;font-size:12px;color:var(--sub);margin-bottom:3px}
   .fld input,.fld select,.fld textarea{width:100%}
@@ -117,604 +148,962 @@
         border-radius:9px;padding:10px 12px;margin:10px 0}
   .fab{position:fixed;right:22px;bottom:22px;background:var(--green);color:#fff;border-radius:26px;
        padding:12px 18px;box-shadow:var(--shadow-l);font-size:14px;z-index:20}
-  footer{margin-top:26px;padding:20px;text-align:center;color:var(--sub);font-size:12px;
-         border-top:1px solid var(--line)}
-  .pill-toggle{cursor:pointer}
-  /* 手动入库 */
-  .ingest-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:6px}
-  .panel{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px}
-  .panel h3{margin:0 0 4px;font-size:15px}
-  .drop{border:1.5px dashed var(--line);border-radius:10px;padding:18px;text-align:center;color:var(--sub);
-        cursor:pointer;margin:12px 0;background:#fafcfb;display:block;font-size:13px}
-  .drop:hover{border-color:var(--green);color:var(--green)}
-  .pending{border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin:8px 0}
-  .pending .pv{font-size:12px;color:var(--sub);margin-top:6px;white-space:pre-wrap;max-height:90px;overflow:auto;
-        background:#f7faf9;border-radius:6px;padding:6px 8px}
-  .aiq{border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin:8px 0;background:#f7fbfa}
-  @media(max-width:780px){.ingest-grid{grid-template-columns:1fr}}
+  footer{margin-top:26px;padding:20px;text-align:center;color:var(--sub);font-size:12px}
+  /* graph */
+  .graph-wrap{position:relative;background:#fff;border:1px solid var(--line);border-radius:12px;
+              box-shadow:var(--shadow);overflow:hidden}
+  .graph-canvas{display:block;width:100%;height:560px;background:
+     radial-gradient(circle at 30% 20%,#f0f7f4,transparent 60%),
+     radial-gradient(circle at 80% 80%,#f0f3fb,transparent 55%),#fbfdfc}
+  .graph-tip{position:absolute;pointer-events:none;background:#0f172a;color:#fff;font-size:12px;
+             padding:4px 9px;border-radius:7px;display:none;z-index:5;max-width:240px}
+  .graph-legend{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--sub);margin:10px 0}
+  .graph-legend i{display:inline-block;width:11px;height:11px;border-radius:50%;margin-right:5px;vertical-align:-1px}
+  .ggrid{display:grid;grid-template-columns:1fr 320px;gap:14px}
+  @media(max-width:880px){.ggrid{grid-template-columns:1fr}.graph-canvas{height:420px}}
+  .sub-card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px;box-shadow:var(--shadow)}
+  .kw{display:inline-block;background:#f1ecfe;color:#6d28d9;border:1px solid #e4d6fb;
+      border-radius:20px;padding:2px 10px;font-size:11.5px;margin:3px 4px 0 0}
+  .kw.concept{background:#fef3e2;color:#b45309;border-color:#fde6c5}
+  .gal{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:8px;margin-top:8px}
+  .gal img{width:100%;height:90px;object-fit:cover;border-radius:8px;border:1px solid var(--line);cursor:pointer}
+  .gal .ph{height:90px;border-radius:8px;background:#eef2f0;display:flex;align-items:center;justify-content:center;
+           color:var(--sub);font-size:11.5px;border:1px dashed var(--line)}
+  .ann{background:#f8faf9;border:1px solid var(--line);border-radius:9px;padding:9px 12px;margin:8px 0;font-size:13px}
+  .ann .meta{font-size:11.5px;color:var(--sub);margin-top:4px;display:flex;justify-content:space-between;gap:8px}
+  .ann .del{color:#dc2626;cursor:pointer;font-size:11.5px}
+  .login-mini{font-size:12.5px;color:var(--sub);background:#fff;border:1px solid var(--line);border-radius:10px;padding:14px;text-align:center}
+  .toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%);background:#0f172a;color:#fff;
+         padding:10px 18px;border-radius:10px;font-size:13px;z-index:99;opacity:0;transition:.25s;pointer-events:none}
+  .toast.on{opacity:1}
+  .spinner{display:inline-block;width:15px;height:15px;border:2px solid #fff;border-top-color:transparent;
+           border-radius:50%;animation:spin .7s linear infinite;vertical-align:-2px;margin-right:6px}
+  @keyframes spin{to{transform:rotate(360deg)}}
 </style>
 </head>
 <body>
 <header class="top">
   <div class="inner">
-    <h1>双碳领域知识库 · 一体化门户</h1>
-    <p id="subtitle">每日推送 ｜ 知识库时间轴 ｜ RAG 智能检索 ｜ 知识管理 —— 一个页面完成全部操作</p>
+    <div>
+      <h1>🌱 双碳领域知识中台</h1>
+      <p>自动采集 · 智能分类 · 知识图谱 · 混合检索 · 分角色协作</p>
+    </div>
+    <div class="acct">
+      <span class="pill-mode" id="modePill">检测中…</span>
+      <span id="acctBox">
+        <button class="ghost" style="background:rgba(255,255,255,.15);color:#fff;border-color:rgba(255,255,255,.4)" onclick="openLogin()">登录 / 注册</button>
+      </span>
+    </div>
   </div>
   <div class="tabs" id="tabs">
-    <div class="tab on" data-v="feed">📰 每日推送</div>
-    <div class="tab" data-v="kb">🗂️ 知识库</div>
-    <div class="tab" data-v="rag">🧠 智能检索</div>
-    <div class="tab" data-v="manage">⚙️ 知识管理</div>
-    <div class="tab" data-v="ingest">📥 手动入库</div>
+    <div class="tab on" data-t="feed">📰 信息流</div>
+    <div class="tab" data-t="kb">🗂️ 知识库</div>
+    <div class="tab" data-t="graph">🕸️ 知识图谱</div>
+    <div class="tab" data-t="ai">🧠 智能检索</div>
+    <div class="tab" data-t="manage">⚙️ 知识管理</div>
+    <div class="tab" data-t="ingest">📥 手动入库</div>
   </div>
 </header>
 
 <div class="wrap">
-  <!-- ============ 每日推送 ============ -->
+  <div id="bannerHost"></div>
+
+  <!-- 信息流 -->
   <section class="view on" id="v-feed">
+    <div class="toolbar">
+      <input type="text" id="feedQ" class="grow" placeholder="搜索标题 / 摘要 / 正文关键词…">
+      <select id="feedDept"><option value="">全部部门</option></select>
+      <select id="feedCat"><option value="">全部分类</option></select>
+      <button onclick="loadFeed()">搜索</button>
+      <span class="seg" id="feedSort">
+        <button class="on" data-s="importance">按重要性</button>
+        <button data-s="date">按时间</button>
+      </span>
+    </div>
     <div class="statbar" id="feedStat"></div>
-    <div class="toolbar">
-      <select id="fe-dept"></select>
-      <select id="fe-cat"></select>
-      <select id="fe-q"><option value="">质量：全部</option><option value="A">A 高</option><option value="B">B 中</option><option value="C">C 一般</option></select>
-      <input type="text" class="grow" id="fe-kw" placeholder="在本日推送内搜索关键词…">
-    </div>
-    <div class="muted" style="margin-bottom:8px">📅 点击日期回看任意一期推送（按收录日分期）：</div>
-    <div class="datenav" id="dateNav"></div>
-    <div id="feedBody"></div>
+    <div class="grid" id="feedGrid"></div>
+    <div class="datenav" id="feedDates"><span class="lbl">按收录日期：</span></div>
+    <div class="muted" id="feedPage" style="margin-top:10px"></div>
   </section>
 
-  <!-- ============ 知识库时间轴 ============ -->
+  <!-- 知识库 -->
   <section class="view" id="v-kb">
+    <div class="toolbar">
+      <input type="text" id="kbQ" class="grow" placeholder="关键词检索…">
+      <select id="kbDept"><option value="">全部部门</option></select>
+      <select id="kbCat"><option value="">全部分类</option></select>
+      <select id="kbRegion"><option value="">全部地域</option></select>
+      <select id="kbQuality"><option value="">全部质量</option><option value="A">A 高</option><option value="B">B 中</option><option value="C">C 低</option></select>
+      <label class="chk"><input type="checkbox" id="kbFull"> 仅全文</label>
+      <label class="chk"><input type="checkbox" id="kbFlag"> 仅疑似重复</label>
+      <button onclick="loadKB()">筛选</button>
+    </div>
     <div class="statbar" id="kbStat"></div>
-    <div class="toolbar">
-      <input type="text" class="grow" id="fk-kw" placeholder="全库关键词搜索（标题/摘要/正文）…">
-      <select id="fk-dept"></select>
-      <select id="fk-cat"></select>
-      <select id="fk-region"></select>
-      <select id="fk-q"><option value="">质量：全部</option><option value="A">A 高</option><option value="B">B 中</option><option value="C">C 一般</option></select>
-      <label class="chk"><input type="checkbox" id="fk-full"> 仅看已全文入库</label>
-    </div>
-    <div id="kbBody"></div>
+    <div class="grid" id="kbGrid"></div>
+    <div class="muted" id="kbPage" style="margin-top:10px"></div>
   </section>
 
-  <!-- ============ RAG 智能检索 ============ -->
-  <section class="view" id="v-rag">
-    <div class="toolbar">
-      <input type="text" class="grow" id="rq" placeholder="输入查询，如：碳排放双控制度 生态环境 / 全国碳市场覆盖哪些行业">
-      <div class="seg" id="ragMode">
-        <button data-m="search" class="on">检索</button>
-        <button data-m="ask">问答</button>
-        <button data-m="report">报告</button>
+  <!-- 知识图谱 -->
+  <section class="view" id="v-graph">
+    <div class="ggrid">
+      <div>
+        <div class="graph-legend" id="graphLegend">
+          <span><i style="background:#0f766e"></i>知识</span>
+          <span><i style="background:#1a7f5a"></i>部门</span>
+          <span><i style="background:#2563eb"></i>分类</span>
+          <span><i style="background:#64748b"></i>地域</span>
+          <span><i style="background:#7c3aed"></i>标签</span>
+          <span><i style="background:#b45309"></i>概念</span>
+        </div>
+        <div class="graph-wrap">
+          <canvas class="graph-canvas" id="graphCanvas"></canvas>
+          <div class="graph-tip" id="graphTip"></div>
+        </div>
+        <div class="toolbar" style="margin-top:10px">
+          <select id="graphDept"><option value="">全部部门</option></select>
+          <select id="graphCat"><option value="">全部分类</option></select>
+          <button onclick="loadGraph()">重新聚合</button>
+          <button class="ghost" onclick="GraphViz.relayout()">重新布局</button>
+          <span class="muted" id="graphMeta"></span>
+        </div>
       </div>
-      <button id="ragGo">检索</button>
+      <div>
+        <div class="sub-card">
+          <h2 style="margin-top:0;font-size:15px">图谱说明</h2>
+          <p class="muted" style="font-size:12.8px;margin:6px 0">
+            每条知识在入库时自动完成 <b>切片 → 向量化 → 元数据标注 → 知识图谱概念抽取 → 质量检查</b>。
+            节点大小代表关联强度，连线表示「知识—部门/分类/地域/标签/概念」的归属与涉及关系。
+          </p>
+          <p class="muted" style="font-size:12.8px">点击「知识」节点可查看详情；点击其它节点可按该维度筛选。</p>
+        </div>
+        <div class="sub-card" id="graphInfo" style="margin-top:12px">
+          <h2 style="margin-top:0;font-size:15px">选中节点</h2>
+          <p class="muted" id="graphSelInfo" style="font-size:12.8px">未选中节点。</p>
+        </div>
+      </div>
     </div>
-    <div class="toolbar">
-      <select id="rr-dept"></select>
-      <select id="rr-cat"></select>
-      <select id="rr-q"><option value="">质量：全部</option><option value="A">A 高</option><option value="B">B 中</option><option value="C">C 一般</option></select>
-      <input type="text" id="rr-from" placeholder="起始 2025-01-01" style="width:130px">
-      <input type="text" id="rr-to" placeholder="截止 2026-12-31" style="width:130px">
-      <label class="chk"><input type="checkbox" id="rr-eco" checked> 优先生态环境条线</label>
-    </div>
-    <div class="muted" id="ragStat" style="margin-bottom:10px"></div>
-    <div id="ragResults"></div>
-    <pre id="ragReport"></pre>
   </section>
 
-  <!-- ============ 知识管理 ============ -->
+  <!-- 智能检索 -->
+  <section class="view" id="v-ai">
+    <div class="toolbar">
+      <span class="seg" id="aiMode">
+        <button class="on" data-m="ask">问答</button>
+        <button data-m="report">专题报告</button>
+      </span>
+      <input type="text" id="aiQuery" class="grow" placeholder="输入问题，如：十五五碳达峰有哪些关键举措？">
+      <button id="aiBtn" onclick="runAI()">生成</button>
+    </div>
+    <div class="note" id="aiNote"></div>
+    <div id="aiOut"></div>
+  </section>
+
+  <!-- 知识管理 -->
   <section class="view" id="v-manage">
-    <div class="dash" id="dash"></div>
-    <div class="toolbar">
-      <div class="bars" id="distBars" style="flex:1;min-width:280px"></div>
+    <div class="dash" id="mDash"></div>
+    <div class="row2">
+      <div class="bars sub-card" id="mDeptBars"><h2 style="margin-top:0">部门分布</h2></div>
+      <div class="bars sub-card" id="mQualBars"><h2 style="margin-top:0">质量分布</h2></div>
     </div>
-    <div class="toolbar">
-      <input type="text" class="grow" id="fm-kw" placeholder="按标题/部门筛选记录…">
-      <select id="fm-dept"></select>
-      <select id="fm-cat"></select>
-      <button class="ghost mini" id="btnAdd">➕ 新增知识</button>
-      <button class="ghost mini" id="btnExportKb">⬇️ 导出 kb.json</button>
-      <button class="ghost mini" id="btnExportNew" disabled>⬇️ 导出新增(inbox)</button>
-    </div>
-    <div class="note">
-      本页所有查看/编辑/新增均在浏览器本地进行，<b>不会自动写回服务器</b>（静态站点无后端）。修改或新增后请点「导出」下载 JSON，
-      交由每日自动化合并入库，或让助手提交到仓库。当前会话的改动仅本地可见。
-    </div>
-    <div class="tbl-wrap">
-      <table>
-        <thead><tr><th style="width:38%">标题</th><th>部门</th><th>分类</th><th>日期</th><th>质量</th><th>全文</th><th>操作</th></tr></thead>
-        <tbody id="mgBody"></tbody>
-      </table>
-    </div>
+    <div class="bars sub-card" id="mCatBars" style="margin-top:12px"><h2 style="margin-top:0">分类分布</h2></div>
+    <div id="mAdmin" style="margin-top:14px"></div>
   </section>
 
-  <!-- ============ 手动入库 ============ -->
+  <!-- 手动入库 -->
   <section class="view" id="v-ingest">
-    <div class="note">📥 把你认为重要的知识补充进库：① <b>上传本地文件</b>——自动抽取正文，整理后可导出入库；② <b>把网页链接交给 AI</b>——由助手在服务器端抓取 → 分析 → 智能分类 → 入库上线（比浏览器端跨域抓取更可靠）。</div>
-    <div class="ingest-grid">
-      <div class="panel">
-        <h3>① 上传本地文件</h3>
-        <div class="muted" style="font-size:12px">支持 .txt / .md / .csv / .json / .html（可多选批量）。文章内容会自动抽取为「正文」；.json 若为数组则逐条导入。</div>
-        <label class="drop" id="dropZone"><input type="file" id="up-file" multiple accept=".txt,.md,.csv,.json,.html,.htm" style="display:none">📎 点击选择文件，或把文件拖到这里</label>
-        <div id="pendingList"><div class="muted">尚未选择文件。</div></div>
+    <div id="ingestGate"></div>
+    <div id="ingestBody" style="display:none">
+      <div class="sub-card" style="margin-bottom:14px">
+        <h2 style="margin-top:0">① 网页交 AI 入库</h2>
+        <p class="muted" style="font-size:12.5px;margin:2px 0 10px">粘贴双碳相关网页链接，AI 自动抓取正文、智能分类（部门/地域/分类/质量/标签）并处理入库。</p>
+        <div class="row2">
+          <div class="fld"><label>网页 URL</label><input type="text" id="inUrl" placeholder="https://..."></div>
+          <div class="fld"><label>备注（可选）</label><input type="text" id="inNote" placeholder="人工补充说明"></div>
+        </div>
+        <button id="inUrlBtn" onclick="ingestURL()">抓取并入库</button>
       </div>
-      <div class="panel">
-        <h3>② 网页交给 AI 入库存档</h3>
-        <div class="muted" style="font-size:12px">粘贴网页链接 → 加入「待 AI 处理」队列 → 点「复制提交文案」后在对话里 @助手，AI 会自动抓取、智能分类并入库上线。</div>
-        <div class="fld"><label>网页链接 URL</label><input type="text" id="webUrl" placeholder="https://..."></div>
-        <div class="fld"><label>备注（可选，如：重点关注 / 属浙江案例）</label><input type="text" id="webNote"></div>
-        <div style="display:flex;gap:8px"><button id="webAdd">加入待 AI 处理</button>
-          <button class="ghost" id="webCopyAll">复制全部提交文案</button></div>
-        <div id="webPreview"></div>
-        <div style="margin-top:12px;font-weight:600;font-size:13px">待 AI 处理队列</div>
-        <div id="aiQueue"><div class="muted">暂无待 AI 处理的网页。</div></div>
+      <div class="sub-card">
+        <h2 style="margin-top:0">② 上传文件入库</h2>
+        <p class="muted" style="font-size:12.5px;margin:2px 0 10px">支持 txt / md / csv / json / html / <b>docx(Word)</b> / <b>pdf</b>。系统解析正文后自动分类入库。</p>
+        <input type="file" id="inFile" accept=".txt,.md,.csv,.json,.html,.htm,.docx,.pdf">
+        <div style="margin-top:10px"><button id="inFileBtn" onclick="ingestFile()">解析并入库</button></div>
+        <div id="inFileMsg" class="muted" style="margin-top:8px"></div>
       </div>
     </div>
   </section>
 </div>
 
-<button class="fab" id="fabFeedback">💬 留言反馈</button>
+<footer>
+  双碳领域知识中台 · 仅收录双碳（碳达峰碳中和）主题 · 后端 FastAPI + SQLite · 前端纯静态 SPA<br>
+  数据来源：生态环境 / 发改 / 经信 / 市监等官方渠道 + 用户手动入库
+</footer>
 
-<footer id="foot">双碳领域知识库 · 自动采集更新，数据源 <code>kb/kb.json</code></footer>
-
-<!-- 详情 / 编辑 / 新增 弹窗 -->
-<div class="mask" id="mask">
-  <div class="modal" id="modal"></div>
-</div>
-
-<!-- 本地文件回退 -->
-<div id="picker-wrap" style="display:none;position:fixed;left:0;right:0;top:0;background:#fff;
-     border-bottom:1px solid var(--line);padding:12px 18px;z-index:60;font-size:13px">
-  无法自动加载 <code>kb/kb.json</code>（可能是本地 file:// 打开）。请手动选择知识库文件：
-  <input type="file" id="picker" accept=".json">
-</div>
+<!-- 通用模态 -->
+<div class="mask" id="mask"><div class="modal" id="modal"></div></div>
+<!-- 登录模态 -->
+<div class="mask" id="loginMask"><div class="modal" id="loginModal"></div></div>
+<!-- 图片灯箱 -->
+<div class="mask" id="imgMask"><img id="imgBig" style="max-width:90%;max-height:86vh;border-radius:10px"></div>
+<div class="toast" id="toast"></div>
 
 <script>
-/* ================= 全局状态 ================= */
-let RECORDS=[], CONFIG={}, NEW_RECORDS=[];
-const CATS=[["policy","政策规划与顶层设计","#1a7f5a"],["standard","法规与标准","#0f766e"],
-  ["carbon_market","碳市场与气候投融资","#2563eb"],["synergy","减污降碳协同","#7c3aed"],
-  ["industry","行业低碳与节能降碳","#b45309"],["tech","技术、产品与创新","#0891b2"],
-  ["literature","研究文献（开源）","#db2777"],["intl_region","国际与区域动态","#475569"]];
-const CATNAME=Object.fromEntries(CATS.map(c=>[c[0],c[1]]));
-const CAT_ORDER=Object.fromEntries(CATS.map((c,i)=>[c[0],i]));
-const QUAL={A:"高",B:"中",C:"一般"};
-const DEPT_PRI=[["生态","环境"],["发改"],["经信","工信"],["市场监管"],[]];
-const DEPT_NAME=["生态环境部门","发展改革委","经信(工信)","市场监管局","其他相关部门"];
-function deptPri(d){d=d||"";for(let i=0;i<DEPT_PRI.length;i++){if(DEPT_PRI[i].length&&DEPT_PRI[i].some(k=>d.includes(k)))return i;}return 4;}
-function esc(s){return (s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");}
+/* ===================== 全局状态 ===================== */
+const App = {
+  mode:'static', health:null,   token: localStorage.getItem('dc_token')||'',
+  user:null, kb:[], /* 静态回退数据 */
+  feedPage:1, kbPage:1, graphData:null, feedDate:''
+};
 
-/* ================= 中文分词 / RAG 引擎 ================= */
-function tokenize(t){if(!t)return[];t=t.toLowerCase();let o=[];
-  (t.match(/[a-z0-9]+/g)||[]).forEach(w=>o.push(w));
-  (t.match(/[\u4e00-\u9fff]+/g)||[]).forEach(r=>{if(r.length===1)o.push(r);else for(let i=0;i<r.length-1;i++)o.push(r.substr(i,2));});
-  return o;}
-function splitSents(t){t=t.replace(/\s+/g,'');return t.split(/(?<=[。！？；\n])/).filter(p=>p.length>=4);}
-function chunkText(t,mx=320){const s=splitSents(t);if(!s.length)return t?[t]:[];let c=[],cur=[],l=0;
-  for(const x of s){if(l+x.length>mx&&cur.length){c.push(cur.join(''));cur=[];l=0;}cur.push(x);l+=x.length;}
-  if(cur.length)c.push(cur.join(''));return c.length?c:[t];}
-let CHUNKS=[],VEC=[],DFV={},DFB={},AVGDL=0,N=0,RAG_BUILT=false;
-function tf(a){const m={};a.forEach(t=>m[t]=(m[t]||0)+1);return m;}
-function ragBuild(){
-  CHUNKS=[];RECORDS.forEach((r,rid)=>{const b=r.content||r.summary||"";if(!b)return;
-    chunkText(b).forEach(t=>CHUNKS.push({rid,text:t,dept:r.department,cat:r.category,date:r.date,
-      quality:r.quality,region:r.region,title:r.title,url:r.url}));});
-  N=CHUNKS.length;AVGDL=CHUNKS.reduce((a,c)=>a+c.text.length,0)/(N||1);DFB={};DFV={};
-  CHUNKS.forEach(c=>{c.tf=tf(tokenize(c.text));Object.keys(c.tf).forEach(t=>DFB[t]=(DFB[t]||0)+1);});
-  Object.keys(DFB).forEach(t=>DFV[t]=DFB[t]);
-  VEC=CHUNKS.map(c=>{const v={};for(const t in c.tf){const df=DFV[t]||0;const idf=Math.log((N-df+0.5)/(df+0.5)+1);
-    v[t]=(1+Math.log(c.tf[t]))*idf;}let n=Math.sqrt(Object.values(v).reduce((a,x)=>a+x*x,0))||1;
-    for(const t in v)v[t]/=n;return v;});
-  RAG_BUILT=true;
-}
-function vecSearch(qt,top=200){const q=tf(qt),qv={};for(const t in q){const df=DFV[t]||0;if(!df)continue;
-  const idf=Math.log((N-df+0.5)/(df+0.5)+1);qv[t]=(1+Math.log(q[t]))*idf;}
-  let n=Math.sqrt(Object.values(qv).reduce((a,x)=>a+x*x,0))||1;for(const t in qv)qv[t]/=n;
-  const s=[];VEC.forEach((v,i)=>{let d=0;for(const t in qv)if(v[t])d+=qv[t]*v[t];if(d>0)s.push([d,i]);});
-  s.sort((a,b)=>b[0]-a[0]);return s.slice(0,top);}
-function bm25(qt,top=200,k1=1.5,b=0.75){const s=[],qs=[...new Set(qt)];
-  CHUNKS.forEach((c,i)=>{let sc=0,dl=c.text.length||1;qs.forEach(t=>{const df=DFB[t]||0;if(!df)return;
-    const f=c.tf[t]||0;if(!f)return;const idf=Math.log((N-df+0.5)/(df+0.5)+1);
-    sc+=idf*(f*(k1+1))/(f+k1*(1-b+b*dl/AVGDL));});if(sc>0)s.push([sc,i]);});
-  s.sort((a,b)=>b[0]-a[0]);return s.slice(0,top);}
-function passF(c,f){if(f.dept&&!(c.dept||"").includes(f.dept))return false;
-  if(f.cat&&c.cat!==f.cat)return false;
-  if(f.q){const o={A:3,B:2,C:1};if((o[c.quality]||0)<(o[f.q]||0))return false;}
-  if(f.from&&(c.date||"")<f.from)return false;if(f.to&&(c.date||"")>f.to)return false;return true;}
-function ragSearch(query,topk=8,f={},eco=true){const qt=tokenize(query);
-  const vs=vecSearch(qt),bs=bm25(qt),rrf={};
-  vs.forEach(([s,i],r)=>rrf[i]=(rrf[i]||0)+1/(60+r+1));
-  bs.forEach(([s,i],r)=>rrf[i]=(rrf[i]||0)+1/(60+r+1));
-  let cand=[];for(const i in rrf){const c=CHUNKS[i];if(!passF(c,f))continue;
-    let bo=1;if(eco&&deptPri(c.dept)===0)bo=1.6;cand.push([rrf[i]*bo,i]);}
-  cand.sort((a,b)=>b[0]-a[0]);
-  return cand.slice(0,topk).map(([s,i])=>{const c=CHUNKS[i];return {title:c.title,url:c.url,date:c.date,
-    dept:c.dept,cat:c.cat,quality:c.quality,region:c.region,chunk:c.text,score:+s.toFixed(4),rid:c.rid};});}
-function ragAsk(q,topk=6,eco=true){const hits=ragSearch(q,topk,{},eco);
-  if(!hits.length)return{answer:"未在知识库中检索到相关内容。",citations:[]};
-  const qs=new Set(tokenize(q));let best=[];
-  hits.forEach(h=>splitSents(h.chunk).forEach(s=>{const ov=[...new Set(tokenize(s))].filter(x=>qs.has(x)).length;
-    if(ov>0)best.push([ov,s,h]);}));
-  best.sort((a,b)=>b[0]-a[0]||b[1].length-a[1].length);
-  const seen=new Set(),pk=[];best.forEach(([o,s])=>{const k=s.substr(0,20);if(seen.has(k))return;seen.add(k);if(pk.length<5)pk.push(s);});
-  return{answer:pk.length?pk.join('。')+'。':hits[0].chunk,citations:hits.slice(0,8)};}
-function ragReport(topic,topk=12,eco=true){const hits=ragSearch(topic,topk,{},eco);
-  if(!hits.length)return"# 报告\n\n未检索到与「"+topic+"」相关的内容。";
-  const L=["# 双碳情报 · 主题检索报告："+topic,"","> 命中 "+hits.length+" 个知识片段（向量+BM25+元数据融合），按相关度排序。",""];
-  const dc={};hits.forEach(h=>dc[h.dept]=(dc[h.dept]||0)+1);
-  L.push("## 一、命中分布（部门）");Object.entries(dc).sort((a,b)=>b[1]-a[1]).forEach(([d,n])=>L.push("- "+(d||"其他")+"："+n+" 条"));
-  L.push("","## 二、核心要点（抽取）");const qs=new Set(tokenize(topic));let sh=0;
-  for(const h of hits){let ss=splitSents(h.chunk).filter(s=>[...new Set(tokenize(s))].filter(x=>qs.has(x)).length>0);
-    if(!ss.length)ss=[h.chunk.substr(0,160)];L.push("","### "+h.title+" 〔"+h.dept+" · "+h.date+" · "+h.quality+"〕");
-    ss.slice(0,3).forEach(s=>L.push("- "+s));L.push("  来源："+h.url);if(++sh>=10)break;}
-  L.push("","## 三、参考文件清单");hits.slice(0,12).forEach((h,i)=>L.push((i+1)+". ["+h.title+"]("+h.url+") — "+h.dept+" / "+h.date));
-  return L.join("\n");}
+const DEPTS = ['生态环境','发改委','经信','市监','住建','交通','农业','能源','科技','金融','商务','其他'];
+const CATS  = ['policy','carbon_market','synergy','industry','tech','standard','finance','intl','literature','other'];
+const CAT_LABELS = {policy:'政策规划',carbon_market:'碳市场',synergy:'减污降碳协同',industry:'行业低碳',tech:'技术创研',standard:'法规标准',finance:'气候投融资',intl:'国际动态',literature:'研究文献',other:'其他'};
+const REGIONS = ['全国','浙江','杭州','国际','北京','上海','广东','江苏','山东','新疆','安徽','重庆','陕西','湖州','舟山'];
 
-/* ================= 通用渲染 ================= */
-function badge(cls,txt){return '<span class="badge '+cls+'">'+esc(txt)+'</span>';}
-function cardHtml(r,idx){
-  const full=r.content_fetched?badge('b-full','✓ 全文'):badge('b-none','摘要');
-  return '<div class="card" data-idx="'+idx+'">'
-    +'<h3>'+esc(r.title)+'</h3>'
-    +'<div class="sum">'+esc(r.summary||r.content||'')+'</div>'
-    +'<div class="badges">'+badge('b-dept',r.department||'其他')+badge('b-cat',CATNAME[r.category]||r.category||'')
-    +badge('b-q','质量'+(r.quality||'-'))+(r.region?badge('b-region',r.region):'')+full+'</div></div>';
-}
-function fillSelect(el,opts,head){el.innerHTML='<option value="">'+head+'</option>'+
-  opts.map(o=>'<option value="'+esc(o[0])+'">'+esc(o[1])+'</option>').join('');}
-function uniqueDepts(){const s=[...new Set(RECORDS.map(r=>r.department).filter(Boolean))];
-  s.sort((a,b)=>deptPri(a)-deptPri(b));return s.map(d=>[d,d]);}
-function uniqueRegions(){return [...new Set(RECORDS.map(r=>r.region).filter(Boolean))].map(x=>[x,x]);}
-
-/* ================= 每日推送 ================= */
-let FEED_DAY=null;
-function pushesByDay(){const m={};RECORDS.forEach(r=>{const k=r.added_at||r.date||"未知";(m[k]=m[k]||[]).push(r);});return m;}
-function renderFeed(){
-  const P=pushesByDay();const days=Object.keys(P).sort().reverse();
-  if(!FEED_DAY||!P[FEED_DAY])FEED_DAY=days[0];
-  const yrs={};RECORDS.forEach(r=>{const y=(r.date||'').slice(0,4);if(y)yrs[y]=(yrs[y]||0)+1;});
-  const full=RECORDS.filter(r=>r.content_fetched).length;
-  document.getElementById('feedStat').innerHTML=
-    '<span class="chip">知识总量 <b>'+RECORDS.length+'</b> 条</span>'
-    +'<span class="chip">全文入库 <b>'+full+'</b> 条</span>'
-    +'<span class="chip">推送期数 <b>'+days.length+'</b> 期</span>'
-    +'<span class="chip">覆盖年份 <b>'+Object.keys(yrs).sort().join('、')+'</b></span>';
-  document.getElementById('dateNav').innerHTML=days.map(d=>
-    '<div class="dpill'+(d===FEED_DAY?' on':'')+'" data-d="'+d+'">'+d+' ('+P[d].length+')</div>').join('');
-  let items=P[FEED_DAY]||[];
-  const fd=val('fe-dept'),fc=val('fe-cat'),fq=val('fe-q'),kw=val('fe-kw').trim().toLowerCase();
-  items=items.filter(r=>(!fd||r.department===fd)&&(!fc||r.category===fc)&&(!fq||r.quality===fq)
-    &&(!kw||((r.title||'')+(r.summary||'')+(r.content||'')).toLowerCase().includes(kw)));
-  let html='<div class="muted" style="margin-bottom:6px">🗓 '+FEED_DAY+' · 当期 '+items.length+' 条</div>';
-  const byCat={};items.forEach(r=>(byCat[r.category]=byCat[r.category]||[]).push(r));
-  CATS.forEach(([cid,cname])=>{let sub=byCat[cid];if(!sub||!sub.length)return;
-    sub.sort((a,b)=>deptPri(a.department)-deptPri(b.department));
-    html+='<section class="block"><h2>'+cname+'<span class="cnt">'+sub.length+' 条</span></h2><div class="grid">'
-      +sub.map(r=>cardHtml(r,RECORDS.indexOf(r))).join('')+'</div></section>';});
-  if(!items.length)html+='<div class="empty">本期无符合条件的记录。</div>';
-  document.getElementById('feedBody').innerHTML=html;
+/* ===================== 工具 ===================== */
+function $(s){return document.querySelector(s);}
+function esc(s){return (s==null?'':String(s)).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function toast(msg){const t=$('#toast');t.textContent=msg;t.classList.add('on');clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('on'),2200);}
+async function api(path, opts={}){
+  const headers = Object.assign({}, opts.headers||{});
+  if(App.token) headers['Authorization']='Bearer '+App.token;
+  if(opts.body && !(opts.body instanceof FormData)) headers['Content-Type']='application/json';
+  const r = await fetch(path,{method:opts.method||'GET',headers,body:opts.body});
+  if(r.status===401){ App.token=''; localStorage.removeItem('dc_token'); App.user=null; updateAuthUI(); toast('登录已失效，请重新登录'); }
+  if(!r.ok){ let m=r.status+' '+r.statusText; try{const e=await r.json(); m=e.detail||m;}catch(e){} throw new Error(m); }
+  return r.json();
 }
 
-/* ================= 知识库时间轴 ================= */
-function renderKb(){
-  const kw=val('fk-kw').trim().toLowerCase(),fd=val('fk-dept'),fc=val('fk-cat'),
-    fr=val('fk-region'),fq=val('fk-q'),ff=document.getElementById('fk-full').checked;
-  let items=RECORDS.filter(r=>(!fd||r.department===fd)&&(!fc||r.category===fc)&&(!fr||r.region===fr)
-    &&(!fq||r.quality===fq)&&(!ff||r.content_fetched)
-    &&(!kw||((r.title||'')+(r.summary||'')+(r.content||'')+(r.tags||[]).join('')).toLowerCase().includes(kw)));
-  items.sort((a,b)=>(b.date||'').localeCompare(a.date||''));
-  document.getElementById('kbStat').innerHTML='<span class="chip">命中 <b>'+items.length+'</b> 条</span>'
-    +'<span class="chip">全库 <b>'+RECORDS.length+'</b> 条</span>';
-  const byDate={};items.forEach(r=>(byDate[r.date||'未知日期']=byDate[r.date||'未知日期']||[]).push(r));
-  const dates=Object.keys(byDate).sort().reverse();
-  let html='';dates.forEach(dt=>{const sub=byDate[dt].sort((a,b)=>
-    (CAT_ORDER[a.category]??99)-(CAT_ORDER[b.category]??99)||deptPri(a.department)-deptPri(b.department));
-    html+='<section class="block"><h2>'+dt+'<span class="cnt">'+sub.length+' 条</span></h2><div class="grid">'
-      +sub.map(r=>cardHtml(r,RECORDS.indexOf(r))).join('')+'</div></section>';});
-  document.getElementById('kbBody').innerHTML=html||'<div class="empty">无匹配记录，试试放宽筛选条件。</div>';
+/* ===================== Markdown 渲染 ===================== */
+function inlineMd(s){
+  s = esc(s);
+  s = s.replace(/`([^`]+)`/g,(m,c)=>'<code>'+c+'</code>');
+  s = s.replace(/\*\*([^*]+)\*\*/g,'<strong>$1</strong>');
+  s = s.replace(/__([^_]+)__/g,'<strong>$1</strong>');
+  s = s.replace(/\*([^*]+)\*/g,'<em>$1</em>');
+  s = s.replace(/\[([^\]]+)\]\(([^)\s]+)\)/g,(m,t,u)=>'<a href="'+u+'" target="_blank" rel="noopener">'+t+'</a>');
+  return s;
+}
+function mdToHtml(md){
+  if(!md) return '';
+  const lines = md.split('\n'); let html=''; let i=0; let listType=null;
+  const closeList=()=>{ if(listType){html+='</'+listType+'>';listType=null;} };
+  while(i<lines.length){
+    const line=lines[i];
+    if(/^```/.test(line.trim())){
+      closeList(); let code=[]; i++;
+      while(i<lines.length && !/^```/.test(lines[i].trim())){code.push(lines[i]);i++;}
+      i++; html+='<pre><code>'+esc(code.join('\n'))+'</code></pre>'; continue;
+    }
+    const h=line.match(/^(#{1,6})\s+(.*)$/);
+    if(h){ closeList(); const lv=h[1].length; html+='<h'+lv+'>'+inlineMd(h[2])+'</h'+lv+'>'; i++; continue; }
+    if(/^---+$/.test(line.trim())){ closeList(); html+='<hr>'; i++; continue; }
+    if(/^>\s?/.test(line)){
+      closeList(); let q=[];
+      while(i<lines.length && /^>\s?/.test(lines[i])){q.push(lines[i].replace(/^>\s?/,''));i++;}
+      html+='<blockquote>'+mdToHtml(q.join('\n'))+'</blockquote>'; continue;
+    }
+    if(/\|/.test(line) && i+1<lines.length && /^\s*\|?[\s:|\-]+\|?\s*$/.test(lines[i+1])){
+      closeList();
+      const splitRow=r=>r.split('|').map(s=>s.trim()).filter((s,idx,arr)=>!(idx===0&&s==='')&&!(idx===arr.length-1&&s===''));
+      const header=splitRow(line); i+=2; const rows=[];
+      while(i<lines.length && /\|/.test(lines[i]) && lines[i].trim()!==''){rows.push(splitRow(lines[i]));i++;}
+      html+='<table><thead><tr>'+header.map(c=>'<th>'+inlineMd(c)+'</th>').join('')+'</tr></thead><tbody>';
+      rows.forEach(r=>{html+='<tr>'+r.map(c=>'<td>'+inlineMd(c)+'</td>').join('')+'</tr>';});
+      html+='</tbody></table>'; continue;
+    }
+    const ul=line.match(/^\s*[-*]\s+(.*)$/);
+    if(ul){ if(listType!=='ul'){closeList();html+='<ul>';listType='ul';} html+='<li>'+inlineMd(ul[1])+'</li>'; i++; continue; }
+    const ol=line.match(/^\s*\d+\.\s+(.*)$/);
+    if(ol){ if(listType!=='ol'){closeList();html+='<ol>';listType='ol';} html+='<li>'+inlineMd(ol[1])+'</li>'; i++; continue; }
+    if(line.trim()===''){ closeList(); i++; continue; }
+    closeList();
+    const para=[];
+    while(i<lines.length && lines[i].trim()!=='' && !/^(#{1,6}\s|>|\s*[-*]\s|\s*\d+\.\s|```)/.test(lines[i]) && !/^---+$/.test(lines[i].trim())){
+      para.push(lines[i]); i++;
+    }
+    html+='<p>'+inlineMd(para.join(' '))+'</p>';
+  }
+  closeList(); return html;
 }
 
-/* ================= RAG ================= */
-let RAG_MODE='search';
-function hl(t,q){const qt=[...new Set(tokenize(q))].filter(x=>x.length>=2||/[a-z0-9]/.test(x));
-  let s=esc(t);qt.forEach(x=>{try{s=s.replace(new RegExp(x,'g'),'<em>'+x+'</em>');}catch(e){}});return s;}
-function runRag(){
-  if(!RAG_BUILT)ragBuild();
-  const q=val('rq').trim();if(!q)return;
-  const f={dept:val('rr-dept'),cat:val('rr-cat'),q:val('rr-q'),from:val('rr-from'),to:val('rr-to')};
-  const eco=document.getElementById('rr-eco').checked;const t0=performance.now();
-  const RES=document.getElementById('ragResults'),REP=document.getElementById('ragReport');
-  if(RAG_MODE==='report'){RES.style.display='none';REP.style.display='block';
-    REP.textContent=ragReport(q,12,eco);
-    document.getElementById('ragStat').textContent='报告生成完成，耗时 '+Math.round(performance.now()-t0)+' ms';return;}
-  REP.style.display='none';RES.style.display='block';
-  if(RAG_MODE==='ask'){const r=ragAsk(q,6,eco);
-    let h='<div class="result"><h3>💡 回答</h3><div class="chunk open">'+hl(r.answer,q)+'</div>'
-      +'<div class="muted" style="margin-top:8px">引用来源 '+r.citations.length+' 条：</div>';
-    r.citations.forEach(c=>h+='<div class="badges" style="margin-top:6px">'+badge('b-dept',c.dept||'')
-      +badge('b-cat',CATNAME[c.cat]||c.cat||'')+badge('b-q',c.quality||'')
-      +' <a href="'+esc(c.url)+'" target="_blank">'+esc(c.title)+' ↗</a></div>');
-    RES.innerHTML=h+'</div>';
-    document.getElementById('ragStat').textContent='问答完成，命中 '+r.citations.length+' 条，耗时 '+Math.round(performance.now()-t0)+' ms';return;}
-  const hits=ragSearch(q,8,f,eco);
-  RES.innerHTML=hits.length?hits.map(it=>'<div class="result"><h3>'+esc(it.title)+'</h3>'
-    +'<div class="badges">'+badge('b-dept',it.dept)+badge('b-cat',CATNAME[it.cat]||it.cat)
-    +badge('b-q','质量'+it.quality)+'<span class="muted">相关度 '+it.score+' ｜ '+it.date+' ｜ '+(it.region||'')+'</span></div>'
-    +'<div class="chunk">'+hl(it.chunk,q)+'</div>'
-    +'<span class="more">展开/收起</span> ｜ <a href="'+esc(it.url)+'" target="_blank">查看原文 ↗</a></div>').join('')
-    :'<div class="empty">未命中，换个关键词或放宽筛选。</div>';
-  document.getElementById('ragStat').textContent='命中 '+hits.length+' 个片段，耗时 '+Math.round(performance.now()-t0)+' ms';
+/* ===================== 配置下拉 ===================== */
+function fillSelect(sel, vals, labelFn){
+  const keep = sel.querySelector('option[value=""]');
+  sel.innerHTML=''; sel.appendChild(keep);
+  vals.forEach(v=>{const o=document.createElement('option');o.value=v;o.textContent=labelFn?labelFn(v):v;sel.appendChild(o);});
 }
 
-/* ================= 知识管理 ================= */
-function renderManage(){
-  const full=RECORDS.filter(r=>r.content_fetched).length;
-  const yrs={};RECORDS.forEach(r=>{const y=(r.date||'').slice(0,4);if(y)yrs[y]=(yrs[y]||0)+1;});
-  document.getElementById('dash').innerHTML=
-    dcard(RECORDS.length,'知识总量')+dcard(full,'全文入库')+dcard(RECORDS.length-full,'仅摘要')
-    +dcard(Object.keys(yrs).length,'覆盖年份')+dcard(NEW_RECORDS.length,'本地新增(待导出)');
-  // 分布条形
-  const byDept={},byCat={};RECORDS.forEach(r=>{const d=DEPT_NAME[deptPri(r.department)];byDept[d]=(byDept[d]||0)+1;
-    byCat[r.category]=(byCat[r.category]||0)+1;});
-  let bars='<div class="muted" style="margin-bottom:6px">按部门优先级分布</div>';
-  DEPT_NAME.forEach(d=>{const n=byDept[d]||0;bars+=barRow(d,n,RECORDS.length);});
-  bars+='<div class="muted" style="margin:10px 0 6px">按分类分布</div>';
-  CATS.forEach(([cid,cn])=>{bars+=barRow(cn,byCat[cid]||0,RECORDS.length);});
-  document.getElementById('distBars').innerHTML=bars;
-  renderMgTable();
+/* ===================== 鉴权 UI ===================== */
+function updateAuthUI(){
+  const box=$('#acctBox');
+  if(App.token && App.user){
+    const roleLabel={admin:'管理员',editor:'编辑',viewer:'访客'}[App.user.role]||App.user.role;
+    box.innerHTML='<span class="who">👤 <b>'+esc(App.user.username)+'</b> · '+roleLabel+'</span>'+
+      '<button class="ghost" style="background:rgba(255,255,255,.15);color:#fff;border-color:rgba(255,255,255,.4)" onclick="logout()">退出</button>';
+  } else {
+    box.innerHTML='<button class="ghost" style="background:rgba(255,255,255,.15);color:#fff;border-color:rgba(255,255,255,.4)" onclick="openLogin()">登录 / 注册</button>';
+  }
+  // 手动入库门禁
+  const gate=$('#ingestGate'), body=$('#ingestBody');
+  if(App.mode==='backend'){
+    if(App.token && (App.user.role==='admin'||App.user.role==='editor')){
+      gate.style.display='none'; body.style.display='block';
+    } else {
+      gate.style.display='block'; body.style.display='none';
+      gate.innerHTML='<div class="login-mini">🔐 手动入库需 <b>编辑/管理员</b> 权限。'+(App.token?'当前账号权限不足。':'请先 ')+'<a href="javascript:openLogin()">登录</a>。</div>';
+    }
+  } else {
+    gate.style.display='block'; body.style.display='none';
+    gate.innerHTML='<div class="login-mini">🌐 当前为<b>只读静态模式</b>，手动入库不可用。部署后端后可启用。</div>';
+  }
 }
-function dcard(n,l){return '<div class="dcard"><div class="n">'+n+'</div><div class="l">'+l+'</div></div>';}
-function barRow(lab,n,total){const pct=total?Math.round(n/total*100):0;
-  return '<div class="row"><div class="lab">'+esc(lab)+'</div><div class="track"><div class="fill" style="width:'+pct+'%"></div></div><div class="v">'+n+'</div></div>';}
-function renderMgTable(){
-  const kw=val('fm-kw').trim().toLowerCase(),fd=val('fm-dept'),fc=val('fm-cat');
-  let items=RECORDS.map((r,i)=>[r,i]).filter(([r])=>(!fd||r.department===fd)&&(!fc||r.category===fc)
-    &&(!kw||((r.title||'')+(r.department||'')).toLowerCase().includes(kw)));
-  document.getElementById('mgBody').innerHTML=items.map(([r,i])=>
-    '<tr><td>'+esc(r.title)+'</td><td>'+esc(r.department||'')+'</td><td>'+esc(CATNAME[r.category]||r.category||'')
-    +'</td><td>'+esc(r.date||'')+'</td><td>'+esc(r.quality||'')+'</td>'
-    +'<td>'+(r.content_fetched?'✓':'—')+'</td>'
-    +'<td><button class="ghost mini" data-view="'+i+'">查看</button> <button class="ghost mini" data-edit="'+i+'">编辑</button></td></tr>').join('')
-    ||'<tr><td colspan="7" class="empty">无匹配记录</td></tr>';
-}
+function logout(){ App.token=''; App.user=null; localStorage.removeItem('dc_token'); updateAuthUI(); toast('已退出'); }
 
-/* ================= 弹窗：详情 / 编辑 / 新增 ================= */
-function openModal(html){document.getElementById('modal').innerHTML='<button class="x" onclick="closeModal()">×</button>'+html;
-  document.getElementById('mask').classList.add('on');}
-function closeModal(){document.getElementById('mask').classList.remove('on');}
-function showDetail(i){const r=RECORDS[i];
-  openModal('<h2>'+esc(r.title)+'</h2>'
-    +'<div class="badges">'+badge('b-dept',r.department||'其他')+badge('b-cat',CATNAME[r.category]||r.category||'')
-    +badge('b-q','质量'+(r.quality||'-'))+(r.region?badge('b-region',r.region):'')
-    +(r.content_fetched?badge('b-full','✓ 全文入库'):badge('b-none','仅摘要'))+'</div>'
-    +'<div class="muted" style="margin-top:8px">📅 发布 '+esc(r.date||'-')+' ｜ 收录 '+esc(r.added_at||'-')
-    +' ｜ 来源 '+esc(r.source||'-')+'</div>'
-    +(r.tags&&r.tags.length?'<div class="muted" style="margin-top:4px">🏷 '+r.tags.map(esc).join(' · ')+'</div>':'')
-    +'<div style="margin-top:8px"><a href="'+esc(r.url)+'" target="_blank">查看原文链接 ↗</a></div>'
-    +'<div class="content">'+esc(r.content||r.summary||'（暂无正文，仅摘要）')+'</div>');
-}
-function editForm(r,i){
-  const isNew=(i===undefined);
-  const catOpts=CATS.map(c=>'<option value="'+c[0]+'"'+(r.category===c[0]?' selected':'')+'>'+c[1]+'</option>').join('');
-  const qOpts=['A','B','C'].map(q=>'<option'+(r.quality===q?' selected':'')+'>'+q+'</option>').join('');
-  return '<h2>'+(isNew?'➕ 新增知识':'✏️ 编辑知识')+'</h2>'
-    +'<div class="fld"><label>标题</label><input type="text" id="m-title" value="'+esc(r.title||'')+'"></div>'
-    +'<div class="row2"><div class="fld"><label>原文链接 URL</label><input type="text" id="m-url" value="'+esc(r.url||'')+'"></div>'
-    +'<div class="fld"><label>来源</label><input type="text" id="m-source" value="'+esc(r.source||'')+'"></div></div>'
-    +'<div class="row2"><div class="fld"><label>部门</label><input type="text" id="m-dept" value="'+esc(r.department||'')+'" placeholder="生态环境 / 发改委 / 经信(工信) / 市场监管 / 其他"></div>'
-    +'<div class="fld"><label>地域</label><input type="text" id="m-region" value="'+esc(r.region||'')+'" placeholder="全国 / 浙江 / 杭州…"></div></div>'
-    +'<div class="row2"><div class="fld"><label>分类</label><select id="m-cat">'+catOpts+'</select></div>'
-    +'<div class="fld"><label>质量</label><select id="m-q">'+qOpts+'</select></div></div>'
-    +'<div class="row2"><div class="fld"><label>发布日期</label><input type="text" id="m-date" value="'+esc(r.date||'')+'" placeholder="YYYY-MM-DD"></div>'
-    +'<div class="fld"><label>标签（逗号分隔）</label><input type="text" id="m-tags" value="'+esc((r.tags||[]).join(','))+'"></div></div>'
-    +'<div class="fld"><label>摘要</label><textarea id="m-summary" rows="3">'+esc(r.summary||'')+'</textarea></div>'
-    +'<div class="fld"><label>正文内容（可留空，抓取后填入）</label><textarea id="m-content" rows="6">'+esc(r.content||'')+'</textarea></div>'
-    +'<div style="margin-top:12px;display:flex;gap:10px">'
-    +'<button onclick="saveRecord('+(isNew?'null':i)+')">保存到本地</button>'
-    +'<button class="ghost" onclick="closeModal()">取消</button></div>'
-    +'<div class="note">保存仅更新当前浏览器内的数据，用于预览/整理。永久生效请在管理页点「导出」下载 JSON 并提交入库。</div>';
-}
-function saveRecord(i){
-  const g=id=>document.getElementById(id).value.trim();
-  const rec={title:g('m-title'),url:g('m-url'),source:g('m-source'),department:g('m-dept'),
-    region:g('m-region'),category:g('m-cat'),quality:g('m-q'),date:g('m-date'),
-    tags:g('m-tags')?g('m-tags').split(/[,，]/).map(s=>s.trim()).filter(Boolean):[],
-    summary:g('m-summary'),content:g('m-content')};
-  if(!rec.title){alert('标题不能为空');return;}
-  rec.content_fetched=!!rec.content;
-  if(i===null){rec.added_at=new Date().toISOString().slice(0,10);
-    RECORDS.unshift(rec);NEW_RECORDS.push(rec);}
-  else{Object.assign(RECORDS[i],rec);}
-  RAG_BUILT=false;closeModal();refreshAll();
-  document.getElementById('btnExportNew').disabled=NEW_RECORDS.length===0;
-}
-function download(name,text){const b=new Blob([text],{type:'application/json'});
-  const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=name;a.click();}
-
-/* ================= 手动入库：文件上传 + 网页交 AI ================= */
-let PENDING=[];
-function extractTextFromFile(file){
-  return new Promise((res)=>{
-    const rd=new FileReader();const name=file.name.replace(/\.[^.]+$/,'');
-    if(/\.json$/i.test(file.name)){
-      rd.onload=()=>{try{const j=JSON.parse(rd.result);
-        if(Array.isArray(j))res({records:j.map(x=>normRec(x,name))});
-        else if(j&&typeof j==='object')res({records:[normRec(j,name)]});
-        else res({text:'',name});}catch(e){res({text:String(rd.result),name});}};
-      rd.readAsText(file);
-    }else if(/\.(html?|txt|md|csv)$/i.test(file.name)){
-      rd.onload=()=>{let t=rd.result||'';
-        if(/\.html?$/i.test(file.name)){t=t.replace(/<script[\s\S]*?<\/script>/gi,' ').replace(/<style[\s\S]*?<\/style>/gi,' ').replace(/<[^>]+>/g,'\n');}
-        t=t.replace(/\r/g,'').replace(/[ \t]+\n/g,'\n').replace(/\n{2,}/g,'\n').trim();
-        res({records:[{title:name,source:file.name,content:t}]});};
-      rd.readAsText(file);
-    }else{res({text:'',name});}
+function openLogin(){
+  $('#loginModal').innerHTML = `
+    <button class="x" onclick="closeLogin()">×</button>
+    <div class="seg" id="loginSeg" style="margin-bottom:14px">
+      <button class="on" data-m="login">登录</button>
+      <button data-m="reg">注册</button>
+    </div>
+    <div id="loginForm"></div>`;
+  $('#loginSeg').querySelectorAll('button').forEach(b=>b.onclick=()=>{
+    $('#loginSeg').querySelectorAll('button').forEach(x=>x.classList.remove('on'));
+    b.classList.add('on'); renderLoginForm(b.dataset.m);
   });
+  renderLoginForm('login');
+  $('#loginMask').classList.add('on');
 }
-function normRec(x,fallback){x=x||{};return {title:x.title||fallback,url:x.url||'',source:x.source||'',
-  department:x.department||'',region:x.region||'',category:x.category||'',quality:x.quality||'B',date:x.date||'',
-  tags:Array.isArray(x.tags)?x.tags:(x.tags?String(x.tags).split(/[,，]/):[]),summary:x.summary||'',content:x.content||''};}
-function handleFiles(e){const files=[...(e.target.files||(e.dataTransfer&&e.dataTransfer.files)||[])];if(!files.length)return;
-  let done=0;files.forEach(f=>{extractTextFromFile(f).then(r=>{
-    if(r.records&&r.records.length){r.records.forEach(rec=>{rec._id='f'+Date.now()+Math.random().toString(36).slice(2,6);PENDING.push(rec);});}
-    else if(r.text){PENDING.push({title:r.name,source:f.name,content:r.text,_id:'f'+Date.now()+Math.random().toString(36).slice(2,6)});}
-    if(++done===files.length)renderPending();});});}
-function renderPending(){const box=document.getElementById('pendingList');
-  if(!PENDING.length){box.innerHTML='<div class="muted">尚未选择文件。</div>';updateIngestExport();return;}
-  box.innerHTML=PENDING.map((r,i)=>{
-    const catOpts=CATS.map(c=>'<option value="'+c[0]+'"'+(r.category===c[0]?' selected':'')+'>'+c[1]+'</option>').join('');
-    return '<div class="pending"><div class="ph"><b>'+esc(r.title||'(无标题)')+'</b>'
-      +'<span class="muted">'+(r.content?(r.content.length+' 字正文'):'无正文')+'</span></div>'
-      +'<div class="row2"><div class="fld"><label>标题</label><input id="p-title-'+i+'" value="'+esc(r.title||'')+'"></div>'
-      +'<div class="fld"><label>部门</label><input id="p-dept-'+i+'" value="'+esc(r.department||'')+'" placeholder="生态环境/发改委/经信/市场监管/其他"></div></div>'
-      +'<div class="row2"><div class="fld"><label>分类</label><select id="p-cat-'+i+'">'+catOpts+'</select></div>'
-      +'<div class="fld"><label>质量</label><select id="p-q-'+i+'">'+['A','B','C'].map(q=>'<option'+(r.quality===q?' selected':'')+'>'+q+'</option>').join('')+'</select></div></div>'
-      +'<div class="fld"><label>标签(逗号分隔)</label><input id="p-tags-'+i+'" value="'+esc((r.tags||[]).join(','))+'"></div>'
-      +'<div class="pv">'+esc((r.content||'').slice(0,300))+'</div>'
-      +'<div style="margin-top:6px;display:flex;gap:8px"><button class="mini" onclick="confirmOne('+i+')">加入知识库</button>'
-      +'<button class="ghost mini" onclick="removePending('+i+')">移除</button></div></div>';
-  }).join('')+'<div style="margin-top:8px"><button onclick="confirmAll()">全部加入知识库</button></div>';
-  updateIngestExport();}
-function pendingVal(i){const g=id=>{const e=document.getElementById(id);return e?e.value.trim():'';};
-  const r=PENDING[i];if(!r)return null;
-  return {title:g('p-title-'+i)||r.title,department:g('p-dept-'+i),category:g('p-cat-'+i),quality:g('p-q-'+i),
-    tags:g('p-tags-'+i)?g('p-tags-'+i).split(/[,，]/).map(s=>s.trim()).filter(Boolean):[],
-    source:r.source,url:r.url||'',region:r.region||'',date:r.date||'',summary:r.summary||'',content:r.content||''};}
-function confirmOne(i){const rec=pendingVal(i);if(!rec||!rec.title){alert('标题不能为空');return;}
-  rec.content_fetched=!!rec.content;rec.added_at=new Date().toISOString().slice(0,10);
-  RECORDS.unshift(rec);NEW_RECORDS.push(rec);RAG_BUILT=false;
-  PENDING.splice(i,1);renderPending();refreshAll();}
-function confirmAll(){if(!PENDING.length){alert('没有待加入的文件');return;}
-  PENDING.forEach((r,i)=>{const rec=pendingVal(i)||r;rec.content_fetched=!!rec.content;rec.added_at=new Date().toISOString().slice(0,10);
-    RECORDS.unshift(rec);NEW_RECORDS.push(rec);});RAG_BUILT=false;PENDING=[];renderPending();refreshAll();
-  alert('已加入 '+NEW_RECORDS.length+' 条本地记录，可在「知识管理」导出 inbox.json 后由助手入库');}
-function removePending(i){PENDING.splice(i,1);renderPending();}
-function updateIngestExport(){const b=document.getElementById('btnExportNew');if(b)b.disabled=NEW_RECORDS.length===0;}
+function closeLogin(){ $('#loginMask').classList.remove('on'); }
+function renderLoginForm(mode){
+  if(mode==='login'){
+    $('#loginForm').innerHTML=`
+      <div class="fld"><label>用户名</label><input type="text" id="lUser" placeholder="如 admin"></div>
+      <div class="fld"><label>密码</label><input type="password" id="lPw" placeholder=""></div>
+      <button style="width:100%" onclick="doLogin()">登录</button>
+      <p class="muted" style="margin-top:10px">默认账号：admin/admin123（管理员）· editor/editor123（编辑）· viewer/viewer123（访客）</p>`;
+  } else {
+    $('#loginForm').innerHTML=`
+      <div class="fld"><label>用户名（≥2位）</label><input type="text" id="lUser" placeholder=""></div>
+      <div class="fld"><label>密码（≥6位）</label><input type="password" id="lPw" placeholder=""></div>
+      <div class="fld"><label>昵称（可选）</label><input type="text" id="lName" placeholder=""></div>
+      <div class="fld"><label>所属团队（可选）</label><select id="lTeam"><option value="">不加入团队</option></select></div>
+      <button style="width:100%" onclick="doRegister()">注册并登录</button>
+      <p class="muted" style="margin-top:10px">注册后默认角色为「访客」，可浏览、检索、批注；管理员可在「知识管理」中调整角色与团队。</p>`;
+    loadTeamsForSelect();
+  }
+}
+async function loadTeamsForSelect(){
+  try{ const ts=await api('/api/teams'); const sel=$('#lTeam');
+    ts.forEach(t=>{const o=document.createElement('option');o.value=t.id;o.textContent=t.name;sel.appendChild(o);});
+  }catch(e){}
+}
+async function doLogin(){
+  const u=$('#lUser').value.trim(), p=$('#lPw').value;
+  if(!u||!p) return toast('请输入用户名和密码');
+  try{
+    const j=await api('/api/auth/login',{method:'POST',body:JSON.stringify({username:u,password:p})});
+    App.token=j.access_token; App.user=j.user; localStorage.setItem('dc_token',j.access_token);
+    updateAuthUI(); closeLogin(); toast('欢迎，'+j.user.username);
+  }catch(e){ toast('登录失败：'+e.message); }
+}
+async function doRegister(){
+  const u=$('#lUser').value.trim(), p=$('#lPw').value, n=$('#lName').value.trim();
+  const tid=$('#lTeam').value||null;
+  if(!u||!p) return toast('请输入用户名和密码');
+  try{
+    const j=await api('/api/auth/register',{method:'POST',body:JSON.stringify({username:u,password:p,display_name:n||null,team_id:tid?parseInt(tid):null})});
+    App.token=j.access_token; App.user=j.user; localStorage.setItem('dc_token',j.access_token);
+    updateAuthUI(); closeLogin(); toast('注册成功，已登录');
+  }catch(e){ toast('注册失败：'+e.message); }
+}
 
-/* 网页 → 待 AI 处理队列（localStorage） */
-function getAIQueue(){try{return JSON.parse(localStorage.getItem('dc_aiq')||'[]');}catch(e){return [];}}
-function setAIQueue(q){localStorage.setItem('dc_aiq',JSON.stringify(q));renderAIQueue();}
-function buildAIPrompt(url,note){return '请抓取并分析以下网页，进行智能分类（部门/地域/分类/质量/标签）、提取摘要与正文，处理后加入双碳知识库：\n链接：'+url+(note?'\n备注：'+note:'')+'\n（用 digest/ingest_url.py 处理并部署上线）';}
-function queueForAI(){const url=val('webUrl').trim();if(!url){alert('请输入网页链接');return;}
-  const note=val('webNote').trim();const q=getAIQueue();
-  if(q.some(x=>x.url===url)){alert('该链接已在待处理队列中');return;}
-  q.unshift({url,note,time:new Date().toISOString().slice(0,16).replace('T',' ')});setAIQueue(q);tryLocalFetch(url);}
-function tryLocalFetch(url){const box=document.getElementById('webPreview');box.innerHTML='<div class="muted">正在尝试本地抓取…</div>';
-  fetch(url,{mode:'cors'}).then(r=>r.text()).then(h=>{
-    h=h.replace(/<script[\s\S]*?<\/script>/gi,' ').replace(/<style[\s\S]*?<\/style>/gi,' ').replace(/<[^>]+>/g,'\n');
-    h=h.replace(/\s+/g,' ').trim();
-    if(h.length>120){box.innerHTML='<div class="note">✅ 本地可直接抓取（'+h.length+' 字）。如需 AI 智能分类并正式入库，请把链接发给助手。</div>'
-      +'<div class="pv" style="max-height:160px;overflow:auto">'+esc(h.slice(0,1200))+'</div>';}
-    else{box.innerHTML='<div class="note">⚠️ 本地抓取内容过少或被跨域阻止，建议把链接发给 AI 助手处理。</div>';}
-  }).catch(()=>{box.innerHTML='<div class="note">⚠️ 浏览器跨域(CORS)阻止了本地抓取。请把链接发给 AI 助手，由助手在服务器端抓取、分析、分类并入库。</div>';});}
-function renderAIQueue(){const box=document.getElementById('aiQueue');const q=getAIQueue();
-  if(!q.length){box.innerHTML='<div class="muted">暂无待 AI 处理的网页。</div>';return;}
-  box.innerHTML=q.map((x,i)=>'<div class="aiq"><div><b>'+esc(x.url)+'</b> <span class="muted">'+x.time+'</span></div>'
-    +(x.note?'<div class="muted">备注：'+esc(x.note)+'</div>':'')
-    +'<div style="margin-top:6px;display:flex;gap:8px"><button class="mini" onclick="copyOne('+i+')">复制提交文案</button>'
-    +'<button class="ghost mini" onclick="removeAI('+i+')">移除</button></div></div>').join('');}
-function copyOne(i){const x=getAIQueue()[i];if(!x)return;copyText(buildAIPrompt(x.url,x.note));}
-function copyAllAI(){const q=getAIQueue();if(!q.length){alert('队列为空');return;}
-  copyText(q.map(x=>buildAIPrompt(x.url,x.note)).join('\n\n----\n\n'));}
-function removeAI(i){const q=getAIQueue();q.splice(i,1);setAIQueue(q);}
-function copyText(t){if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(t).then(()=>alert('已复制，去对话里 @助手 粘贴发送即可')).catch(()=>{window.prompt('复制以下内容发给助手：',t);});}
-  else{window.prompt('复制以下内容发给助手：',t);}}
-function renderIngest(){renderPending();renderAIQueue();}
+/* ===================== 条目卡片渲染 ===================== */
+function recCard(r){
+  const imp = (typeof r.importance==='number')?r.importance:null;
+  const impHtml = imp!=null ? '<span class="imp-star" title="重要性评分">★ '+imp.toFixed(1)+'</span>' : '';
+  const q = r.quality||'';
+  const full = r.content_fetched ? '<span class="badge b-full">全文</span>' : '';
+  const d = r.date||r.added_at||'';
+  return `<div class="card" onclick="openDetail(${JSON.stringify(typeof r.id==='number'?r.id:r.id)})">
+    <h3>${esc(r.title)}</h3>
+    <div class="sum">${esc(r.summary||'')}${r.content&&!r.summary?' '+esc(String(r.content).slice(0,120)):''}</div>
+    <div class="badges">
+      ${r.department?`<span class="badge b-dept">${esc(r.department)}</span>`:''}
+      ${r.category?`<span class="badge b-cat">${esc(CAT_LABELS[r.category]||r.category)}</span>`:''}
+      ${r.region?`<span class="badge b-region">${esc(r.region)}</span>`:''}
+      ${q?`<span class="badge b-q">质量${esc(q)}</span>`:''}
+      ${full}
+      ${impHtml}
+      <span class="muted" style="margin-left:auto">${esc(d)}</span>
+    </div>
+  </div>`;
+}
+function openDetail(id){
+  if(App.mode==='backend') loadDetailBackend(id);
+  else loadDetailStatic(id);
+}
 
-/* ================= 工具 ================= */
-function val(id){const e=document.getElementById(id);return e?e.value:'';}
-function refreshAll(){renderFeed();renderKb();if(document.getElementById('v-manage').classList.contains('on'))renderManage();}
+/* ===================== 信息流（重要性排序，日期分期在底部） ===================== */
+function curFeedSort(){return $('#feedSort').querySelector('.on').dataset.s;}
+async function loadFeed(){
+  $('#feedGrid').innerHTML='<div class="empty">加载中…</div>';
+  const q=$('#feedQ').value, dept=$('#feedDept').value, cat=$('#feedCat').value, sort=curFeedSort();
+  if(App.mode==='backend'){
+    try{
+      const data=await api('/api/records?q='+encodeURIComponent(q)+'&dept='+encodeURIComponent(dept)+'&cat='+encodeURIComponent(cat)+'&sort='+sort+'&date='+encodeURIComponent(App.feedDate||'')+'&page='+App.feedPage+'&size=30');
+      $('#feedStat').innerHTML='<span class="chip">共 <b>'+data.total+'</b> 条 · 按'+(sort==='importance'?'重要性':'时间')+'排序</span>';
+      $('#feedGrid').innerHTML = data.items.length? data.items.map(recCard).join('') : '<div class="empty">暂无匹配结果</div>';
+      $('#feedPage').innerHTML = pageBtns(App.feedPage, data.total, 30, 'App.feedPage', 'loadFeed');
+      await loadDates();
+    }catch(e){ $('#feedGrid').innerHTML='<div class="empty">加载失败：'+esc(e.message)+'</div>'; }
+  } else {
+    let arr = App.kb.slice();
+    if(q) arr = arr.filter(r=>(r.title+' '+(r.summary||'')+' '+(r.content||'')).toLowerCase().includes(q.toLowerCase()));
+    if(dept) arr=arr.filter(r=>r.department===dept);
+    if(cat) arr=arr.filter(r=>r.category===cat);
+    arr.sort((a,b)=> (b.date||'').localeCompare(a.date||''));
+    $('#feedStat').innerHTML='<span class="chip">共 <b>'+arr.length+'</b> 条 · 静态只读</span>';
+    const slice=arr.slice((App.feedPage-1)*30,App.feedPage*30);
+    $('#feedGrid').innerHTML = slice.length? slice.map(recCard).join('') : '<div class="empty">暂无匹配结果</div>';
+    $('#feedPage').innerHTML = pageBtns(App.feedPage, arr.length, 30, 'App.feedPage', 'loadFeed');
+    loadDatesStatic(arr);
+  }
+}
+async function loadDates(){
+  try{
+    const ds=await api('/api/records/dates');
+    const host=$('#feedDates');
+    let html='<span class="lbl">按收录日期：</span><span class="dpill'+(!App.feedDate?' on':'')+'" onclick="setFeedDate(\'\')">全部</span>';
+    ds.slice(0,40).forEach(d=>{ html+='<span class="dpill'+(App.feedDate===d.date?' on':'')+'" onclick="setFeedDate(\''+esc(d.date)+'\')">'+esc(d.date)+' <span class="muted">('+d.count+')</span></span>'; });
+    host.innerHTML=html;
+  }catch(e){}
+}
+function loadDatesStatic(arr){
+  const map={}; arr.forEach(r=>{const d=r.added_at||r.date; if(d) map[d]=(map[d]||0)+1;});
+  const ds=Object.keys(map).sort().reverse().slice(0,40).map(d=>({date:d,count:map[d]}));
+  const host=$('#feedDates');
+  let html='<span class="lbl">按收录日期：</span><span class="dpill'+(!App.feedDate?' on':'')+'" onclick="setFeedDate(\'\')">全部</span>';
+  ds.forEach(d=>{ html+='<span class="dpill'+(App.feedDate===d?' on':'')+'" onclick="setFeedDate(\''+esc(d)+'\')">'+esc(d)+' ('+d.count+')</span>'; });
+  host.innerHTML=html;
+}
+function setFeedDate(d){ App.feedDate=d; App.feedPage=1; if(App.mode==='backend'){ /* 后端按 added_at 筛选需额外参数，这里简化：后端日期过滤暂用 date 字段近似 */ loadFeed(); } else loadFeed(); }
 
-/* ================= 初始化 ================= */
-function initSelects(){
-  const depts=uniqueDepts(),cats=CATS.map(c=>[c[0],c[1]]),regions=uniqueRegions();
-  fillSelect(document.getElementById('fe-dept'),depts,'部门：全部');
-  fillSelect(document.getElementById('fe-cat'),cats,'分类：全部');
-  fillSelect(document.getElementById('fk-dept'),depts,'部门：全部');
-  fillSelect(document.getElementById('fk-cat'),cats,'分类：全部');
-  fillSelect(document.getElementById('fk-region'),regions,'地域：全部');
-  fillSelect(document.getElementById('rr-dept'),depts,'部门：全部');
-  fillSelect(document.getElementById('rr-cat'),cats,'分类：全部');
-  fillSelect(document.getElementById('fm-dept'),depts,'部门：全部');
-  fillSelect(document.getElementById('fm-cat'),cats,'分类：全部');
+function pageBtns(page,total,size,varName,fn){
+  const pages=Math.ceil(total/size); if(pages<=1) return '';
+  let s='';
+  if(page>1) s+='<button class="mini ghost" onclick="'+varName+'='+(page-1)+';'+fn+'()">上一页</button> ';
+  s+='<span class="muted"> 第 '+page+' / '+pages+' 页 </span>';
+  if(page<pages) s+=' <button class="mini ghost" onclick="'+varName+'='+(page+1)+';'+fn+'()">下一页</button>';
+  return s;
 }
-function bindEvents(){
-  document.getElementById('tabs').addEventListener('click',e=>{const t=e.target.closest('.tab');if(!t)return;
-    document.querySelectorAll('.tab').forEach(x=>x.classList.remove('on'));t.classList.add('on');
-    document.querySelectorAll('.view').forEach(x=>x.classList.remove('on'));
-    document.getElementById('v-'+t.dataset.v).classList.add('on');
-    if(t.dataset.v==='manage')renderManage();if(t.dataset.v==='rag'&&!RAG_BUILT)ragBuild();
-    if(t.dataset.v==='ingest')renderIngest();});
-  ['fe-dept','fe-cat','fe-q'].forEach(id=>document.getElementById(id).addEventListener('change',renderFeed));
-  document.getElementById('fe-kw').addEventListener('input',renderFeed);
-  document.getElementById('dateNav').addEventListener('click',e=>{const p=e.target.closest('.dpill');if(!p)return;
-    FEED_DAY=p.dataset.d;renderFeed();});
-  ['fk-dept','fk-cat','fk-region','fk-q'].forEach(id=>document.getElementById(id).addEventListener('change',renderKb));
-  document.getElementById('fk-full').addEventListener('change',renderKb);
-  document.getElementById('fk-kw').addEventListener('input',renderKb);
-  document.getElementById('ragMode').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;
-    document.querySelectorAll('#ragMode button').forEach(x=>x.classList.remove('on'));b.classList.add('on');
-    RAG_MODE=b.dataset.m;document.getElementById('ragGo').textContent=RAG_MODE==='search'?'检索':(RAG_MODE==='ask'?'问答':'生成报告');});
-  document.getElementById('ragGo').addEventListener('click',runRag);
-  document.getElementById('rq').addEventListener('keydown',e=>{if(e.key==='Enter')runRag();});
-  document.getElementById('ragResults').addEventListener('click',e=>{if(e.target.classList.contains('more')){
-    const c=e.target.parentElement.querySelector('.chunk');if(c)c.classList.toggle('open');}});
-  // 卡片点击 → 详情
-  document.querySelector('.wrap').addEventListener('click',e=>{const c=e.target.closest('.card');
-    if(c&&c.dataset.idx!==undefined)showDetail(+c.dataset.idx);});
-  // 管理表格
-  ['fm-dept','fm-cat'].forEach(id=>document.getElementById(id).addEventListener('change',renderMgTable));
-  document.getElementById('fm-kw').addEventListener('input',renderMgTable);
-  document.getElementById('mgBody').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;
-    if(b.dataset.view!==undefined)showDetail(+b.dataset.view);
-    if(b.dataset.edit!==undefined)openModal(editForm(RECORDS[+b.dataset.edit],+b.dataset.edit));});
-  document.getElementById('btnAdd').addEventListener('click',()=>openModal(editForm({},undefined)));
-  // 手动入库：文件上传 + 网页交 AI
-  document.getElementById('up-file').addEventListener('change',handleFiles);
-  document.getElementById('webAdd').addEventListener('click',queueForAI);
-  document.getElementById('webCopyAll').addEventListener('click',copyAllAI);
-  const drop=document.getElementById('dropZone');
-  if(drop){drop.addEventListener('dragover',e=>{e.preventDefault();drop.style.borderColor='var(--green)';});
-    drop.addEventListener('drop',e=>{e.preventDefault();handleFiles(e);});}
-  document.getElementById('btnExportKb').addEventListener('click',()=>{
-    const clean=RECORDS.map(r=>{const c=Object.assign({},r);delete c._ev;return c;});
-    download('kb.json',JSON.stringify(clean,null,1));});
-  document.getElementById('btnExportNew').addEventListener('click',()=>{
-    if(!NEW_RECORDS.length){alert('暂无本地新增记录');return;}
-    download('inbox.json',JSON.stringify(NEW_RECORDS,null,1));});
-  document.getElementById('mask').addEventListener('click',e=>{if(e.target.id==='mask')closeModal();});
-  document.getElementById('fabFeedback').addEventListener('click',()=>{
-    if(CONFIG.feedback_url)window.open(CONFIG.feedback_url,'_blank');});
-  document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal();});
+
+/* ===================== 知识库 ===================== */
+async function loadKB(){
+  $('#kbGrid').innerHTML='<div class="empty">加载中…</div>';
+  const q=$('#kbQ').value, dept=$('#kbDept').value, cat=$('#kbCat').value, region=$('#kbRegion').value,
+        quality=$('#kbQuality').value, only_full=$('#kbFull').checked, only_flagged=$('#kbFlag').checked;
+  if(App.mode==='backend'){
+    try{
+      let url='/api/records?q='+encodeURIComponent(q)+'&dept='+encodeURIComponent(dept)+'&cat='+encodeURIComponent(cat)+
+        '&region='+encodeURIComponent(region)+'&quality='+encodeURIComponent(quality)+'&sort=importance&page='+App.kbPage+'&size=30';
+      if(only_full) url+='&only_full=1'; if(only_flagged) url+='&only_flagged=1';
+      const data=await api(url);
+      $('#kbStat').innerHTML='<span class="chip">共 <b>'+data.total+'</b> 条</span>';
+      $('#kbGrid').innerHTML = data.items.length? data.items.map(recCard).join('') : '<div class="empty">暂无匹配结果</div>';
+      $('#kbPage').innerHTML = pageBtns(App.kbPage, data.total, 30, 'App.kbPage', 'loadKB');
+    }catch(e){ $('#kbGrid').innerHTML='<div class="empty">加载失败：'+esc(e.message)+'</div>'; }
+  } else {
+    let arr=App.kb.slice();
+    if(q) arr=arr.filter(r=>(r.title+' '+(r.summary||'')+' '+(r.content||'')).toLowerCase().includes(q.toLowerCase()));
+    if(dept) arr=arr.filter(r=>r.department===dept);
+    if(cat) arr=arr.filter(r=>r.category===cat);
+    if(region) arr=arr.filter(r=>r.region===region);
+    if(quality) arr=arr.filter(r=>r.quality===quality);
+    arr.sort((a,b)=>(b.date||'').localeCompare(a.date||''));
+    $('#kbStat').innerHTML='<span class="chip">共 <b>'+arr.length+'</b> 条 · 静态只读</span>';
+    const slice=arr.slice((App.kbPage-1)*30,App.kbPage*30);
+    $('#kbGrid').innerHTML = slice.length? slice.map(recCard).join('') : '<div class="empty">暂无匹配结果</div>';
+    $('#kbPage').innerHTML = pageBtns(App.kbPage, arr.length, 30, 'App.kbPage', 'loadKB');
+  }
 }
-function applyConfig(){
-  if(CONFIG.project_name)document.querySelector('header h1').textContent=CONFIG.project_name+' · 一体化门户';
-  const foot=document.getElementById('foot');
-  foot.innerHTML='双碳领域知识库 · 自动采集更新 ｜ '
-    +(CONFIG.feedback_url?'<a href="'+CONFIG.feedback_url+'" target="_blank">填写反馈问卷</a> ｜ ':'')
-    +(CONFIG.owner_email?'负责人 <a href="mailto:'+CONFIG.owner_email+'">'+CONFIG.owner_email+'</a>':'')
-    +'<br><span class="muted">'+(CONFIG.update_note||'')+'</span>';
+
+/* ===================== 详情（后端） ===================== */
+async function loadDetailBackend(id){
+  let rec;
+  try{ rec=await api('/api/records/'+id); }
+  catch(e){ toast('详情加载失败：'+e.message); return; }
+  const annHtml = (rec.annotations||[]).map(a=>`
+    <div class="ann"><div>${esc(a.text)}</div>
+      <div class="meta"><span>${esc(a.display_name||a.username||'用户')} · ${esc(a.created_at||'')}</span>
+      ${canDeleteAnn(a)?`<span class="del" onclick="delAnn(${id},${a.id})">删除</span>`:''}</div></div>`).join('');
+  const kg = (rec.kg_terms||[]).map(t=>`<span class="kw concept">${esc(t)}</span>`).join('');
+  const tags = (rec.tags||[]).map(t=>`<span class="kw">${esc(t)}</span>`).join('');
+  const imgs = (rec.images||[]);
+  const gal = imgs.length? '<div class="gal">'+imgs.map(src=> src&&/^https?:/.test(src)
+      ? `<img src="${esc(src)}" onclick="openImg('${esc(src)}')" onerror="this.replaceWith(Object.assign(document.createElement('div'),{className:'ph',textContent:'图片不可预览'}))">`
+      : `<div class="ph">非公开图片</div>`).join('')+'</div>' : '<p class="muted">本条无图片。</p>';
+  const flags = rec.flags||{};
+  const flagHtml = (flags.dup? '<span class="badge b-q">疑似重复'+(flags.dup_of?' → #'+flags.dup_of:'')+'</span>':'')+(flags.lowq?'<span class="badge b-none">低质待复核</span>':'');
+  // 本地小图谱
+  const localNodes=[{id:'r',label:rec.title.slice(0,18),type:'record',weight:5}];
+  const localEdges=[];
+  [['department','dept',rec.department],['category','cat',rec.category?CAT_LABELS[rec.category]:null],['region','region',rec.region]].forEach(([f,t,v])=>{
+    if(v){ localNodes.push({id:f,label:v,type:t,weight:3}); localEdges.push({source:'r',target:f}); }});
+  (rec.tags||[]).forEach(t=>{ localNodes.push({id:'t'+t,label:t,type:'tag',weight:2}); localEdges.push({source:'r',target:'t'+t}); });
+  (rec.kg_terms||[]).forEach(t=>{ localNodes.push({id:'c'+t,label:t,type:'concept',weight:2}); localEdges.push({source:'r',target:'c'+t}); });
+
+  $('#modal').innerHTML=`
+    <button class="x" onclick="closeMask()">×</button>
+    <h2>${esc(rec.title)}</h2>
+    <div class="badges" style="margin-bottom:8px">
+      ${rec.department?`<span class="badge b-dept">${esc(rec.department)}</span>`:''}
+      ${rec.category?`<span class="badge b-cat">${esc(CAT_LABELS[rec.category]||rec.category)}</span>`:''}
+      ${rec.region?`<span class="badge b-region">${esc(rec.region)}</span>`:''}
+      ${rec.quality?`<span class="badge b-q">质量${esc(rec.quality)}</span>`:''}
+      <span class="imp-star">★ 重要性 ${(rec.importance||0).toFixed(1)}</span>
+      ${flagHtml}
+    </div>
+    <p class="muted" style="font-size:12.5px">来源：${esc(rec.source||'')} · 发布 ${esc(rec.date||'')} · 入库 ${esc(rec.added_at||'')} ${rec.url?`· <a href="${esc(rec.url)}" target="_blank" rel="noopener">原文↗</a>`:''}</p>
+    <div class="ggrid" style="grid-template-columns:1fr 280px">
+      <div>
+        <h3 style="font-size:14px;margin:10px 0 4px">正文</h3>
+        <div class="content md">${mdToHtml((rec.content||rec.summary||'（无正文）').slice(0,6000))}</div>
+      </div>
+      <div>
+        <div class="sub-card" style="margin-bottom:12px">
+          <h3 style="font-size:13.5px;margin:0 0 6px">AI 关键词</h3>
+          <div>${tags||'<span class="muted">无</span>'}</div>
+          <h3 style="font-size:13.5px;margin:10px 0 6px">知识图谱概念</h3>
+          <div>${kg||'<span class="muted">无</span>'}</div>
+        </div>
+        <div class="sub-card">
+          <h3 style="font-size:13.5px;margin:0 0 6px">本条目知识图谱</h3>
+          <div class="graph-wrap" style="border:none;box-shadow:none"><canvas class="graph-canvas" id="localCanvas" style="height:240px"></canvas></div>
+        </div>
+      </div>
+    </div>
+    <div class="sub-card" style="margin-top:14px">
+      <h3 style="font-size:14px;margin:0 0 6px">图片画廊</h3>${gal}
+    </div>
+    <div class="sub-card" style="margin-top:14px">
+      <h3 style="font-size:14px;margin:0 0 6px">批注 / 分析记录 ${(rec.annotations||[]).length?('('+(rec.annotations||[]).length+')'):''}</h3>
+      <div id="annList">${annHtml||'<p class="muted">暂无批注。</p>'}</div>
+      <div class="row2" style="margin-top:8px">
+        <textarea id="annText" rows="2" placeholder="记录你的分析、疑问或补充…"></textarea>
+        <div style="align-self:end"><button class="mini" onclick="addAnn(${id})">添加批注</button></div>
+      </div>
+      ${App.token?'':'<p class="muted">登录后可添加批注。</p>'}
+    </div>`;
+  $('#mask').classList.add('on');
+  GraphViz.mount('localCanvas', localNodes, localEdges);
 }
-function boot(data){
-  RECORDS=data;initSelects();bindEvents();applyConfig();
-  renderFeed();renderKb();
-  document.getElementById('subtitle').textContent=
-    '共 '+RECORDS.length+' 条知识 ｜ 每日推送·知识库·RAG检索·知识管理 —— 一页搞定';
+function canDeleteAnn(a){ if(!App.user) return false; if(App.user.role==='admin'||App.user.role==='editor') return true; return a.username===App.user.username; }
+async function addAnn(id){
+  const t=$('#annText').value.trim(); if(!t) return toast('批注内容为空');
+  if(!App.token) return toast('请先登录');
+  try{
+    await api('/api/records/'+id+'/annotations',{method:'POST',body:JSON.stringify({text:t})});
+    $('#annText').value=''; loadDetailBackend(id); toast('批注已添加');
+  }catch(e){ toast('失败：'+e.message); }
 }
-function loadAll(){
-  Promise.all([
-    fetch('config.json',{cache:'no-store'}).then(r=>r.ok?r.json():{}).catch(()=>({})),
-    fetch('kb/kb.json',{cache:'no-store'}).then(r=>{if(!r.ok)throw 0;return r.json();})
-  ]).then(([cfg,kb])=>{CONFIG=cfg;boot(kb);})
-    .catch(()=>{document.getElementById('picker-wrap').style.display='block';
-      bindEvents();initSelects&&null;});
+async function delAnn(id,aid){
+  if(!confirm('确认删除该批注？')) return;
+  try{ await api('/api/records/'+id+'/annotations/'+aid,{method:'DELETE'}); loadDetailBackend(id); toast('已删除'); }
+  catch(e){ toast('失败：'+e.message); }
 }
-document.getElementById('picker').addEventListener('change',e=>{const f=e.target.files[0];if(!f)return;
-  const rd=new FileReader();rd.onload=()=>{try{RECORDS=JSON.parse(rd.result);
-    document.getElementById('picker-wrap').style.display='none';
-    initSelects();bindEvents();applyConfig();renderFeed();renderKb();}catch(err){alert('解析失败');}};
-  rd.readAsText(f);});
-loadAll();
+
+/* ===================== 详情（静态回退） ===================== */
+function loadDetailStatic(idx){
+  const r=App.kb[idx]; if(!r) return;
+  const tags=(r.tags||[]).map(t=>`<span class="kw">${esc(t)}</span>`).join('');
+  const localNodes=[{id:'r',label:(r.title||'').slice(0,18),type:'record',weight:5}]; const localEdges=[];
+  [['department','dept',r.department],['category','cat',r.category?CAT_LABELS[r.category]:null],['region','region',r.region]].forEach(([f,t,v])=>{
+    if(v){localNodes.push({id:f,label:v,type:t,weight:3});localEdges.push({source:'r',target:f});}});
+  (r.tags||[]).forEach(t=>{localNodes.push({id:'t'+t,label:t,type:'tag',weight:2});localEdges.push({source:'r',target:'t'+t});});
+  $('#modal').innerHTML=`
+    <button class="x" onclick="closeMask()">×</button>
+    <h2>${esc(r.title)}</h2>
+    <div class="badges" style="margin-bottom:8px">
+      ${r.department?`<span class="badge b-dept">${esc(r.department)}</span>`:''}
+      ${r.category?`<span class="badge b-cat">${esc(CAT_LABELS[r.category]||r.category)}</span>`:''}
+      ${r.region?`<span class="badge b-region">${esc(r.region)}</span>`:''}
+      ${r.quality?`<span class="badge b-q">质量${esc(r.quality)}</span>`:''}
+    </div>
+    <p class="muted" style="font-size:12.5px">来源：${esc(r.source||'')} · 发布 ${esc(r.date||'')} · 入库 ${esc(r.added_at||'')} ${r.url?`· <a href="${esc(r.url)}" target="_blank" rel="noopener">原文↗</a>`:''}</p>
+    <div class="ggrid" style="grid-template-columns:1fr 280px">
+      <div><h3 style="font-size:14px;margin:10px 0 4px">正文</h3><div class="content md">${mdToHtml((r.content||r.summary||'（无正文）').slice(0,6000))}</div></div>
+      <div>
+        <div class="sub-card" style="margin-bottom:12px"><h3 style="font-size:13.5px;margin:0 0 6px">标签</h3><div>${tags||'<span class="muted">无</span>'}</div>
+          <h3 style="font-size:13.5px;margin:10px 0 6px">本条目知识图谱</h3>
+          <div class="graph-wrap" style="border:none;box-shadow:none"><canvas class="graph-canvas" id="localCanvas" style="height:240px"></canvas></div></div>
+      </div>
+    </div>
+    <div class="note">🌐 当前为只读静态模式，批注与图片画廊需在部署后端后使用。</div>`;
+  $('#mask').classList.add('on');
+  GraphViz.mount('localCanvas', localNodes, localEdges);
+}
+
+/* ===================== 知识图谱（全局） ===================== */
+const GCOLORS={record:'#0f766e',dept:'#1a7f5a',cat:'#2563eb',region:'#64748b',tag:'#7c3aed',concept:'#b45309'};
+const GraphViz = {
+  canvas:null, ctx:null, nodes:[], edges:[], raf:null, dpr:1, W:0, H:0, drag:null, hover:null, alpha:1, onNode:null,
+  mount(id, nodes, edges){
+    this.canvas=document.getElementById(id); if(!this.canvas) return;
+    this.ctx=this.canvas.getContext('2d'); this.nodes=nodes; this.edges=edges; this.alpha=1; this.drag=null; this.hover=null;
+    this._resize(); this._init(); this._bind(); this._loop();
+  },
+  _resize(){
+    const rect=this.canvas.getBoundingClientRect();
+    this.dpr=window.devicePixelRatio||1;
+    this.W=rect.width||this.canvas.clientWidth||600; this.H=rect.height||this.canvas.clientHeight||400;
+    this.canvas.width=this.W*this.dpr; this.canvas.height=this.H*this.dpr;
+    this.ctx.setTransform(this.dpr,0,0,this.dpr,0,0);
+  },
+  _init(){
+    const cx=this.W/2, cy=this.H/2;
+    this.nodes.forEach((n,i)=>{ if(n.x==null){ const a=i/this.nodes.length*Math.PI*2; n.x=cx+Math.cos(a)*(Math.min(this.W,this.H)/3)*(0.4+Math.random()*0.6); n.y=cy+Math.sin(a)*(Math.min(this.W,this.H)/3)*(0.4+Math.random()*0.6); n.vx=0;n.vy=0; } });
+  },
+  _bind(){
+    const c=this.canvas; if(c._gvbound) return; c._gvbound=true;
+    c.addEventListener('mousemove',e=>{
+      const rect=c.getBoundingClientRect(); const mx=e.clientX-rect.left, my=e.clientY-rect.top;
+      if(this.drag){ this.drag.x=mx; this.drag.y=my; this.drag.vx=0; this.drag.vy=0; return; }
+      const n=this._pick(mx,my); this.hover=n;
+      const tip=$('#graphTip');
+      if(n){ tip.style.display='block'; tip.style.left=(mx+12)+'px'; tip.style.top=(my+12)+'px'; tip.textContent=n.label+' · '+(n.type==='record'?'知识':n.type); c.style.cursor='pointer'; }
+      else { tip.style.display='none'; c.style.cursor='default'; }
+    });
+    c.addEventListener('mousedown',e=>{ const rect=c.getBoundingClientRect(); const n=this._pick(e.clientX-rect.left,e.clientY-rect.top); if(n){this.drag=n;} });
+    c.addEventListener('mouseup',e=>{
+      if(this.drag && !this._moved){ // click
+        this._click(this.drag);
+      }
+      this.drag=null;
+    });
+    c.addEventListener('mouseleave',()=>{ this.hover=null; $('#graphTip').style.display='none'; });
+    window.addEventListener('resize',()=>{ if(this.canvas && document.body.contains(this.canvas)){ this._resize(); this.alpha=Math.max(this.alpha,0.4);} });
+  },
+  _pick(mx,my){
+    for(const n of this.nodes){ const r=this._radius(n)+4; if((mx-n.x)**2+(my-n.y)**2<=r*r) return n; }
+    return null;
+  },
+  _radius(n){ return n.type==='record'?14:6+Math.min(n.weight||1,8); },
+  _click(n){
+    $('#graphSelInfo').innerHTML='<b>'+esc(n.label)+'</b><br><span class="muted">类型：'+(n.type==='record'?'知识条目':n.type)+' · 关联度 '+(n.weight||0)+'</span>';
+    if(n.type==='record'){ openDetail(n._id!=null?n._id:n.ref); }
+    else { // 按维度筛选
+      const dim={dept:'department',cat:'category',region:'region',tag:'tag',concept:'concept'}[n.type];
+      if(dim && dim!=='tag' && dim!=='concept'){
+        $('#kb'+ (dim==='department'?'Dept':dim==='category'?'Cat':'Region') ).value = n.label;
+        switchTab('kb'); loadKB();
+      } else if(n.type==='tag'||n.type==='concept'){
+        $('#kbQ').value=n.label; switchTab('kb'); loadKB();
+      }
+    }
+  },
+  relayout(){ this.alpha=1; this.nodes.forEach(n=>{n.x=null;}); this._init(); },
+  _loop(){
+    cancelAnimationFrame(this.raf);
+    const step=()=>{
+      this._tick(); this._draw();
+      if(this.alpha>0.02){ this.raf=requestAnimationFrame(step); }
+    };
+    this.raf=requestAnimationFrame(step);
+  },
+  _tick(){
+    const ns=this.nodes, k=this.alpha;
+    for(let i=0;i<ns.length;i++){
+      const a=ns[i]; if(a===this.drag) continue;
+      // 斥力
+      for(let j=0;j<ns.length;j++){
+        if(i===j) continue; const b=ns[j];
+        let dx=a.x-b.x, dy=a.y-b.y; let d2=dx*dx+dy*dy; if(d2<1) d2=1;
+        const f=1800/d2; const d=Math.sqrt(d2);
+        a.vx+=(dx/d)*f*k; a.vy+=(dy/d)*f*k;
+      }
+      // 居中
+      a.vx+=(this.W/2-a.x)*0.002; a.vy+=(this.H/2-a.y)*0.002;
+    }
+    // 弹簧
+    for(const e of this.edges){
+      const a=ns.find(n=>n.id===e.source), b=ns.find(n=>n.id===e.target); if(!a||!b) continue;
+      let dx=b.x-a.x, dy=b.y-a.y; let d=Math.sqrt(dx*dx+dy*dy)||1; const L=80;
+      const f=(d-L)*0.02; a.vx+=(dx/d)*f; a.vy+=(dy/d)*f; b.vx-=(dx/d)*f; b.vy-=(dy/d)*f;
+    }
+    for(const n of ns){ if(n===this.drag) continue; n.x+=n.vx*0.6; n.y+=n.vy*0.6; n.vx*=0.82; n.vy*=0.82;
+      n.x=Math.max(16,Math.min(this.W-16,n.x)); n.y=Math.max(16,Math.min(this.H-16,n.y)); }
+    this.alpha*=0.985;
+  },
+  _draw(){
+    const ctx=this.ctx; ctx.clearRect(0,0,this.W,this.H);
+    ctx.lineWidth=1; ctx.strokeStyle='rgba(100,116,139,.28)';
+    for(const e of this.edges){ const a=this.nodes.find(n=>n.id===e.source), b=this.nodes.find(n=>n.id===e.target); if(!a||!b) continue; ctx.beginPath(); ctx.moveTo(a.x,a.y); ctx.lineTo(b.x,b.y); ctx.stroke(); }
+    for(const n of this.nodes){
+      const r=this._radius(n); ctx.beginPath(); ctx.arc(n.x,n.y,r,0,Math.PI*2);
+      ctx.fillStyle=GCOLORS[n.type]||'#94a3b8'; ctx.fill();
+      if(n===this.hover){ ctx.lineWidth=2; ctx.strokeStyle='#0f172a'; ctx.stroke(); }
+      if(r>=9 || (this.hover===n)){ ctx.fillStyle='#1e2b25'; ctx.font='11px sans-serif'; ctx.textAlign='center'; ctx.fillText(n.label.length>10?n.label.slice(0,10)+'…':n.label, n.x, n.y+r+12); }
+    }
+  }
+};
+async function loadGraph(){
+  const dept=$('#graphDept').value, cat=$('#graphCat').value;
+  if(App.mode==='backend'){
+    try{
+      const g=await api('/api/graph?dept='+encodeURIComponent(dept)+'&cat='+encodeURIComponent(cat)+'&limit=300');
+      const nodes=g.nodes.map(n=>({...n})); const recById={};
+      g.nodes.filter(n=>n.type==='record').forEach(n=>{ n._id=parseInt(String(n.id).replace('r','')); });
+      GraphViz.onNode=null;
+      $('#graphMeta').textContent='聚合 '+g.record_count+' 条 · '+g.nodes.length+' 节点 / '+g.edges.length+' 边';
+      GraphViz.mount('graphCanvas', g.nodes.map(n=>({...n, ref: n._id})), g.edges);
+    }catch(e){ toast('图谱加载失败：'+e.message); }
+  } else {
+    const g=buildGraphStatic(dept,cat);
+    $('#graphMeta').textContent='静态模式 · '+g.nodes.length+' 节点 / '+g.edges.length+' 边';
+    GraphViz.mount('graphCanvas', g.nodes, g.edges);
+  }
+}
+function buildGraphStatic(dept,cat){
+  const nodes={}, edges=[];
+  const node=(id,label,type)=>{ if(!nodes[id]) nodes[id]={id,label,type,weight:0}; nodes[id].weight++; };
+  App.kb.forEach((r,i)=>{
+    if(dept && r.department!==dept) return; if(cat && r.category!==cat) return;
+    const rid='r'+i; node(rid,(r.title||'').slice(0,20),'record');
+    [['department','dept',r.department],['category','cat',r.category?CAT_LABELS[r.category]:null],['region','region',r.region]].forEach(([f,t,v])=>{ if(v){ const id=f+':'+v; node(id,v,t); edges.push({source:rid,target:id}); }});
+    (r.tags||[]).forEach(t=>{ const id='tag:'+t; node(id,t,'tag'); edges.push({source:rid,target:id}); });
+  });
+  return {nodes:Object.values(nodes), edges};
+}
+
+/* ===================== 智能检索（AI） ===================== */
+function curAiMode(){return $('#aiMode').querySelector('.on').dataset.m;}
+async function runAI(){
+  const btn=$('#aiBtn'); const q=$('#aiQuery').value.trim(); if(!q) return toast('请输入问题或主题');
+  btn.disabled=true; btn.innerHTML='<span class="spinner"></span>生成中';
+  $('#aiNote').textContent = App.mode==='backend' ? (App.health&&App.health.ai_configured?'已接入 AI 模型（DeepSeek），生成式回答。':'未配置 AI 密钥，使用离线富检索汇总。') : '静态只读模式：本地关键词检索 + 离线汇总。';
+  try{
+    if(App.mode==='backend'){
+      const mode=curAiMode();
+      if(mode==='ask'){
+        const j=await api('/api/ai/ask',{method:'POST',body:JSON.stringify({query:q,top_k:6,use_ai:true})});
+        $('#aiOut').innerHTML = `<div class="result"><div class="md">${mdToHtml(j.answer)}</div>${renderSources(j.sources, j.mode)}</div>`;
+      } else {
+        const j=await api('/api/ai/report',{method:'POST',body:JSON.stringify({topic:q,top_k:12,use_ai:true})});
+        $('#aiOut').innerHTML = `<div class="result"><div class="md">${mdToHtml(j.report)}</div>${renderSources(j.sources, j.mode)}</div>`;
+      }
+    } else {
+      const res = staticAI(q, curAiMode());
+      $('#aiOut').innerHTML = `<div class="result"><div class="md">${mdToHtml(res.text)}</div>${renderSources(res.sources,'offline')}</div>`;
+    }
+  }catch(e){ $('#aiOut').innerHTML='<div class="empty">生成失败：'+esc(e.message)+'</div>'; }
+  finally{ btn.disabled=false; btn.textContent='生成'; }
+}
+function renderSources(srcs, mode){
+  if(!srcs||!srcs.length) return '';
+  const items=srcs.map(s=>`<li>${s.url?`<a href="${esc(s.url)}" target="_blank" rel="noopener">${esc(s.title)}</a>`:esc(s.title)} ${s.department?'· '+esc(s.department):''} ${s.quality?'· 质量'+esc(s.quality):''}</li>`).join('');
+  return `<div class="srcbox">📚 参考来源（${mode==='ai'?'AI 生成':'离线汇总'}）：${srcs.length} 条<ul style="margin:6px 0 0;padding-left:20px">${items}</ul></div>`;
+}
+
+/* 静态分词 + 检索 */
+function tok(s){ const out=[]; const cjk=(s||'').match(/[\u4e00-\u9fa5]/g)||[]; for(let i=0;i<cjk.length-1;i++) out.push(cjk[i]+cjk[i+1]); (s||'').toLowerCase().match(/[a-z0-9]+/g)?.forEach(w=>out.push(w)); return out; }
+function staticSearch(q,k){
+  const qt=tok(q); if(!qt.length) return App.kb.slice(0,k);
+  return App.kb.map(r=>{ const blob=(r.title+' '+(r.summary||'')+' '+(r.tags||[]).join(' ')+' '+String(r.content||'').slice(0,400)).toLowerCase();
+    let sc=0; qt.forEach(t=>{ if(blob.includes(t)) sc++; }); return {r,sc}; })
+    .filter(x=>x.sc>0).sort((a,b)=>b.sc-a.sc).slice(0,k).map(x=>x.r);
+}
+function staticAI(q,mode){
+  const rows=staticSearch(q, mode==='ask'?6:12);
+  if(mode==='ask'){
+    let text='## 关于「'+q+'」的检索结果\n\n> 以下为知识库检索到的相关内容（静态只读模式，离线汇总）。\n\n### 一、要点速览\n';
+    rows.slice(0,5).forEach((r,i)=>{ text+=(i+1)+'. **'+r.title+'**（'+(r.department||'')+' · '+(r.region||'')+' · 质量'+(r.quality||'')+'）— '+String(r.summary||'').slice(0,120)+'\n'; });
+    text+='\n### 二、相关原文摘录\n';
+    rows.slice(0,3).forEach(r=>{ text+='\n**'+r.title+'**\n\n> '+String(r.content||r.summary||'').slice(0,300).replace(/\n/g,' ')+'\n\n来源：'+(r.url||'本地知识库')+'\n'; });
+    text+='\n### 三、建议\n\n- 部署后端并配置 AI 密钥后，可获取更深入的分析式回答。';
+    return {text, sources: rows.map(r=>({title:r.title,url:r.url,department:r.department,quality:r.quality}))};
+  } else {
+    let text='# 双碳知识简报：'+q+'\n\n> 基于本地知识库 '+rows.length+' 条相关记录自动生成（静态离线版）。\n\n## 1. 政策规划\n'+joinCat(rows,'policy')+
+      '\n\n## 2. 碳市场\n'+joinCat(rows,'carbon_market')+'\n\n## 3. 减污降碳协同\n'+joinCat(rows,'synergy')+
+      '\n\n## 4. 行业低碳\n'+joinCat(rows,'industry')+'\n\n## 5. 技术创研\n'+joinCat(rows,'tech')+
+      '\n\n## 6. 参考来源\n'+rows.slice(0,10).map(r=>'- ['+r.title+']('+(r.url||'#')+') — '+(r.department||'')).join('\n');
+    return {text, sources: rows.map(r=>({title:r.title}))};
+  }
+}
+function joinCat(rows,cat){ const it=rows.filter(r=>(r.category||'')===cat).slice(0,4); if(!it.length) return '_（暂无相关记录）_'; return it.map(r=>'- **'+r.title+'**：'+String(r.summary||'').slice(0,100)).join('\n'); }
+
+/* ===================== 知识管理 ===================== */
+async function loadManage(){
+  $('#mDash').innerHTML='<div class="dcard"><div class="n">…</div><div class="l">加载中</div></div>';
+  if(App.mode==='backend'){
+    try{
+      const data=await api('/api/records?size=1000&page=1');
+      const items=data.items;
+      const total=items.length;
+      const by=(f)=>{const m={};items.forEach(r=>{const k=r[f]||'未知';m[k]=(m[k]||0)+1;});return m;};
+      const dDept=by('department'), dQual=by('quality'), dCat=by('category');
+      $('#mDash').innerHTML=`<div class="dcard"><div class="n">${total}</div><div class="l">知识条目（本页）</div></div>
+        <div class="dcard"><div class="n">${Object.keys(dDept).length}</div><div class="l">涉及部门</div></div>
+        <div class="dcard"><div class="n">${Object.keys(dCat).length}</div><div class="l">分类维度</div></div>
+        <div class="dcard"><div class="n">${items.filter(r=>r.content_fetched).length}</div><div class="l">已抓全文</div></div>`;
+      bars('mDeptBars', dDept); bars('mQualBars', dQual); bars('mCatBars', dCat, CAT_LABELS);
+      await loadAdmin();
+    }catch(e){ $('#mDash').innerHTML='<div class="empty">加载失败：'+esc(e.message)+'</div>'; }
+  } else {
+    const items=App.kb;
+    const by=(f)=>{const m={};items.forEach(r=>{const k=r[f]||'未知';m[k]=(m[k]||0)+1;});return m;};
+    const dDept=by('department'), dQual=by('quality'), dCat=by('category');
+    $('#mDash').innerHTML=`<div class="dcard"><div class="n">${items.length}</div><div class="l">知识条目</div></div>
+      <div class="dcard"><div class="n">${Object.keys(dDept).length}</div><div class="l">涉及部门</div></div>
+      <div class="dcard"><div class="n">${Object.keys(dCat).length}</div><div class="l">分类维度</div></div>
+      <div class="dcard"><div class="n">静态</div><div class="l">只读模式</div></div>`;
+    bars('mDeptBars', dDept); bars('mQualBars', dQual); bars('mCatBars', dCat, CAT_LABELS);
+    $('#mAdmin').innerHTML='<div class="note">🌐 静态只读模式：用户 / 团队 / 质量扫描需在部署后端后使用。</div>';
+  }
+}
+function bars(id, map, labelFn){
+  const el=$('#'+id); const entries=Object.entries(map).sort((a,b)=>b[1]-a[1]); const max=Math.max(1,...entries.map(e=>e[1]));
+  el.innerHTML='<h2 style="margin-top:0">'+el.querySelector('h2').textContent+'</h2>'+entries.map(([k,v])=>{
+    return `<div class="row"><span class="lab">${esc(labelFn?labelFn(k):k)}</span><span class="track"><span class="fill" style="width:${v/max*100}%"></span></span><span class="v">${v}</span></div>`;
+  }).join('');
+}
+async function loadAdmin(){
+  const host=$('#mAdmin');
+  if(!App.user || App.user.role!=='admin'){ host.innerHTML='<div class="note">🔒 用户管理、团队管理、质量扫描为<b>管理员</b>专属功能。</div>'; return; }
+  try{
+    const users=await api('/api/users'); const teams=await api('/api/teams');
+    const roleLabel={admin:'管理员',editor:'编辑',viewer:'访客'};
+    const uRows=users.map(u=>`<tr><td>${esc(u.username)}</td><td>${esc(u.display_name||'—')}</td>
+      <td><select onchange="setRole(${u.id},this.value)">${ROLES.map(r=>`<option ${r===u.role?'selected':''}>${r}</option>`).join('')}</select></td>
+      <td>${u.team_id?('#'+u.team_id):'—'}</td>
+      <td><button class="mini ghost" onclick="setRole(${u.id},'')">调整</button></td></tr>`).join('');
+    host.innerHTML=`
+      <div class="sub-card" style="margin-bottom:12px">
+        <h2 style="margin-top:0">用户与角色（${users.length}）</h2>
+        <div class="tbl-wrap"><table><thead><tr><th>用户名</th><th>昵称</th><th>角色</th><th>团队</th><th></th></tr></thead><tbody>${uRows}</tbody></table></div>
+        <div class="toolbar" style="margin-top:12px">
+          <input type="text" id="nuUser" placeholder="新用户名">
+          <input type="text" id="nuPw" placeholder="密码(≥6)">
+          <select id="nuRole">${ROLES.map(r=>`<option>${r}</option>`).join('')}</select>
+          <button onclick="createUser()">新建用户</button>
+          <button class="ghost" onclick="qualityScan()">执行质量扫描</button>
+        </div>
+      </div>
+      <div class="sub-card">
+        <h2 style="margin-top:0">团队（${teams.length}）</h2>
+        <div class="tbl-wrap"><table><thead><tr><th>ID</th><th>名称</th><th>描述</th></tr></thead><tbody>
+          ${teams.map(t=>`<tr><td>${t.id}</td><td>${esc(t.name)}</td><td>${esc(t.description||'—')}</td></tr>`).join('')}</tbody></table></div>
+        <div class="toolbar" style="margin-top:12px">
+          <input type="text" id="ntName" placeholder="团队名称">
+          <input type="text" id="ntDesc" placeholder="描述" class="grow">
+          <button onclick="createTeam()">新建团队</button>
+        </div>
+      </div>`;
+  }catch(e){ host.innerHTML='<div class="note">管理员功能加载失败：'+esc(e.message)+'</div>'; }
+}
+const ROLES=['admin','editor','viewer'];
+async function setRole(uid,role){
+  try{ await api('/api/users/'+uid,{method:'PATCH',body:JSON.stringify({role})}); toast('角色已更新'); }
+  catch(e){ toast('失败：'+e.message); }
+}
+async function createUser(){
+  const username=$('#nuUser').value.trim(), password=$('#nuPw').value, role=$('#nuRole').value;
+  if(!username||!password) return toast('请输入用户名和密码');
+  try{ await api('/api/users',{method:'POST',body:JSON.stringify({username,password,role})}); toast('用户已创建'); loadAdmin(); }
+  catch(e){ toast('失败：'+e.message); }
+}
+async function createTeam(){
+  const name=$('#ntName').value.trim(), description=$('#ntDesc').value.trim();
+  if(!name) return toast('请输入团队名称');
+  try{ await api('/api/teams',{method:'POST',body:JSON.stringify({name,description})}); toast('团队已创建'); loadAdmin(); }
+  catch(e){ toast('失败：'+e.message); }
+}
+async function qualityScan(){
+  if(!confirm('将对全部知识做重复/低质检测，可能更新质量标记，确认？')) return;
+  try{ const j=await api('/api/quality/scan',{method:'POST'}); toast('质量扫描完成，处理 '+j.updated+' 条'); loadManage(); }
+  catch(e){ toast('失败：'+e.message); }
+}
+
+/* ===================== 手动入库 ===================== */
+async function ingestURL(){
+  const url=$('#inUrl').value.trim(), note=$('#inNote').value.trim();
+  if(!url) return toast('请输入网页 URL');
+  const btn=$('#inUrlBtn'); btn.disabled=true; btn.innerHTML='<span class="spinner"></span>抓取中';
+  try{
+    const j=await api('/api/ingest/url',{method:'POST',body:JSON.stringify({url,note})});
+    toast('入库成功 #'+j.id+'（'+j.department+'/'+j.category+'/质量'+j.quality+'）');
+    $('#inUrl').value=''; $('#inNote').value='';
+    if(j.flags&&j.flags.dup) toast('提示：与已有知识疑似重复');
+  }catch(e){ toast('入库失败：'+e.message); }
+  finally{ btn.disabled=false; btn.textContent='抓取并入库'; }
+}
+async function ingestFile(){
+  const f=$('#inFile').files[0]; if(!f) return toast('请选择文件');
+  const btn=$('#inFileBtn'); btn.disabled=true; btn.innerHTML='<span class="spinner"></span>解析中';
+  $('#inFileMsg').textContent='';
+  try{
+    const fd=new FormData(); fd.append('file', f);
+    const j=await api('/api/ingest/file',{method:'POST',body:fd});
+    $('#inFileMsg').textContent='✅ 入库成功 #'+j.id+' · '+j.department+'/'+j.category+' · 标签：'+(j.tags||[]).join('、');
+    $('#inFile').value='';
+  }catch(e){ $('#inFileMsg').textContent='❌ 失败：'+e.message; }
+  finally{ btn.disabled=false; btn.textContent='解析并入库'; }
+}
+
+/* ===================== 通用 ===================== */
+function closeMask(){ $('#mask').classList.remove('on'); if(GraphViz.canvas && GraphViz.canvas.id==='localCanvas'){ cancelAnimationFrame(GraphViz.raf); } }
+function openImg(src){ $('#imgBig').src=src; $('#imgMask').classList.add('on'); }
+function switchTab(t){
+  document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('on', x.dataset.t===t));
+  document.querySelectorAll('.view').forEach(v=>v.classList.toggle('on', v.id==='v-'+t));
+  if(t==='feed') loadFeed();
+  else if(t==='kb') loadKB();
+  else if(t==='graph') loadGraph();
+  else if(t==='ai') {/* 等待用户输入 */}
+  else if(t==='manage') loadManage();
+  else if(t==='ingest') updateAuthUI();
+}
+
+/* ===================== 启动 ===================== */
+async function boot(){
+  // 下拉填充
+  fillSelect($('#feedDept'), DEPTS); fillSelect($('#kbDept'), DEPTS); fillSelect($('#graphDept'), DEPTS);
+  fillSelect($('#feedCat'), CATS, c=>CAT_LABELS[c]); fillSelect($('#kbCat'), CATS, c=>CAT_LABELS[c]); fillSelect($('#graphCat'), CATS, c=>CAT_LABELS[c]);
+  fillSelect($('#kbRegion'), REGIONS);
+
+  // 模式探测
+  try{ const r=await fetch('/api/health',{cache:'no-store'}); if(r.ok){ const j=await r.json(); App.mode='backend'; App.health=j; } }
+  catch(e){ App.mode='static'; }
+
+  // 鉴权回放
+  if(App.token){ try{ App.user=await api('/api/auth/me'); }catch(e){ App.token=''; localStorage.removeItem('dc_token'); } }
+
+  // 静态回退数据
+  if(App.mode==='static'){ try{ App.kb=await (await fetch('/kb/kb.json',{cache:'no-store'})).json(); App.kb.forEach((r,i)=>r.id=i); }catch(e){ App.kb=[]; } }
+
+  // 顶部模式 & 横幅
+  const mp=$('#modePill');
+  if(App.mode==='backend'){
+    mp.textContent='● 在线后端'; mp.style.background='rgba(34,197,94,.25)';
+    const ai = App.health&&App.health.ai_configured ? 'AI 模型已接入（DeepSeek）' : '后端在线，未配置 AI 密钥（离线富检索）';
+    $('#bannerHost').innerHTML='<div class="banner ok">🟢 已连接知识库后端（FastAPI）· '+ai+' · 共 '+((App.health&&App.health.records)||0)+' 条知识</div>';
+  } else {
+    mp.textContent='○ 只读静态'; mp.style.background='rgba(255,255,255,.18)';
+    $('#bannerHost').innerHTML='<div class="banner">🌐 未检测到后端，当前为<b>只读静态模式</b>（GitHub Pages）。可浏览 / 检索知识，登录、入库、批注、图谱全局视图、AI 生成需在部署后端后使用。部署方式见项目 README。</div>';
+  }
+
+  // 顶部分段按钮
+  $('#feedSort').querySelectorAll('button').forEach(b=>b.onclick=()=>{ $('#feedSort').querySelectorAll('button').forEach(x=>x.classList.remove('on')); b.classList.add('on'); loadFeed(); });
+  $('#aiMode').querySelectorAll('button').forEach(b=>b.onclick=()=>{ $('#aiMode').querySelectorAll('button').forEach(x=>x.classList.remove('on')); b.classList.add('on'); $('#aiQuery').placeholder = b.dataset.m==='ask'?'输入问题，如：十五五碳达峰有哪些关键举措？':'输入专题，如：钢铁行业低碳转型'; });
+  $('#tabs').querySelectorAll('.tab').forEach(t=>t.onclick=()=>switchTab(t.dataset.t));
+  $('#mask').addEventListener('click',e=>{ if(e.target.id==='mask') closeMask(); });
+  $('#loginMask').addEventListener('click',e=>{ if(e.target.id==='loginMask') closeLogin(); });
+  $('#imgMask').addEventListener('click',()=>$('#imgMask').classList.remove('on'));
+
+  updateAuthUI();
+  switchTab('feed');
+}
+boot();
 </script>
 </body>
 </html>
