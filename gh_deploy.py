@@ -42,7 +42,7 @@ def req(method, url, data=None):
     r.get_method = lambda: method
     if data is not None:
         r.data = data.encode("utf-8")
-    return urllib.request.urlopen(r, timeout=30)
+    return urllib.request.urlopen(r, timeout=90)
 
 
 def get_remote(path):
@@ -58,18 +58,18 @@ def get_remote(path):
 
 def upload(path):
     local = os.path.join(BASE, path)
-    with open(local, "r", encoding="utf-8", errors="replace") as f:
-        text = f.read()
-    sha, remote_text = get_remote(path)
-    if sha and remote_text == text:
-        print("SKIP (unchanged) " + path)
-        return True
-    b64 = base64.b64encode(text.encode("utf-8")).decode("ascii")
-    body = {"message": "deploy: %s" % path, "content": b64, "branch": BRANCH}
-    if sha:
-        body["sha"] = sha
-    for attempt in range(3):
+    for attempt in range(5):
         try:
+            with open(local, "r", encoding="utf-8", errors="replace") as f:
+                text = f.read()
+            sha, remote_text = get_remote(path)
+            if sha and remote_text == text:
+                print("SKIP (unchanged) " + path)
+                return True
+            b64 = base64.b64encode(text.encode("utf-8")).decode("ascii")
+            body = {"message": "deploy: %s" % path, "content": b64, "branch": BRANCH}
+            if sha:
+                body["sha"] = sha
             with req("PUT", API % path, json.dumps(body)) as r:
                 print(("OK %d " % r.status) + path)
                 return True
@@ -78,8 +78,8 @@ def upload(path):
             print("HTTP %d %s  %s" % (e.code, path, msg[:120]))
             time.sleep(2)
         except Exception as e:
-            print("ERR %s %s" % (path, e))
-            time.sleep(2)
+            print("ERR %s %s %s" % (path, type(e).__name__, str(e)[:80]))
+            time.sleep(3)
     return False
 
 
