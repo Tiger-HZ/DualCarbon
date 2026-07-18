@@ -5,6 +5,6 @@
 import os, runpy
 
 BASE = os.path.dirname(os.path.abspath(__file__))
-for step in ("merge.py", "render.py"):
+for step in ("merge.py", "enrich_importance.py", "render.py"):
     runpy.run_path(os.path.join(BASE, step), run_name="__main__")
 print("update done")
