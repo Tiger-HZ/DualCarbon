@@ -1,133 +1,585 @@
-<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>双碳领域知识库</title><style>
-:root{--green:#1a7f5a;--green-d:#136046;--bg:#f6f8f7;--panel:#fff;--line:#e3e8e6;--text:#16201c;--muted:#6b7b75}
-*{box-sizing:border-box}
-body{margin:0;font-family:-apple-system,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;background:var(--bg);color:var(--text);line-height:1.65}
-a{color:#0f766e;text-decoration:none}
-a:hover{text-decoration:underline}
-.wrap{max-width:1180px;margin:0 auto;padding:0 20px 70px}
-header.top{background:linear-gradient(135deg,#1a7f5a,#0f766e);color:#fff;padding:26px 20px 22px}
-header.top .inner{max-width:1180px;margin:0 auto}
-header.top h1{margin:0;font-size:23px;font-weight:700;letter-spacing:.5px}
-header.top p{margin:6px 0 0;opacity:.92;font-size:13.5px}
-header.top .up{margin-top:10px;font-size:12.5px;opacity:.85}
-.statbar{max-width:1180px;margin:14px auto;padding:0 20px;display:flex;gap:10px;flex-wrap:wrap}
-.chip{background:#fff;border:1px solid var(--line);border-radius:999px;padding:6px 14px;font-size:13px;box-shadow:0 1px 2px rgba(0,0,0,.03)}
-.chip b{color:var(--green-d)}
-.bar{position:sticky;top:0;z-index:20;background:rgba(246,248,247,.96);backdrop-filter:blur(6px);border-bottom:1px solid var(--line);padding:12px 0;margin-bottom:14px}
-.bar .inner{max-width:1180px;margin:0 auto;padding:0 20px;display:flex;gap:10px;flex-wrap:wrap;align-items:center}
-input#search{flex:1;min-width:200px;padding:9px 12px;border:1px solid var(--line);border-radius:9px;font-size:14px}
-select{padding:9px 10px;border:1px solid var(--line);border-radius:9px;font-size:13.5px;background:#fff}
-.pills{display:flex;gap:6px;flex-wrap:wrap}
-.pill{border:1px solid var(--line);background:#fff;border-radius:999px;padding:6px 12px;font-size:12.5px;cursor:pointer;color:#334}
-.pill.active{background:var(--green);color:#fff;border-color:var(--green)}
-.winbtns{display:flex;gap:6px;flex-wrap:wrap}
-.winbtn{border:1px solid var(--line);background:#fff;border-radius:8px;padding:6px 10px;font-size:12.5px;cursor:pointer;color:#334}
-.winbtn.active{background:#0f766e;color:#fff;border-color:#0f766e}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:14px}
-section.block{margin:22px 0 8px}
-section.block h2{color:var(--green-d);font-size:17px;margin:0 0 10px;padding-bottom:6px;border-bottom:2px solid #d7e7df}
-section.block h2 .cnt{color:var(--muted);font-size:13px;font-weight:400;margin-left:8px}
-.card{background:var(--panel);border:1px solid var(--line);border-radius:13px;padding:14px 15px;box-shadow:0 1px 3px rgba(0,0,0,.04);transition:transform .12s,box-shadow .12s;display:flex;flex-direction:column}
-.card:hover{transform:translateY(-2px);box-shadow:0 6px 18px rgba(20,80,60,.12)}
-.card-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:7px;gap:6px;flex-wrap:wrap}
-.badge{color:#fff;border-radius:7px;padding:3px 9px;font-size:12px;font-weight:600}
-.q{font-size:11.5px;padding:2px 8px;border-radius:6px;font-weight:600}
-.q-A{background:#dcfce7;color:#166534}.q-B{background:#fef9c3;color:#854d0e}.q-C{background:#e5e7eb;color:#4b5563}
-.scope{font-size:11px;padding:2px 8px;border-radius:6px;font-weight:600}
-.full{font-size:10.5px;padding:1px 7px;border-radius:5px;font-weight:600}
-.full.yes{background:#e7f6ee;color:#136046}.full.no{background:#f1f5f4;color:#8a978f}
-.card-title{margin:0 0 6px;font-size:15.5px;line-height:1.45}
-.card-title a{color:#0f2e25}
-.meta{font-size:12px;color:var(--muted);margin-bottom:7px}
-.dept{background:#eef6f1;color:#136046;border-radius:5px;padding:1px 7px}
-.region{background:#eff4fb;color:#1d4ed8;border-radius:5px;padding:1px 7px}
-.summary{font-size:13.5px;color:#37403c;margin:0 0 9px;flex:1}
-.tags{display:flex;gap:5px;flex-wrap:wrap}
-.tag{background:#f1f5f4;color:#52635c;border-radius:5px;padding:1px 7px;font-size:11.5px}
-.fab{position:fixed;right:22px;bottom:22px;z-index:50;background:var(--green);color:#fff;border:none;border-radius:999px;padding:13px 18px;font-size:14px;font-weight:600;cursor:pointer;box-shadow:0 6px 18px rgba(20,80,60,.35)}
-.fab:hover{background:var(--green-d)}
-.empty{text-align:center;color:var(--muted);padding:40px;font-size:14px}
-footer{margin-top:40px;border-top:1px solid var(--line);padding-top:16px;color:var(--muted);font-size:12.5px;text-align:center}
-footer a{color:#0f766e}
-.count{font-size:13px;color:var(--muted);margin:0 20px 8px;max-width:1180px}
-.pushnav{display:flex;gap:8px;flex-wrap:wrap;margin:6px 0 4px}
-.pday{border:1px solid var(--line);background:#fff;border-radius:8px;padding:7px 12px;font-size:13px;cursor:pointer;color:#334;text-decoration:none}
-.pday:hover{background:#eef6f1;border-color:var(--green)}
-.pday.cur{background:var(--green);color:#fff;border-color:var(--green)}
-.pday b{color:var(--green-d)}
-.pday.cur b{color:#fff}
-.phead{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin:18px 0 2px}
-.phead h2{margin:0;color:var(--green-d);font-size:18px}
-.phead .sub{color:var(--muted);font-size:13px}
-.pager{display:flex;gap:10px;margin:10px 0 4px}
-.pager a{border:1px solid var(--line);background:#fff;border-radius:8px;padding:7px 13px;font-size:13px;color:#136046;text-decoration:none}
-.pager a:hover{background:#eef6f1}
-.pager .dis{color:#b9c2be;border:1px dashed var(--line);background:#fafbfa}
-.note{background:#eef6f1;border:1px solid #d7e7df;color:#136046;border-radius:9px;padding:9px 13px;font-size:13px;margin:10px 0}
-</style></head><body><header class="top"><div class="inner"><h1>双碳领域知识库</h1><p>面向双碳领域研究与管理人员，自动采集并入库政策法规/标准/碳市场/减污降碳协同/行业节能/技术产品/研究文献/国际与区域动态，按部门优先级与质量等级呈现，支持全文检索、RAG问答与报告生成。 · 每日推送</p><div class="up">双碳知识中台 ｜ 生成于 2026-07-18 00:32</div></div></header><div class="wrap"><div class="statbar"><span class="chip">知识总量 <b>59</b> 条</span><span class="chip">全文入库 <b>40</b> 条</span><span class="chip">推送期数 <b>27</b> 期</span><span class="chip">覆盖年份 <b>2023、2024、2025、2026</b></span></div><div class="statbar"><span class="chip">2023年 <b>5</b></span> <span class="chip">2024年 <b>13</b></span> <span class="chip">2025年 <b>12</b></span> <span class="chip">2026年 <b>29</b></span></div><div class="bar"><div class="inner"><input id="search" placeholder="搜索标题 / 摘要 / 标签 / 来源 / 部门…"><div class="pills"><button class="pill active" data-cat="">全部门类</button><button class="pill" data-cat="policy">政策规划与顶层设计</button><button class="pill" data-cat="standard">法规与标准</button><button class="pill" data-cat="carbon_market">碳市场与气候投融资</button><button class="pill" data-cat="synergy">减污降碳协同</button><button class="pill" data-cat="industry">行业低碳与节能降碳</button><button class="pill" data-cat="tech">技术、产品与创新</button><button class="pill" data-cat="literature">研究文献（开源）</button><button class="pill" data-cat="intl_region">国际与区域动态</button></div><select id="fdept"><option value="">全部部门</option><option value="中办国办">中办国办</option><option value="全国人大常委会">全国人大常委会</option><option value="其他">其他</option><option value="发改委">发改委</option><option value="商务">商务</option><option value="国务院">国务院</option><option value="国务院办公厅">国务院办公厅</option><option value="国务院新闻办">国务院新闻办</option><option value="国家发改委">国家发改委</option><option value="国家电投">国家电投</option><option value="市场监管">市场监管</option><option value="杭州市">杭州市</option><option value="杭州市发改委">杭州市发改委</option><option value="杭州市建委">杭州市建委</option><option value="杭州市政府">杭州市政府</option><option value="浙江省人大">浙江省人大</option><option value="浙江省住建厅">浙江省住建厅</option><option value="浙江省政府办公厅">浙江省政府办公厅</option><option value="生态环境">生态环境</option><option value="生态环境部">生态环境部</option><option value="经信（工信）">经信（工信）</option><option value="萧山区">萧山区</option></select><select id="fregion"><option value="">全部地区</option><option value="全国">全国</option><option value="其他省份">其他省份</option><option value="国际">国际</option><option value="杭州">杭州</option><option value="浙江">浙江</option><option value="深圳">深圳</option></select><select id="fqual"><option value="">全部质量</option><option value="A">质量 高</option><option value="B">质量 中</option><option value="C">质量 一般</option></select><input type="hidden" id="fcat" value=""><a href="archive.html" style="font-size:13px">全部知识库 / 时间轴 →</a><a href="rag.html" style="margin-left:auto;font-size:13px;font-weight:700;color:#1a7f5a">🧠 RAG 智能检索（向量+关键词+元数据）→</a></div></div><div class="count" id="count"></div><div class="phead"><h2>最新推送</h2><span class="sub">2026-07-17 · 当日新增 29 条</span></div><div class="grid"><article class="card" data-cat="policy" data-dept="生态环境" data-region="全国" data-qual="A" data-date="2026-07-03" data-text="国务院印发《美丽中国建设“十五五”规划》 专设“积极应对气候变化”章节，明确全面实施碳排放总量和强度双控制度、加快发展全国碳市场、健全产品碳足迹管理体系、推进ccus示范。 生态环境部 / 国务院 十五五 碳达峰 碳市场 碳足迹"><div class="card-top"><span class="badge" style="background:#1a7f5a">政策规划与顶层设计</span><span class="q q-A">质量 高</span><span class="scope" style="background:#1a7f5a;color:#fff">生态环境部门</span></div><h3 class="card-title"><a href="https://www.mee.gov.cn/zcwj/gwywj/202607/t20260703_1160943.shtml" target="_blank" rel="noopener">国务院印发《美丽中国建设“十五五”规划》</a></h3><div class="meta">生态环境部 / 国务院 · 2026-07-03 · <span class="dept">生态环境</span> · <span class="region">全国</span> · <span class="full yes">全文入库</span></div><p class="summary">专设“积极应对气候变化”章节，明确全面实施碳排放总量和强度双控制度、加快发展全国碳市场、健全产品碳足迹管理体系、推进CCUS示范。</p><div class="tags"><span class="tag">十五五</span><span class="tag">碳达峰</span><span class="tag">碳市场</span><span class="tag">碳足迹</span></div></article><article class="card" data-cat="policy" data-dept="发改委" data-region="全国" data-qual="A" data-date="2026-07-05" data-text="国务院印发《“十五五”碳达峰行动方案》（国发〔2026〕22号） 到2030年单位gdp二氧化碳排放比2025年降低17%、非化石能源消费占比达25%；建设100个左右国家级零碳园区和500个左右零碳工厂。 国务院 / 发改委 十五五 碳达峰 零碳园区 能耗双控"><div class="card-top"><span class="badge" style="background:#1a7f5a">政策规划与顶层设计</span><span class="q q-A">质量 高</span><span class="scope" style="background:#0f766e;color:#fff">发展改革委</span></div><h3 class="card-title"><a href="https://fgw.wulanchabu.gov.cn/xywlcb/news/ODAuMTM" target="_blank" rel="noopener">国务院印发《“十五五”碳达峰行动方案》（国发〔2026〕22号）</a></h3><div class="meta">国务院 / 发改委 · 2026-07-05 · <span class="dept">发改委</span> · <span class="region">全国</span> · <span class="full no">摘要</span></div><p class="summary">到2030年单位GDP二氧化碳排放比2025年降低17%、非化石能源消费占比达25%；建设100个左右国家级零碳园区和500个左右零碳工厂。</p><div class="tags"><span class="tag">十五五</span><span class="tag">碳达峰</span><span class="tag">零碳园区</span><span class="tag">能耗双控</span></div></article><article class="card" data-cat="policy" data-dept="发改委" data-region="全国" data-qual="A" data-date="2026-04-23" data-text="中办国办印发《碳达峰碳中和综合评价考核办法》 自2026年度起对各省党政开展碳达峰碳中和评价考核，设控制指标与支撑指标，正式将碳排放双控纳入党内法规体系。 中共中央办公厅 / 国务院办公厅 考核 双控 党政同责"><div class="card-top"><span class="badge" style="background:#1a7f5a">政策规划与顶层设计</span><span class="q q-A">质量 高</span><span class="scope" style="background:#0f766e;color:#fff">发展改革委</span></div><h3 class="card-title"><a href="https://mee.gov.cn/zcwj/zyygwj/202604/t20260423_1149959.shtml" target="_blank" rel="noopener">中办国办印发《碳达峰碳中和综合评价考核办法》</a></h3><div class="meta">中共中央办公厅 / 国务院办公厅 · 2026-04-23 · <span class="dept">发改委</span> · <span class="region">全国</span> · <span class="full yes">全文入库</span></div><p class="summary">自2026年度起对各省党政开展碳达峰碳中和评价考核，设控制指标与支撑指标，正式将碳排放双控纳入党内法规体系。</p><div class="tags"><span class="tag">考核</span><span class="tag">双控</span><span class="tag">党政同责</span></div></article><article class="card" data-cat="policy" data-dept="发改委" data-region="杭州" data-qual="A" data-date="2026-06-01" data-text="杭州起草《关于推进杭州市碳达峰碳中和的若干政策措施》（22条） “十五五”期间安排资金约180亿元（市本级约20亿元）支持双碳工作；迭代升级杭州能源双碳数智平台3.0，发布“杭碳宝”能碳智能体。 杭州市生态环境局（提案答复） 杭州 政策措施 资金 数智平台"><div class="card-top"><span class="badge" style="background:#1a7f5a">政策规划与顶层设计</span><span class="q q-A">质量 高</span><span class="scope" style="background:#0f766e;color:#fff">发展改革委</span></div><h3 class="card-title"><a href="https://epb.hangzhou.gov.cn/col/col1229362672/art/2026/art_755dd9c52aca4ad7b4abdd8d290f217b.html" target="_blank" rel="noopener">杭州起草《关于推进杭州市碳达峰碳中和的若干政策措施》（22条）</a></h3><div class="meta">杭州市生态环境局（提案答复） · 2026-06-01 · <span class="dept">发改委</span> · <span class="region">杭州</span> · <span class="full yes">全文入库</span></div><p class="summary">“十五五”期间安排资金约180亿元（市本级约20亿元）支持双碳工作；迭代升级杭州能源双碳数智平台3.0，发布“杭碳宝”能碳智能体。</p><div class="tags"><span class="tag">杭州</span><span class="tag">政策措施</span><span class="tag">资金</span><span class="tag">数智平台</span></div></article><article class="card" data-cat="policy" data-dept="发改委" data-region="浙江" data-qual="A" data-date="2026-06-01" data-text="浙江牵头起草“十五五”碳达峰工作思路，形成“1+9+13”方案清单 推动形成全市“1+9+13”碳达峰（节能降碳）工作方案清单，同步制定《杭州市新型能源体系建设方案（2026—2030年）》。 杭州市发展改革委（提案答复） 浙江 杭州 方案清单 新型能源体系"><div class="card-top"><span class="badge" style="background:#1a7f5a">政策规划与顶层设计</span><span class="q q-A">质量 高</span><span class="scope" style="background:#0f766e;color:#fff">发展改革委</span></div><h3 class="card-title"><a href="https://www.hangzhou.gov.cn/col/col1229505914/art/2026/art_ea84b07755f1e0e265d3a7eaeb5d980e.html" target="_blank" rel="noopener">浙江牵头起草“十五五”碳达峰工作思路，形成“1+9+13”方案清单</a></h3><div class="meta">杭州市发展改革委（提案答复） · 2026-06-01 · <span class="dept">发改委</span> · <span class="region">浙江</span> · <span class="full yes">全文入库</span></div><p class="summary">推动形成全市“1+9+13”碳达峰（节能降碳）工作方案清单，同步制定《杭州市新型能源体系建设方案（2026—2030年）》。</p><div class="tags"><span class="tag">浙江</span><span class="tag">杭州</span><span class="tag">方案清单</span><span class="tag">新型能源体系</span></div></article><article class="card" data-cat="standard" data-dept="市场监管" data-region="全国" data-qual="A" data-date="2026-08-01" data-text="产品碳足迹国标 gb/t 47064-2026《钢铁产品》8月1日实施 钢铁产品碳足迹“国标算法”，采用“从摇篮到大门”边界，对标iso 14067，为应对cbam、支撑碳双控提供统一方法学。 国家市场监督管理总局 / 国家标准委 碳足迹 钢铁 国标 cbam"><div class="card-top"><span class="badge" style="background:#0f766e">法规与标准</span><span class="q q-A">质量 高</span><span class="scope" style="background:#b45309;color:#fff">市场监管局</span></div><h3 class="card-title"><a href="https://openstd.samr.gov.cn/bzgk/std/std_list" target="_blank" rel="noopener">产品碳足迹国标 GB/T 47064-2026《钢铁产品》8月1日实施</a></h3><div class="meta">国家市场监督管理总局 / 国家标准委 · 2026-08-01 · <span class="dept">市场监管</span> · <span class="region">全国</span> · <span class="full yes">全文入库</span></div><p class="summary">钢铁产品碳足迹“国标算法”，采用“从摇篮到大门”边界，对标ISO 14067，为应对CBAM、支撑碳双控提供统一方法学。</p><div class="tags"><span class="tag">碳足迹</span><span class="tag">钢铁</span><span class="tag">国标</span><span class="tag">CBAM</span></div></article><article class="card" data-cat="standard" data-dept="市场监管" data-region="全国" data-qual="A" data-date="2026-06-08" data-text="产品碳足迹核查机构认可制度发布实施（cnas） 对产品碳足迹核查机构的基本资格、人员能力、核查活动规范性作出规定，提升碳足迹数据质量，助力健全产品碳足迹管理制度。 市场监管总局（国家认监委） 碳足迹 核查 认可 cnas"><div class="card-top"><span class="badge" style="background:#0f766e">法规与标准</span><span class="q q-A">质量 高</span><span class="scope" style="background:#b45309;color:#fff">市场监管局</span></div><h3 class="card-title"><a href="https://www.samr.gov.cn/rkjcs/sjdt/gzdt/art/2026/art_f2153d50061442e39e1b53ed2a680d29.html" target="_blank" rel="noopener">产品碳足迹核查机构认可制度发布实施（CNAS）</a></h3><div class="meta">市场监管总局（国家认监委） · 2026-06-08 · <span class="dept">市场监管</span> · <span class="region">全国</span> · <span class="full yes">全文入库</span></div><p class="summary">对产品碳足迹核查机构的基本资格、人员能力、核查活动规范性作出规定，提升碳足迹数据质量，助力健全产品碳足迹管理制度。</p><div class="tags"><span class="tag">碳足迹</span><span class="tag">核查</span><span class="tag">认可</span><span class="tag">CNAS</span></div></article><article class="card" data-cat="standard" data-dept="市场监管" data-region="深圳" data-qual="B" data-date="2026-06-03" data-text="深圳发布全国首个碳足迹标识及产品碳减量通用标准 构建100项碳足迹标准体系，首创碳足迹标识公共服务系统并接入粤碳云；218家企业取得704张碳足迹认证证书。 深圳市市场监管局 碳足迹 标识 深圳 认证"><div class="card-top"><span class="badge" style="background:#0f766e">法规与标准</span><span class="q q-B">质量 中</span><span class="scope" style="background:#b45309;color:#fff">市场监管局</span></div><h3 class="card-title"><a href="https://amr.sz.gov.cn/xxgk/xwzx/mtbd/content/post_12826366.html" target="_blank" rel="noopener">深圳发布全国首个碳足迹标识及产品碳减量通用标准</a></h3><div class="meta">深圳市市场监管局 · 2026-06-03 · <span class="dept">市场监管</span> · <span class="region">深圳</span> · <span class="full yes">全文入库</span></div><p class="summary">构建100项碳足迹标准体系，首创碳足迹标识公共服务系统并接入粤碳云；218家企业取得704张碳足迹认证证书。</p><div class="tags"><span class="tag">碳足迹</span><span class="tag">标识</span><span class="tag">深圳</span><span class="tag">认证</span></div></article><article class="card" data-cat="standard" data-dept="生态环境" data-region="浙江" data-qual="A" data-date="2026-07-01" data-text="浙江省生态环境厅印发《浙江省全国碳市场企业提质增效实施方案》 到2030年碳市场企业单位产品碳排放基本达行业先进水平，实施降碳项目500个以上、削减碳排放1600万吨以上，履约率保持100%。 浙江省生态环境厅（气候处） 浙江 碳市场 提质增效 一企一策"><div class="card-top"><span class="badge" style="background:#0f766e">法规与标准</span><span class="q q-A">质量 高</span><span class="scope" style="background:#1a7f5a;color:#fff">生态环境部门</span></div><h3 class="card-title"><a href="https://sthjt.zj.gov.cn/col/col1229116580/art/2026/art_0fe76b6a829343d08e96adc650480611.html" target="_blank" rel="noopener">浙江省生态环境厅印发《浙江省全国碳市场企业提质增效实施方案》</a></h3><div class="meta">浙江省生态环境厅（气候处） · 2026-07-01 · <span class="dept">生态环境</span> · <span class="region">浙江</span> · <span class="full yes">全文入库</span></div><p class="summary">到2030年碳市场企业单位产品碳排放基本达行业先进水平，实施降碳项目500个以上、削减碳排放1600万吨以上，履约率保持100%。</p><div class="tags"><span class="tag">浙江</span><span class="tag">碳市场</span><span class="tag">提质增效</span><span class="tag">一企一策</span></div></article><article class="card" data-cat="carbon_market" data-dept="生态环境" data-region="全国" data-qual="A" data-date="2026-01-27" data-text="生态环境部办公厅《关于做好2026年全国碳排放权交易市场有关工作的通知》 部署2026年全国碳市场工作，钢铁、水泥行业企业按要求报送排放报告；强调数据质量管理与配额清缴履约监督执法。 生态环境部 碳市场 配额 数据质量 履约"><div class="card-top"><span class="badge" style="background:#2563eb">碳市场与气候投融资</span><span class="q q-A">质量 高</span><span class="scope" style="background:#1a7f5a;color:#fff">生态环境部门</span></div><h3 class="card-title"><a href="https://www.mee.gov.cn/xxgk2018/xxgk/xxgk06/202602/t20260209_1143900.html" target="_blank" rel="noopener">生态环境部办公厅《关于做好2026年全国碳排放权交易市场有关工作的通知》</a></h3><div class="meta">生态环境部 · 2026-01-27 · <span class="dept">生态环境</span> · <span class="region">全国</span> · <span class="full yes">全文入库</span></div><p class="summary">部署2026年全国碳市场工作，钢铁、水泥行业企业按要求报送排放报告；强调数据质量管理与配额清缴履约监督执法。</p><div class="tags"><span class="tag">碳市场</span><span class="tag">配额</span><span class="tag">数据质量</span><span class="tag">履约</span></div></article><article class="card" data-cat="carbon_market" data-dept="生态环境" data-region="浙江" data-qual="A" data-date="2026-06-17" data-text="浙江456家重点企业被纳入全国碳市场，年排放约4亿吨 占全国碳市场扩围后重点企业，年排放占全省近三分之二；浙江计划“十五五”推动碳市场企业实施500个以上降碳项目。 人民网（浙江） 浙江 碳市场 重点企业 扩围"><div class="card-top"><span class="badge" style="background:#2563eb">碳市场与气候投融资</span><span class="q q-A">质量 高</span><span class="scope" style="background:#1a7f5a;color:#fff">生态环境部门</span></div><h3 class="card-title"><a href="https://zj.people.com.cn/BIG5/n2/2026/0617/c186327-41613242.html" target="_blank" rel="noopener">浙江456家重点企业被纳入全国碳市场，年排放约4亿吨</a></h3><div class="meta">人民网（浙江） · 2026-06-17 · <span class="dept">生态环境</span> · <span class="region">浙江</span> · <span class="full no">摘要</span></div><p class="summary">占全国碳市场扩围后重点企业，年排放占全省近三分之二；浙江计划“十五五”推动碳市场企业实施500个以上降碳项目。</p><div class="tags"><span class="tag">浙江</span><span class="tag">碳市场</span><span class="tag">重点企业</span><span class="tag">扩围</span></div></article><article class="card" data-cat="carbon_market" data-dept="其他" data-region="浙江" data-qual="B" data-date="2026-05-20" data-text="浙江绿色金融“20条”：碳减排贷款865.8亿元，支持1199家企业 建立绿色投融资对接机制，整合减污降碳项目资源累计支持融资超4800亿元；创新碳金融产品44个。 人民银行浙江省分行 绿色金融 浙江 碳金融 转型金融"><div class="card-top"><span class="badge" style="background:#2563eb">碳市场与气候投融资</span><span class="q q-B">质量 中</span><span class="scope" style="background:#64748b;color:#fff">其他相关部门</span></div><h3 class="card-title"><a href="https://new.qq.com/rain/a/20260520A08CYU00" target="_blank" rel="noopener">浙江绿色金融“20条”：碳减排贷款865.8亿元，支持1199家企业</a></h3><div class="meta">人民银行浙江省分行 · 2026-05-20 · <span class="dept">其他</span> · <span class="region">浙江</span> · <span class="full no">摘要</span></div><p class="summary">建立绿色投融资对接机制，整合减污降碳项目资源累计支持融资超4800亿元；创新碳金融产品44个。</p><div class="tags"><span class="tag">绿色金融</span><span class="tag">浙江</span><span class="tag">碳金融</span><span class="tag">转型金融</span></div></article><article class="card" data-cat="carbon_market" data-dept="其他" data-region="浙江" data-qual="B" data-date="2026-05-01" data-text="浙江碳账户、碳效码金融服务：企业碳账户贷款余额达1109亿元 衢州碳账户、湖州“工业碳效码”嵌入银行授信定价；探索碳排放配额抵押贷款、排污权抵质押贷款等碳金融工具。 人民银行浙江省分行 碳账户 碳效码 浙江 碳金融"><div class="card-top"><span class="badge" style="background:#2563eb">碳市场与气候投融资</span><span class="q q-B">质量 中</span><span class="scope" style="background:#64748b;color:#fff">其他相关部门</span></div><h3 class="card-title"><a href="https://www.toutiao.com/article/7598030907563409970" target="_blank" rel="noopener">浙江碳账户、碳效码金融服务：企业碳账户贷款余额达1109亿元</a></h3><div class="meta">人民银行浙江省分行 · 2026-05-01 · <span class="dept">其他</span> · <span class="region">浙江</span> · <span class="full no">摘要</span></div><p class="summary">衢州碳账户、湖州“工业碳效码”嵌入银行授信定价；探索碳排放配额抵押贷款、排污权抵质押贷款等碳金融工具。</p><div class="tags"><span class="tag">碳账户</span><span class="tag">碳效码</span><span class="tag">浙江</span><span class="tag">碳金融</span></div></article><article class="card" data-cat="synergy" data-dept="生态环境" data-region="其他省份" data-qual="B" data-date="2026-05-25" data-text="东营港化工产业园探索减污降碳协同创新（首批试点） 140万千瓦海上风电年发绿电47亿千瓦时；建成全国首台套co2捕集制氮装置年捕集25万吨，提供园区协同创新经验。 中国环境报 减污降碳协同 化工园区 ccus 循环经济"><div class="card-top"><span class="badge" style="background:#7c3aed">减污降碳协同</span><span class="q q-B">质量 中</span><span class="scope" style="background:#1a7f5a;color:#fff">生态环境部门</span></div><h3 class="card-title"><a href="https://epaper.cenews.com.cn/html/2026/20260525/20260525_007/20260525_007_04_6434.html" target="_blank" rel="noopener">东营港化工产业园探索减污降碳协同创新（首批试点）</a></h3><div class="meta">中国环境报 · 2026-05-25 · <span class="dept">生态环境</span> · <span class="region">其他省份</span> · <span class="full yes">全文入库</span></div><p class="summary">140万千瓦海上风电年发绿电47亿千瓦时；建成全国首台套CO2捕集制氮装置年捕集25万吨，提供园区协同创新经验。</p><div class="tags"><span class="tag">减污降碳协同</span><span class="tag">化工园区</span><span class="tag">CCUS</span><span class="tag">循环经济</span></div></article><article class="card" data-cat="synergy" data-dept="生态环境" data-region="其他省份" data-qual="B" data-date="2026-05-29" data-text="广州南沙减污降碳协同创新试点产业园区 全国首批、广东唯一的减污降碳协同创新试点产业园区；汽车、港口物流全链条绿色转型，分布式光伏全覆盖。 广州市生态环境局 减污降碳协同 广州 绿色港口 绿色制造"><div class="card-top"><span class="badge" style="background:#7c3aed">减污降碳协同</span><span class="q q-B">质量 中</span><span class="scope" style="background:#1a7f5a;color:#fff">生态环境部门</span></div><h3 class="card-title"><a href="https://sthjj.gz.gov.cn/hbyd/zjhjb/content/post_10839759.html" target="_blank" rel="noopener">广州南沙减污降碳协同创新试点产业园区</a></h3><div class="meta">广州市生态环境局 · 2026-05-29 · <span class="dept">生态环境</span> · <span class="region">其他省份</span> · <span class="full yes">全文入库</span></div><p class="summary">全国首批、广东唯一的减污降碳协同创新试点产业园区；汽车、港口物流全链条绿色转型，分布式光伏全覆盖。</p><div class="tags"><span class="tag">减污降碳协同</span><span class="tag">广州</span><span class="tag">绿色港口</span><span class="tag">绿色制造</span></div></article><article class="card" data-cat="industry" data-dept="发改委" data-region="全国" data-qual="A" data-date="2026-06-15" data-text="发改委等部门《关于开展重点行业节能降碳改造攻坚三年行动的通知》 聚焦钢铁、电解铝、水泥、平板玻璃、炼油、乙烯、合成氨、甲醇、煤电9个行业，到2028年底累计形成节能量1亿吨标煤以上、减排二氧化碳2亿吨以上。 国家发展改革委 节能降碳 重点行业 攻坚行动"><div class="card-top"><span class="badge" style="background:#b45309">行业低碳与节能降碳</span><span class="q q-A">质量 高</span><span class="scope" style="background:#0f766e;color:#fff">发展改革委</span></div><h3 class="card-title"><a href="https://www.ndrc.gov.cn/wsdwhfz/202606/t20260618_1405993.html" target="_blank" rel="noopener">发改委等部门《关于开展重点行业节能降碳改造攻坚三年行动的通知》</a></h3><div class="meta">国家发展改革委 · 2026-06-15 · <span class="dept">发改委</span> · <span class="region">全国</span> · <span class="full yes">全文入库</span></div><p class="summary">聚焦钢铁、电解铝、水泥、平板玻璃、炼油、乙烯、合成氨、甲醇、煤电9个行业，到2028年底累计形成节能量1亿吨标煤以上、减排二氧化碳2亿吨以上。</p><div class="tags"><span class="tag">节能降碳</span><span class="tag">重点行业</span><span class="tag">攻坚行动</span></div></article><article class="card" data-cat="industry" data-dept="经信（工信）" data-region="全国" data-qual="A" data-date="2026-01-19" data-text="五部门联合印发《关于开展零碳工厂建设工作的指导意见》 分阶段梯度培育零碳工厂，2027年在汽车、锂电池、光伏等领域培育一批，2030年拓展至钢铁、有色、石化化工、建材等行业。 工信部 / 发改委 / 生态环境部等 零碳工厂 绿色制造 工信部"><div class="card-top"><span class="badge" style="background:#b45309">行业低碳与节能降碳</span><span class="q q-A">质量 高</span><span class="scope" style="background:#2563eb;color:#fff">经信(工信)</span></div><h3 class="card-title"><a href="https://www.gov.cn/lianbo/202601/content_7055270.htm" target="_blank" rel="noopener">五部门联合印发《关于开展零碳工厂建设工作的指导意见》</a></h3><div class="meta">工信部 / 发改委 / 生态环境部等 · 2026-01-19 · <span class="dept">经信（工信）</span> · <span class="region">全国</span> · <span class="full yes">全文入库</span></div><p class="summary">分阶段梯度培育零碳工厂，2027年在汽车、锂电池、光伏等领域培育一批，2030年拓展至钢铁、有色、石化化工、建材等行业。</p><div class="tags"><span class="tag">零碳工厂</span><span class="tag">绿色制造</span><span class="tag">工信部</span></div></article><article class="card" data-cat="industry" data-dept="经信（工信）" data-region="全国" data-qual="A" data-date="2026-03-20" data-text="工信部《节能装备高质量发展实施方案（2026—2028年）》 聚焦节能电机、变压器、工业热泵、水电解制氢装备等六类节能装备，构建装备节能降碳大模型，推进ai赋能。 工业和信息化部 节能装备 工信部 ai赋能"><div class="card-top"><span class="badge" style="background:#b45309">行业低碳与节能降碳</span><span class="q q-A">质量 高</span><span class="scope" style="background:#2563eb;color:#fff">经信(工信)</span></div><h3 class="card-title"><a href="https://www.miit.gov.cn/xwfb/xwfbh/bxwfbh/art/2026/art_4e9257192fe743ca84c33ffc78e94e0c.html" target="_blank" rel="noopener">工信部《节能装备高质量发展实施方案（2026—2028年）》</a></h3><div class="meta">工业和信息化部 · 2026-03-20 · <span class="dept">经信（工信）</span> · <span class="region">全国</span> · <span class="full yes">全文入库</span></div><p class="summary">聚焦节能电机、变压器、工业热泵、水电解制氢装备等六类节能装备，构建装备节能降碳大模型，推进AI赋能。</p><div class="tags"><span class="tag">节能装备</span><span class="tag">工信部</span><span class="tag">AI赋能</span></div></article><article class="card" data-cat="industry" data-dept="经信（工信）" data-region="全国" data-qual="B" data-date="2026-04-24" data-text="工信部启动2026年度工业节能降碳诊断服务工作 聚焦重点行业企业节能降碳诊断与碳排放核算，并依产品碳足迹国标开展产业链上下游产品碳足迹核算服务。 工业和信息化部 节能降碳诊断 工信部 碳足迹"><div class="card-top"><span class="badge" style="background:#b45309">行业低碳与节能降碳</span><span class="q q-B">质量 中</span><span class="scope" style="background:#2563eb;color:#fff">经信(工信)</span></div><h3 class="card-title"><a href="https://www.cinn.cn/bw/2026/04-24/VDpBo451.html" target="_blank" rel="noopener">工信部启动2026年度工业节能降碳诊断服务工作</a></h3><div class="meta">工业和信息化部 · 2026-04-24 · <span class="dept">经信（工信）</span> · <span class="region">全国</span> · <span class="full no">摘要</span></div><p class="summary">聚焦重点行业企业节能降碳诊断与碳排放核算，并依产品碳足迹国标开展产业链上下游产品碳足迹核算服务。</p><div class="tags"><span class="tag">节能降碳诊断</span><span class="tag">工信部</span><span class="tag">碳足迹</span></div></article><article class="card" data-cat="literature" data-dept="其他" data-region="国际" data-qual="B" data-date="2026-07-12" data-text="affordable low-carbon electricity pathways for india under uncertainty（印度低碳电力路径） 在技术与需求不确定性下构建印度电力脱碳成本最优路径，显示光伏为主、需求响应可降本达10%，对电力规划有参考价值。 arxiv 电力 脱碳路径 开源文献 arxiv"><div class="card-top"><span class="badge" style="background:#db2777">研究文献（开源）</span><span class="q q-B">质量 中</span><span class="scope" style="background:#64748b;color:#fff">其他相关部门</span></div><h3 class="card-title"><a href="https://arxiv.org/abs/2607.10581" target="_blank" rel="noopener">Affordable low-carbon electricity pathways for India under uncertainty（印度低碳电力路径）</a></h3><div class="meta">arXiv · 2026-07-12 · <span class="dept">其他</span> · <span class="region">国际</span> · <span class="full no">摘要</span></div><p class="summary">在技术与需求不确定性下构建印度电力脱碳成本最优路径，显示光伏为主、需求响应可降本达10%，对电力规划有参考价值。</p><div class="tags"><span class="tag">电力</span><span class="tag">脱碳路径</span><span class="tag">开源文献</span><span class="tag">arXiv</span></div></article><article class="card" data-cat="literature" data-dept="其他" data-region="国际" data-qual="B" data-date="2026-06-21" data-text="federated learning for global carbon emission forecasting（联邦学习碳排预测） 提出隐私保护的联邦混合预测框架，14个客户端r2平均0.73，为分布式碳排放协同预测提供合规方案。 arxiv 碳预测 联邦学习 开源文献 arxiv"><div class="card-top"><span class="badge" style="background:#db2777">研究文献（开源）</span><span class="q q-B">质量 中</span><span class="scope" style="background:#64748b;color:#fff">其他相关部门</span></div><h3 class="card-title"><a href="https://www.arxiv.org/abs/2606.22618" target="_blank" rel="noopener">Federated Learning for Global Carbon Emission Forecasting（联邦学习碳排预测）</a></h3><div class="meta">arXiv · 2026-06-21 · <span class="dept">其他</span> · <span class="region">国际</span> · <span class="full no">摘要</span></div><p class="summary">提出隐私保护的联邦混合预测框架，14个客户端R2平均0.73，为分布式碳排放协同预测提供合规方案。</p><div class="tags"><span class="tag">碳预测</span><span class="tag">联邦学习</span><span class="tag">开源文献</span><span class="tag">arXiv</span></div></article><article class="card" data-cat="literature" data-dept="其他" data-region="国际" data-qual="C" data-date="2026-05-26" data-text="huntms: 面向碳与成本削减的微服务地理分布框架 面向区域受限中小企业的碳感知微服务部署框架，实测碳排降低37.4%、运营成本降3.6%，对数据中心低碳部署有启发。 arxiv 碳感知 数据中心 开源文献 arxiv"><div class="card-top"><span class="badge" style="background:#db2777">研究文献（开源）</span><span class="q q-C">质量 一般</span><span class="scope" style="background:#64748b;color:#fff">其他相关部门</span></div><h3 class="card-title"><a href="https://arxiv.org/abs/2603.10768v2" target="_blank" rel="noopener">HuntMS: 面向碳与成本削减的微服务地理分布框架</a></h3><div class="meta">arXiv · 2026-05-26 · <span class="dept">其他</span> · <span class="region">国际</span> · <span class="full no">摘要</span></div><p class="summary">面向区域受限中小企业的碳感知微服务部署框架，实测碳排降低37.4%、运营成本降3.6%，对数据中心低碳部署有启发。</p><div class="tags"><span class="tag">碳感知</span><span class="tag">数据中心</span><span class="tag">开源文献</span><span class="tag">arXiv</span></div></article><article class="card" data-cat="literature" data-dept="其他" data-region="国际" data-qual="C" data-date="2026-06-10" data-text="standardized methods and recommendations for green federated learning（绿色联邦学习核算方法） 提出联邦学习co2e标准化碳核算方法，强调按站点、按轮次报告，支撑可复现的“绿色”ai评估。 arxiv 绿色ai 碳核算 开源文献 arxiv"><div class="card-top"><span class="badge" style="background:#db2777">研究文献（开源）</span><span class="q q-C">质量 一般</span><span class="scope" style="background:#64748b;color:#fff">其他相关部门</span></div><h3 class="card-title"><a href="https://tw.arxiv.org/abs/2602.00343" target="_blank" rel="noopener">Standardized Methods and Recommendations for Green Federated Learning（绿色联邦学习核算方法）</a></h3><div class="meta">arXiv · 2026-06-10 · <span class="dept">其他</span> · <span class="region">国际</span> · <span class="full no">摘要</span></div><p class="summary">提出联邦学习CO2e标准化碳核算方法，强调按站点、按轮次报告，支撑可复现的“绿色”AI评估。</p><div class="tags"><span class="tag">绿色AI</span><span class="tag">碳核算</span><span class="tag">开源文献</span><span class="tag">arXiv</span></div></article><article class="card" data-cat="literature" data-dept="其他" data-region="国际" data-qual="C" data-date="2026-04-23" data-text="topology optimization for materially efficient reinforced concrete（高效钢筋混凝土拓扑优化） 通过拓扑优化使混凝土用量减少约33%而性能不变，为建材碳影响下降提供可行路径，涉及水泥碳排放（约占全球8%）。  建材 碳影响 开源文献 arxiv"><div class="card-top"><span class="badge" style="background:#db2777">研究文献（开源）</span><span class="q q-C">质量 一般</span><span class="scope" style="background:#64748b;color:#fff">其他相关部门</span></div><h3 class="card-title"><a href="https://www.arxiv.org/abs/2604.22070" target="_blank" rel="noopener">Topology Optimization for Materially Efficient Reinforced Concrete（高效钢筋混凝土拓扑优化）</a></h3><div class="meta"> · 2026-04-23 · <span class="dept">其他</span> · <span class="region">国际</span> · <span class="full no">摘要</span></div><p class="summary">通过拓扑优化使混凝土用量减少约33%而性能不变，为建材碳影响下降提供可行路径，涉及水泥碳排放（约占全球8%）。</p><div class="tags"><span class="tag">建材</span><span class="tag">碳影响</span><span class="tag">开源文献</span><span class="tag">arXiv</span></div></article><article class="card" data-cat="intl_region" data-dept="商务" data-region="国际" data-qual="A" data-date="2026-05-01" data-text="欧盟发布cbam第三国碳价抵扣征求意见稿 明确出口国已付碳价如何折算抵扣cbam证书，要求实际排放核算与欧盟认可认证；对中国出口企业抵扣门槛较严。 商务部世贸司 / 中国wto通报咨询 cbam 碳关税 碳价抵扣 欧盟"><div class="card-top"><span class="badge" style="background:#475569">国际与区域动态</span><span class="q q-A">质量 高</span><span class="scope" style="background:#64748b;color:#fff">其他相关部门</span></div><h3 class="card-title"><a href="https://chinawto.mofcom.gov.cn/article/jsbl/zszc/202605/20260503629402.shtml" target="_blank" rel="noopener">欧盟发布CBAM第三国碳价抵扣征求意见稿</a></h3><div class="meta">商务部世贸司 / 中国WTO通报咨询 · 2026-05-01 · <span class="dept">商务</span> · <span class="region">国际</span> · <span class="full no">摘要</span></div><p class="summary">明确出口国已付碳价如何折算抵扣CBAM证书，要求实际排放核算与欧盟认可认证；对中国出口企业抵扣门槛较严。</p><div class="tags"><span class="tag">CBAM</span><span class="tag">碳关税</span><span class="tag">碳价抵扣</span><span class="tag">欧盟</span></div></article><article class="card" data-cat="intl_region" data-dept="商务" data-region="国际" data-qual="A" data-date="2026-06-12" data-text="欧盟cbam扩容新规：下游金属制品纳入，2028年生效 管控边界向下游钢铝制品延伸，新增机械、汽车、家电等约180种产品；搭建反规避监管体系，出口企业需提前应对。 行业分析（瑞欧科技） cbam 扩容 出口 欧盟"><div class="card-top"><span class="badge" style="background:#475569">国际与区域动态</span><span class="q q-A">质量 高</span><span class="scope" style="background:#64748b;color:#fff">其他相关部门</span></div><h3 class="card-title"><a href="http://accie.org.cn/zh-cn/dzhd/130321.html" target="_blank" rel="noopener">欧盟CBAM扩容新规：下游金属制品纳入，2028年生效</a></h3><div class="meta">行业分析（瑞欧科技） · 2026-06-12 · <span class="dept">商务</span> · <span class="region">国际</span> · <span class="full yes">全文入库</span></div><p class="summary">管控边界向下游钢铝制品延伸，新增机械、汽车、家电等约180种产品；搭建反规避监管体系，出口企业需提前应对。</p><div class="tags"><span class="tag">CBAM</span><span class="tag">扩容</span><span class="tag">出口</span><span class="tag">欧盟</span></div></article><article class="card" data-cat="intl_region" data-dept="商务" data-region="国际" data-qual="B" data-date="2026-04-15" data-text="cbam证书2026年一季度官方价格75.36欧元/吨 cbam证书价格与eu ets碳价挂钩；成本通过压价、分摊条款与供应链重构转嫁中国出口企业，建议建立碳数据体系。 21世纪经济报道 cbam 证书价格 碳成本 出口"><div class="card-top"><span class="badge" style="background:#475569">国际与区域动态</span><span class="q q-B">质量 中</span><span class="scope" style="background:#64748b;color:#fff">其他相关部门</span></div><h3 class="card-title"><a href="https://www.cnenergynews.cn/article/4RAYF7uqAzb" target="_blank" rel="noopener">CBAM证书2026年一季度官方价格75.36欧元/吨</a></h3><div class="meta">21世纪经济报道 · 2026-04-15 · <span class="dept">商务</span> · <span class="region">国际</span> · <span class="full yes">全文入库</span></div><p class="summary">CBAM证书价格与EU ETS碳价挂钩；成本通过压价、分摊条款与供应链重构转嫁中国出口企业，建议建立碳数据体系。</p><div class="tags"><span class="tag">CBAM</span><span class="tag">证书价格</span><span class="tag">碳成本</span><span class="tag">出口</span></div></article><article class="card" data-cat="intl_region" data-dept="生态环境" data-region="杭州" data-qual="A" data-date="2026-06-01" data-text="杭州解读产品碳足迹管理最新工作方案（综合规划处） 将产品碳足迹管理作为应对绿色贸易壁垒、提升国际竞争力关键抓手；开展安防、纺织服装、锂电池等产品本地化核算规则研究。 杭州市生态环境局（综合规划处） 杭州 碳足迹 cbam 综合规划处"><div class="card-top"><span class="badge" style="background:#475569">国际与区域动态</span><span class="q q-A">质量 高</span><span class="scope" style="background:#1a7f5a;color:#fff">生态环境部门</span></div><h3 class="card-title"><a href="https://epb.hangzhou.gov.cn/col/col1692260/art/2026/art_f075281b43d24199b28db4acc1d6edc9.html" target="_blank" rel="noopener">杭州解读产品碳足迹管理最新工作方案（综合规划处）</a></h3><div class="meta">杭州市生态环境局（综合规划处） · 2026-06-01 · <span class="dept">生态环境</span> · <span class="region">杭州</span> · <span class="full yes">全文入库</span></div><p class="summary">将产品碳足迹管理作为应对绿色贸易壁垒、提升国际竞争力关键抓手；开展安防、纺织服装、锂电池等产品本地化核算规则研究。</p><div class="tags"><span class="tag">杭州</span><span class="tag">碳足迹</span><span class="tag">CBAM</span><span class="tag">综合规划处</span></div></article><article class="card" data-cat="policy" data-dept="中办国办" data-region="全国" data-qual="A" data-date="2026-04-23" data-text="中共中央办公厅、国务院办公厅《碳达峰碳中和综合评价考核办法》 建立碳达峰碳中和综合评价考核制度，将碳排放双控目标纳入考核，压实地方与重点企业控排减排责任，为'十五五'全面实施碳排放双控制度提供考核依据。 中共中央办公厅、国务院办公厅 双碳考核 中办国办 碳双控"><div class="card-top"><span class="badge" style="background:#1a7f5a">政策规划与顶层设计</span><span class="q q-A">质量 高</span><span class="scope" style="background:#64748b;color:#fff">其他相关部门</span></div><h3 class="card-title"><a href="https://www.mee.gov.cn/" target="_blank" rel="noopener">中共中央办公厅、国务院办公厅《碳达峰碳中和综合评价考核办法》</a></h3><div class="meta">中共中央办公厅、国务院办公厅 · 2026-04-23 · <span class="dept">中办国办</span> · <span class="region">全国</span> · <span class="full yes">全文入库</span></div><p class="summary">建立碳达峰碳中和综合评价考核制度，将碳排放双控目标纳入考核，压实地方与重点企业控排减排责任，为'十五五'全面实施碳排放双控制度提供考核依据。</p><div class="tags"><span class="tag">双碳考核</span><span class="tag">中办国办</span><span class="tag">碳双控</span></div></article></div><div class="note">📅 回看历史推送：点击下方任意日期，即可查看当日新增/入库的知识（今天也能看昨天的推送）。</div><div class="phead"><h2>历史推送</h2><span class="sub">共 27 期</span></div><div class="pushnav"><a class="pday cur" href="push-2026-07-17.html">2026-07-17 <b>29</b></a><a class="pday" href="push-2025-11-24.html">2025-11-24 <b>1</b></a><a class="pday" href="push-2025-11-19.html">2025-11-19 <b>1</b></a><a class="pday" href="push-2025-11-08.html">2025-11-08 <b>1</b></a><a class="pday" href="push-2025-07-25.html">2025-07-25 <b>1</b></a><a class="pday" href="push-2025-06-30.html">2025-06-30 <b>1</b></a><a class="pday" href="push-2025-05-22.html">2025-05-22 <b>1</b></a><a class="pday" href="push-2025-03-26.html">2025-03-26 <b>1</b></a><a class="pday" href="push-2025-02-28.html">2025-02-28 <b>1</b></a><a class="pday" href="push-2025-01-21.html">2025-01-21 <b>1</b></a><a class="pday" href="push-2025-01-20.html">2025-01-20 <b>1</b></a><a class="pday" href="push-2025-01-01.html">2025-01-01 <b>2</b></a><a class="pday" href="push-2024-12-30.html">2024-12-30 <b>1</b></a><a class="pday" href="push-2024-12-18.html">2024-12-18 <b>1</b></a><a class="pday" href="push-2024-11-08.html">2024-11-08 <b>1</b></a><a class="pday" href="push-2024-10-21.html">2024-10-21 <b>1</b></a><a class="pday" href="push-2024-08-02.html">2024-08-02 <b>1</b></a><a class="pday" href="push-2024-07-21.html">2024-07-21 <b>1</b></a><a class="pday" href="push-2024-05-29.html">2024-05-29 <b>2</b></a><a class="pday" href="push-2024-05-21.html">2024-05-21 <b>1</b></a><a class="pday" href="push-2024-02-02.html">2024-02-02 <b>1</b></a><a class="pday" href="push-2024-01-01.html">2024-01-01 <b>3</b></a><a class="pday" href="push-2023-12-01.html">2023-12-01 <b>1</b></a><a class="pday" href="push-2023-11-07.html">2023-11-07 <b>1</b></a><a class="pday" href="push-2023-10-20.html">2023-10-20 <b>1</b></a><a class="pday" href="push-2023-10-19.html">2023-10-19 <b>1</b></a><a class="pday" href="push-2023-06-01.html">2023-06-01 <b>1</b></a></div></div><button class="fab" onclick="location.href='https://wj.qq.com/s2/27342859/4455'">💬 留言反馈</button><footer>双碳领域知识库 · 自动采集更新（内容入库，支持 <a href="rag.html" style="color:#fff;text-decoration:underline">RAG 智能检索</a> / 报告生成）｜ 团队反馈：<a href="https://wj.qq.com/s2/27342859/4455" target="_blank" rel="noopener">填写问卷</a> ｜ 负责人邮箱 <a href="mailto:tjhjxhlin@163.com">tjhjxhlin@163.com</a><br>每日自动采集更新；站点托管于 GitHub Pages 固定链接 https://tiger-hz.github.io/DualCarbon/ ，由 .github/workflows/pages.yml 在推送 main 时自动部署。优化需求须经负责人（tjhjxhlin@163.com）确认后实施。</footer>
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>双碳领域知识库 · 一体化门户</title>
+<style>
+  :root{
+    --bg:#f5f7f6; --card:#fff; --ink:#1e2b25; --sub:#5c6b63; --line:#e4eae7;
+    --green:#1a7f5a; --green-d:#0f766e; --blue:#2563eb; --amber:#b45309; --purple:#7c3aed;
+    --chip:#eef4f1; --shadow:0 1px 3px rgba(16,40,30,.08); --shadow-l:0 6px 24px rgba(16,40,30,.14);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0}
+  body{font-family:-apple-system,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;
+       background:var(--bg);color:var(--ink);line-height:1.62;font-size:14px}
+  a{color:var(--blue);text-decoration:none}
+  a:hover{text-decoration:underline}
+  /* header */
+  header.top{background:linear-gradient(120deg,#0f766e,#1a7f5a);color:#fff;padding:20px 22px 0}
+  header .inner{max-width:1180px;margin:0 auto}
+  header h1{margin:0;font-size:21px;font-weight:700;letter-spacing:.4px}
+  header p{margin:5px 0 0;font-size:12.5px;opacity:.9}
+  .tabs{display:flex;gap:4px;max-width:1180px;margin:14px auto 0;flex-wrap:wrap}
+  .tab{padding:10px 18px;cursor:pointer;color:rgba(255,255,255,.82);font-size:14px;font-weight:600;
+       border-radius:10px 10px 0 0;user-select:none;border:1px solid transparent;border-bottom:none}
+  .tab.on{background:var(--bg);color:var(--green);}
+  .wrap{max-width:1180px;margin:0 auto;padding:18px}
+  .view{display:none}
+  .view.on{display:block}
+  /* bars & chips */
+  .statbar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+  .chip{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:5px 13px;
+        font-size:12.5px;color:var(--sub);box-shadow:var(--shadow)}
+  .chip b{color:var(--green);font-size:14px}
+  .toolbar{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 14px;
+           box-shadow:var(--shadow);margin-bottom:14px;display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+  input[type=text],select,textarea{padding:9px 11px;border:1px solid var(--line);border-radius:9px;
+        font-size:13.5px;outline:none;background:#fff;font-family:inherit}
+  input[type=text]:focus,select:focus,textarea:focus{border-color:var(--green)}
+  .grow{flex:1;min-width:200px}
+  button{cursor:pointer;border:none;border-radius:9px;padding:9px 16px;font-size:13.5px;font-weight:600;
+         background:var(--green);color:#fff}
+  button.ghost{background:#fff;color:var(--green);border:1px solid var(--green)}
+  button.mini{padding:5px 10px;font-size:12px}
+  button:disabled{opacity:.5;cursor:not-allowed}
+  .seg{display:inline-flex;border:1px solid var(--line);border-radius:9px;overflow:hidden}
+  .seg button{background:#fff;color:var(--sub);border-radius:0;padding:9px 15px}
+  .seg button.on{background:var(--green);color:#fff}
+  label.chk{display:inline-flex;gap:6px;align-items:center;font-size:13px;color:var(--sub)}
+  /* cards */
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:12px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 15px;
+        box-shadow:var(--shadow);cursor:pointer;transition:.15s;display:flex;flex-direction:column}
+  .card:hover{box-shadow:var(--shadow-l);transform:translateY(-1px)}
+  .card h3{margin:0 0 7px;font-size:14.5px;line-height:1.45}
+  .card .sum{font-size:12.8px;color:var(--sub);flex:1;
+             display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+  .badges{display:flex;gap:5px;flex-wrap:wrap;margin-top:9px}
+  .badge{display:inline-block;padding:1.5px 9px;border-radius:20px;font-size:11px;font-weight:600}
+  .b-dept{background:#e7f0ec;color:#0f766e}
+  .b-cat{background:#eef2ff;color:#2563eb}
+  .b-q{background:#fef3e2;color:#b45309}
+  .b-full{background:#e8f7ef;color:#1a7f5a}
+  .b-region{background:#f1f5f9;color:#475569}
+  .b-none{background:#f3f4f6;color:#9ca3af}
+  .block h2{font-size:15px;margin:20px 0 10px;padding-bottom:6px;border-bottom:2px solid var(--line);
+            display:flex;align-items:center;gap:8px}
+  .block h2 .cnt{font-size:12px;color:var(--sub);font-weight:500}
+  .datenav{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:14px}
+  .dpill{padding:6px 12px;border-radius:8px;background:var(--card);border:1px solid var(--line);
+         font-size:12.5px;cursor:pointer;color:var(--sub)}
+  .dpill.on{background:var(--green);color:#fff;border-color:var(--green)}
+  .muted{color:var(--sub);font-size:12.5px}
+  .empty{text-align:center;color:var(--sub);padding:36px}
+  /* RAG */
+  .result{background:var(--card);border:1px solid var(--line);border-radius:11px;padding:13px 15px;margin-bottom:11px}
+  .result h3{margin:0 0 5px;font-size:14.5px}
+  .chunk{font-size:13.3px;margin:7px 0;max-height:120px;overflow:hidden;position:relative}
+  .chunk.open{max-height:none}
+  .chunk em{background:#fff3bf;font-style:normal;border-radius:3px;padding:0 1px}
+  .more{font-size:12px;color:var(--blue);cursor:pointer;user-select:none}
+  #ragReport{white-space:pre-wrap;font-size:13px;background:var(--card);border:1px solid var(--line);
+             border-radius:11px;padding:16px;max-height:600px;overflow:auto;display:none}
+  /* manage */
+  table{width:100%;border-collapse:collapse;background:var(--card);border-radius:11px;overflow:hidden;
+        box-shadow:var(--shadow);font-size:13px}
+  th,td{text-align:left;padding:9px 11px;border-bottom:1px solid var(--line);vertical-align:top}
+  th{background:#f0f5f3;color:var(--sub);font-size:12px;position:sticky;top:0}
+  tr:hover td{background:#fafcfb}
+  .tbl-wrap{max-height:560px;overflow:auto;border-radius:11px}
+  .dash{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;margin-bottom:16px}
+  .dcard{background:var(--card);border:1px solid var(--line);border-radius:11px;padding:13px 15px;box-shadow:var(--shadow)}
+  .dcard .n{font-size:22px;font-weight:700;color:var(--green)}
+  .dcard .l{font-size:12px;color:var(--sub);margin-top:3px}
+  .bars .row{display:flex;align-items:center;gap:8px;margin:5px 0;font-size:12.5px}
+  .bars .lab{width:120px;color:var(--sub);text-align:right;flex-shrink:0}
+  .bars .track{flex:1;background:#eef2f0;border-radius:6px;height:14px;overflow:hidden}
+  .bars .fill{height:100%;background:var(--green);border-radius:6px}
+  .bars .v{width:36px;color:var(--sub)}
+  /* modal */
+  .mask{position:fixed;inset:0;background:rgba(16,30,24,.5);display:none;z-index:50;
+        align-items:flex-start;justify-content:center;padding:40px 16px;overflow:auto}
+  .mask.on{display:flex}
+  .modal{background:#fff;border-radius:14px;max-width:760px;width:100%;box-shadow:var(--shadow-l);
+         padding:22px 24px;position:relative}
+  .modal h2{margin:0 6px 4px 0;font-size:18px;line-height:1.4}
+  .modal .x{position:absolute;top:14px;right:16px;font-size:22px;cursor:pointer;color:var(--sub);
+            background:none;padding:0;width:30px}
+  .modal .content{white-space:pre-wrap;font-size:13.6px;line-height:1.75;color:var(--ink);
+                  max-height:52vh;overflow:auto;margin-top:12px;padding-top:12px;border-top:1px solid var(--line)}
+  .fld{margin:9px 0}
+  .fld label{display:block;font-size:12px;color:var(--sub);margin-bottom:3px}
+  .fld input,.fld select,.fld textarea{width:100%}
+  .row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .note{font-size:12px;color:var(--sub);background:#f0f5f3;border:1px solid var(--line);
+        border-radius:9px;padding:10px 12px;margin:10px 0}
+  .fab{position:fixed;right:22px;bottom:22px;background:var(--green);color:#fff;border-radius:26px;
+       padding:12px 18px;box-shadow:var(--shadow-l);font-size:14px;z-index:20}
+  footer{margin-top:26px;padding:20px;text-align:center;color:var(--sub);font-size:12px;
+         border-top:1px solid var(--line)}
+  .pill-toggle{cursor:pointer}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="inner">
+    <h1>双碳领域知识库 · 一体化门户</h1>
+    <p id="subtitle">每日推送 ｜ 知识库时间轴 ｜ RAG 智能检索 ｜ 知识管理 —— 一个页面完成全部操作</p>
+  </div>
+  <div class="tabs" id="tabs">
+    <div class="tab on" data-v="feed">📰 每日推送</div>
+    <div class="tab" data-v="kb">🗂️ 知识库</div>
+    <div class="tab" data-v="rag">🧠 智能检索</div>
+    <div class="tab" data-v="manage">⚙️ 知识管理</div>
+  </div>
+</header>
+
+<div class="wrap">
+  <!-- ============ 每日推送 ============ -->
+  <section class="view on" id="v-feed">
+    <div class="statbar" id="feedStat"></div>
+    <div class="toolbar">
+      <select id="fe-dept"></select>
+      <select id="fe-cat"></select>
+      <select id="fe-q"><option value="">质量：全部</option><option value="A">A 高</option><option value="B">B 中</option><option value="C">C 一般</option></select>
+      <input type="text" class="grow" id="fe-kw" placeholder="在本日推送内搜索关键词…">
+    </div>
+    <div class="muted" style="margin-bottom:8px">📅 点击日期回看任意一期推送（按收录日分期）：</div>
+    <div class="datenav" id="dateNav"></div>
+    <div id="feedBody"></div>
+  </section>
+
+  <!-- ============ 知识库时间轴 ============ -->
+  <section class="view" id="v-kb">
+    <div class="statbar" id="kbStat"></div>
+    <div class="toolbar">
+      <input type="text" class="grow" id="fk-kw" placeholder="全库关键词搜索（标题/摘要/正文）…">
+      <select id="fk-dept"></select>
+      <select id="fk-cat"></select>
+      <select id="fk-region"></select>
+      <select id="fk-q"><option value="">质量：全部</option><option value="A">A 高</option><option value="B">B 中</option><option value="C">C 一般</option></select>
+      <label class="chk"><input type="checkbox" id="fk-full"> 仅看已全文入库</label>
+    </div>
+    <div id="kbBody"></div>
+  </section>
+
+  <!-- ============ RAG 智能检索 ============ -->
+  <section class="view" id="v-rag">
+    <div class="toolbar">
+      <input type="text" class="grow" id="rq" placeholder="输入查询，如：碳排放双控制度 生态环境 / 全国碳市场覆盖哪些行业">
+      <div class="seg" id="ragMode">
+        <button data-m="search" class="on">检索</button>
+        <button data-m="ask">问答</button>
+        <button data-m="report">报告</button>
+      </div>
+      <button id="ragGo">检索</button>
+    </div>
+    <div class="toolbar">
+      <select id="rr-dept"></select>
+      <select id="rr-cat"></select>
+      <select id="rr-q"><option value="">质量：全部</option><option value="A">A 高</option><option value="B">B 中</option><option value="C">C 一般</option></select>
+      <input type="text" id="rr-from" placeholder="起始 2025-01-01" style="width:130px">
+      <input type="text" id="rr-to" placeholder="截止 2026-12-31" style="width:130px">
+      <label class="chk"><input type="checkbox" id="rr-eco" checked> 优先生态环境条线</label>
+    </div>
+    <div class="muted" id="ragStat" style="margin-bottom:10px"></div>
+    <div id="ragResults"></div>
+    <pre id="ragReport"></pre>
+  </section>
+
+  <!-- ============ 知识管理 ============ -->
+  <section class="view" id="v-manage">
+    <div class="dash" id="dash"></div>
+    <div class="toolbar">
+      <div class="bars" id="distBars" style="flex:1;min-width:280px"></div>
+    </div>
+    <div class="toolbar">
+      <input type="text" class="grow" id="fm-kw" placeholder="按标题/部门筛选记录…">
+      <select id="fm-dept"></select>
+      <select id="fm-cat"></select>
+      <button class="ghost mini" id="btnAdd">➕ 新增知识</button>
+      <button class="ghost mini" id="btnExportKb">⬇️ 导出 kb.json</button>
+      <button class="ghost mini" id="btnExportNew" disabled>⬇️ 导出新增(inbox)</button>
+    </div>
+    <div class="note">
+      本页所有查看/编辑/新增均在浏览器本地进行，<b>不会自动写回服务器</b>（静态站点无后端）。修改或新增后请点「导出」下载 JSON，
+      交由每日自动化合并入库，或让助手提交到仓库。当前会话的改动仅本地可见。
+    </div>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th style="width:38%">标题</th><th>部门</th><th>分类</th><th>日期</th><th>质量</th><th>全文</th><th>操作</th></tr></thead>
+        <tbody id="mgBody"></tbody>
+      </table>
+    </div>
+  </section>
+</div>
+
+<button class="fab" id="fabFeedback">💬 留言反馈</button>
+
+<footer id="foot">双碳领域知识库 · 自动采集更新，数据源 <code>kb/kb.json</code></footer>
+
+<!-- 详情 / 编辑 / 新增 弹窗 -->
+<div class="mask" id="mask">
+  <div class="modal" id="modal"></div>
+</div>
+
+<!-- 本地文件回退 -->
+<div id="picker-wrap" style="display:none;position:fixed;left:0;right:0;top:0;background:#fff;
+     border-bottom:1px solid var(--line);padding:12px 18px;z-index:60;font-size:13px">
+  无法自动加载 <code>kb/kb.json</code>（可能是本地 file:// 打开）。请手动选择知识库文件：
+  <input type="file" id="picker" accept=".json">
+</div>
+
 <script>
-function applyFilter(){
-  var q=(document.getElementById('search').value||'').toLowerCase().trim();
-  var dept=document.getElementById('fdept').value;
-  var region=document.getElementById('fregion').value;
-  var qual=document.getElementById('fqual').value;
-  var cat=document.getElementById('fcat').value;
-  var win=document.getElementById('fwin')?document.getElementById('fwin').value:'all';
-  var now=new Date(); var y=now.getFullYear();
-  var cards=document.querySelectorAll('.card');
-  var count=0;
-  cards.forEach(function(c){
-    var ok=true;
-    if(q && c.dataset.text.indexOf(q)===-1) ok=false;
-    if(cat && c.dataset.cat!==cat) ok=false;
-    if(dept && c.dataset.dept!==dept) ok=false;
-    if(region && c.dataset.region!==region) ok=false;
-    if(qual && c.dataset.qual!==qual) ok=false;
-    if(win && win!=='all'){
-      var d=new Date(c.dataset.date); if(isNaN(d)) ok=false;
-      var days=(now-d)/86400000;
-      if(win==='7'&&days>7)ok=false;
-      else if(win==='30'&&days>30)ok=false;
-      else if(win==='90'&&days>90)ok=false;
-      else if(win==='180'&&days>180)ok=false;
-      else if(win==='2026'&&d.getFullYear()!==2026)ok=false;
-      else if(win==='2025'&&d.getFullYear()!==2025)ok=false;
-      else if(win==='2024'&&d.getFullYear()!==2024)ok=false;
-      else if(win==='2023'&&d.getFullYear()!==2023)ok=false;
-      else if(win==='3y'&&days>365*3)ok=false;
-      else if(win==='older'&&d.getFullYear()>=2023)ok=false;
-    }
-    c.style.display=ok?'':'none';
-    if(ok)count++;
-  });
-  document.querySelectorAll('section.block').forEach(function(s){
-    var any=Array.prototype.some.call(s.querySelectorAll('.card'),function(c){return c.style.display!=='none';});
-    s.style.display=any?'':'none';
-  });
-  var ce=document.getElementById('count'); if(ce) ce.textContent='当前显示 '+count+' 条';
+/* ================= 全局状态 ================= */
+let RECORDS=[], CONFIG={}, NEW_RECORDS=[];
+const CATS=[["policy","政策规划与顶层设计","#1a7f5a"],["standard","法规与标准","#0f766e"],
+  ["carbon_market","碳市场与气候投融资","#2563eb"],["synergy","减污降碳协同","#7c3aed"],
+  ["industry","行业低碳与节能降碳","#b45309"],["tech","技术、产品与创新","#0891b2"],
+  ["literature","研究文献（开源）","#db2777"],["intl_region","国际与区域动态","#475569"]];
+const CATNAME=Object.fromEntries(CATS.map(c=>[c[0],c[1]]));
+const CAT_ORDER=Object.fromEntries(CATS.map((c,i)=>[c[0],i]));
+const QUAL={A:"高",B:"中",C:"一般"};
+const DEPT_PRI=[["生态","环境"],["发改"],["经信","工信"],["市场监管"],[]];
+const DEPT_NAME=["生态环境部门","发展改革委","经信(工信)","市场监管局","其他相关部门"];
+function deptPri(d){d=d||"";for(let i=0;i<DEPT_PRI.length;i++){if(DEPT_PRI[i].length&&DEPT_PRI[i].some(k=>d.includes(k)))return i;}return 4;}
+function esc(s){return (s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");}
+
+/* ================= 中文分词 / RAG 引擎 ================= */
+function tokenize(t){if(!t)return[];t=t.toLowerCase();let o=[];
+  (t.match(/[a-z0-9]+/g)||[]).forEach(w=>o.push(w));
+  (t.match(/[\u4e00-\u9fff]+/g)||[]).forEach(r=>{if(r.length===1)o.push(r);else for(let i=0;i<r.length-1;i++)o.push(r.substr(i,2));});
+  return o;}
+function splitSents(t){t=t.replace(/\s+/g,'');return t.split(/(?<=[。！？；\n])/).filter(p=>p.length>=4);}
+function chunkText(t,mx=320){const s=splitSents(t);if(!s.length)return t?[t]:[];let c=[],cur=[],l=0;
+  for(const x of s){if(l+x.length>mx&&cur.length){c.push(cur.join(''));cur=[];l=0;}cur.push(x);l+=x.length;}
+  if(cur.length)c.push(cur.join(''));return c.length?c:[t];}
+let CHUNKS=[],VEC=[],DFV={},DFB={},AVGDL=0,N=0,RAG_BUILT=false;
+function tf(a){const m={};a.forEach(t=>m[t]=(m[t]||0)+1);return m;}
+function ragBuild(){
+  CHUNKS=[];RECORDS.forEach((r,rid)=>{const b=r.content||r.summary||"";if(!b)return;
+    chunkText(b).forEach(t=>CHUNKS.push({rid,text:t,dept:r.department,cat:r.category,date:r.date,
+      quality:r.quality,region:r.region,title:r.title,url:r.url}));});
+  N=CHUNKS.length;AVGDL=CHUNKS.reduce((a,c)=>a+c.text.length,0)/(N||1);DFB={};DFV={};
+  CHUNKS.forEach(c=>{c.tf=tf(tokenize(c.text));Object.keys(c.tf).forEach(t=>DFB[t]=(DFB[t]||0)+1);});
+  Object.keys(DFB).forEach(t=>DFV[t]=DFB[t]);
+  VEC=CHUNKS.map(c=>{const v={};for(const t in c.tf){const df=DFV[t]||0;const idf=Math.log((N-df+0.5)/(df+0.5)+1);
+    v[t]=(1+Math.log(c.tf[t]))*idf;}let n=Math.sqrt(Object.values(v).reduce((a,x)=>a+x*x,0))||1;
+    for(const t in v)v[t]/=n;return v;});
+  RAG_BUILT=true;
 }
-function bind(){
-  document.getElementById('search').addEventListener('input',applyFilter);
-  ['fdept','fregion','fqual','fcat'].forEach(function(id){var e=document.getElementById(id);if(e)e.addEventListener('change',applyFilter);});
-  var w=document.getElementById('fwin'); if(w) w.addEventListener('change',applyFilter);
-  document.querySelectorAll('.pill').forEach(function(p){
-    p.addEventListener('click',function(){
-      document.querySelectorAll('.pill').forEach(function(x){x.classList.remove('active');});
-      p.classList.add('active');
-      document.getElementById('fcat').value=p.dataset.cat;
-      applyFilter();
-    });
-  });
-  document.querySelectorAll('.winbtn').forEach(function(b){
-    b.addEventListener('click',function(){
-      document.querySelectorAll('.winbtn').forEach(function(x){x.classList.remove('active');});
-      b.classList.add('active');
-      document.getElementById('fwin').value=b.dataset.win;
-      applyFilter();
-    });
-  });
-  applyFilter();
+function vecSearch(qt,top=200){const q=tf(qt),qv={};for(const t in q){const df=DFV[t]||0;if(!df)continue;
+  const idf=Math.log((N-df+0.5)/(df+0.5)+1);qv[t]=(1+Math.log(q[t]))*idf;}
+  let n=Math.sqrt(Object.values(qv).reduce((a,x)=>a+x*x,0))||1;for(const t in qv)qv[t]/=n;
+  const s=[];VEC.forEach((v,i)=>{let d=0;for(const t in qv)if(v[t])d+=qv[t]*v[t];if(d>0)s.push([d,i]);});
+  s.sort((a,b)=>b[0]-a[0]);return s.slice(0,top);}
+function bm25(qt,top=200,k1=1.5,b=0.75){const s=[],qs=[...new Set(qt)];
+  CHUNKS.forEach((c,i)=>{let sc=0,dl=c.text.length||1;qs.forEach(t=>{const df=DFB[t]||0;if(!df)return;
+    const f=c.tf[t]||0;if(!f)return;const idf=Math.log((N-df+0.5)/(df+0.5)+1);
+    sc+=idf*(f*(k1+1))/(f+k1*(1-b+b*dl/AVGDL));});if(sc>0)s.push([sc,i]);});
+  s.sort((a,b)=>b[0]-a[0]);return s.slice(0,top);}
+function passF(c,f){if(f.dept&&!(c.dept||"").includes(f.dept))return false;
+  if(f.cat&&c.cat!==f.cat)return false;
+  if(f.q){const o={A:3,B:2,C:1};if((o[c.quality]||0)<(o[f.q]||0))return false;}
+  if(f.from&&(c.date||"")<f.from)return false;if(f.to&&(c.date||"")>f.to)return false;return true;}
+function ragSearch(query,topk=8,f={},eco=true){const qt=tokenize(query);
+  const vs=vecSearch(qt),bs=bm25(qt),rrf={};
+  vs.forEach(([s,i],r)=>rrf[i]=(rrf[i]||0)+1/(60+r+1));
+  bs.forEach(([s,i],r)=>rrf[i]=(rrf[i]||0)+1/(60+r+1));
+  let cand=[];for(const i in rrf){const c=CHUNKS[i];if(!passF(c,f))continue;
+    let bo=1;if(eco&&deptPri(c.dept)===0)bo=1.6;cand.push([rrf[i]*bo,i]);}
+  cand.sort((a,b)=>b[0]-a[0]);
+  return cand.slice(0,topk).map(([s,i])=>{const c=CHUNKS[i];return {title:c.title,url:c.url,date:c.date,
+    dept:c.dept,cat:c.cat,quality:c.quality,region:c.region,chunk:c.text,score:+s.toFixed(4),rid:c.rid};});}
+function ragAsk(q,topk=6,eco=true){const hits=ragSearch(q,topk,{},eco);
+  if(!hits.length)return{answer:"未在知识库中检索到相关内容。",citations:[]};
+  const qs=new Set(tokenize(q));let best=[];
+  hits.forEach(h=>splitSents(h.chunk).forEach(s=>{const ov=[...new Set(tokenize(s))].filter(x=>qs.has(x)).length;
+    if(ov>0)best.push([ov,s,h]);}));
+  best.sort((a,b)=>b[0]-a[0]||b[1].length-a[1].length);
+  const seen=new Set(),pk=[];best.forEach(([o,s])=>{const k=s.substr(0,20);if(seen.has(k))return;seen.add(k);if(pk.length<5)pk.push(s);});
+  return{answer:pk.length?pk.join('。')+'。':hits[0].chunk,citations:hits.slice(0,8)};}
+function ragReport(topic,topk=12,eco=true){const hits=ragSearch(topic,topk,{},eco);
+  if(!hits.length)return"# 报告\n\n未检索到与「"+topic+"」相关的内容。";
+  const L=["# 双碳情报 · 主题检索报告："+topic,"","> 命中 "+hits.length+" 个知识片段（向量+BM25+元数据融合），按相关度排序。",""];
+  const dc={};hits.forEach(h=>dc[h.dept]=(dc[h.dept]||0)+1);
+  L.push("## 一、命中分布（部门）");Object.entries(dc).sort((a,b)=>b[1]-a[1]).forEach(([d,n])=>L.push("- "+(d||"其他")+"："+n+" 条"));
+  L.push("","## 二、核心要点（抽取）");const qs=new Set(tokenize(topic));let sh=0;
+  for(const h of hits){let ss=splitSents(h.chunk).filter(s=>[...new Set(tokenize(s))].filter(x=>qs.has(x)).length>0);
+    if(!ss.length)ss=[h.chunk.substr(0,160)];L.push("","### "+h.title+" 〔"+h.dept+" · "+h.date+" · "+h.quality+"〕");
+    ss.slice(0,3).forEach(s=>L.push("- "+s));L.push("  来源："+h.url);if(++sh>=10)break;}
+  L.push("","## 三、参考文件清单");hits.slice(0,12).forEach((h,i)=>L.push((i+1)+". ["+h.title+"]("+h.url+") — "+h.dept+" / "+h.date));
+  return L.join("\n");}
+
+/* ================= 通用渲染 ================= */
+function badge(cls,txt){return '<span class="badge '+cls+'">'+esc(txt)+'</span>';}
+function cardHtml(r,idx){
+  const full=r.content_fetched?badge('b-full','✓ 全文'):badge('b-none','摘要');
+  return '<div class="card" data-idx="'+idx+'">'
+    +'<h3>'+esc(r.title)+'</h3>'
+    +'<div class="sum">'+esc(r.summary||r.content||'')+'</div>'
+    +'<div class="badges">'+badge('b-dept',r.department||'其他')+badge('b-cat',CATNAME[r.category]||r.category||'')
+    +badge('b-q','质量'+(r.quality||'-'))+(r.region?badge('b-region',r.region):'')+full+'</div></div>';
 }
-document.addEventListener('DOMContentLoaded',bind);
+function fillSelect(el,opts,head){el.innerHTML='<option value="">'+head+'</option>'+
+  opts.map(o=>'<option value="'+esc(o[0])+'">'+esc(o[1])+'</option>').join('');}
+function uniqueDepts(){const s=[...new Set(RECORDS.map(r=>r.department).filter(Boolean))];
+  s.sort((a,b)=>deptPri(a)-deptPri(b));return s.map(d=>[d,d]);}
+function uniqueRegions(){return [...new Set(RECORDS.map(r=>r.region).filter(Boolean))].map(x=>[x,x]);}
+
+/* ================= 每日推送 ================= */
+let FEED_DAY=null;
+function pushesByDay(){const m={};RECORDS.forEach(r=>{const k=r.added_at||r.date||"未知";(m[k]=m[k]||[]).push(r);});return m;}
+function renderFeed(){
+  const P=pushesByDay();const days=Object.keys(P).sort().reverse();
+  if(!FEED_DAY||!P[FEED_DAY])FEED_DAY=days[0];
+  const yrs={};RECORDS.forEach(r=>{const y=(r.date||'').slice(0,4);if(y)yrs[y]=(yrs[y]||0)+1;});
+  const full=RECORDS.filter(r=>r.content_fetched).length;
+  document.getElementById('feedStat').innerHTML=
+    '<span class="chip">知识总量 <b>'+RECORDS.length+'</b> 条</span>'
+    +'<span class="chip">全文入库 <b>'+full+'</b> 条</span>'
+    +'<span class="chip">推送期数 <b>'+days.length+'</b> 期</span>'
+    +'<span class="chip">覆盖年份 <b>'+Object.keys(yrs).sort().join('、')+'</b></span>';
+  document.getElementById('dateNav').innerHTML=days.map(d=>
+    '<div class="dpill'+(d===FEED_DAY?' on':'')+'" data-d="'+d+'">'+d+' ('+P[d].length+')</div>').join('');
+  let items=P[FEED_DAY]||[];
+  const fd=val('fe-dept'),fc=val('fe-cat'),fq=val('fe-q'),kw=val('fe-kw').trim().toLowerCase();
+  items=items.filter(r=>(!fd||r.department===fd)&&(!fc||r.category===fc)&&(!fq||r.quality===fq)
+    &&(!kw||((r.title||'')+(r.summary||'')+(r.content||'')).toLowerCase().includes(kw)));
+  let html='<div class="muted" style="margin-bottom:6px">🗓 '+FEED_DAY+' · 当期 '+items.length+' 条</div>';
+  const byCat={};items.forEach(r=>(byCat[r.category]=byCat[r.category]||[]).push(r));
+  CATS.forEach(([cid,cname])=>{let sub=byCat[cid];if(!sub||!sub.length)return;
+    sub.sort((a,b)=>deptPri(a.department)-deptPri(b.department));
+    html+='<section class="block"><h2>'+cname+'<span class="cnt">'+sub.length+' 条</span></h2><div class="grid">'
+      +sub.map(r=>cardHtml(r,RECORDS.indexOf(r))).join('')+'</div></section>';});
+  if(!items.length)html+='<div class="empty">本期无符合条件的记录。</div>';
+  document.getElementById('feedBody').innerHTML=html;
+}
+
+/* ================= 知识库时间轴 ================= */
+function renderKb(){
+  const kw=val('fk-kw').trim().toLowerCase(),fd=val('fk-dept'),fc=val('fk-cat'),
+    fr=val('fk-region'),fq=val('fk-q'),ff=document.getElementById('fk-full').checked;
+  let items=RECORDS.filter(r=>(!fd||r.department===fd)&&(!fc||r.category===fc)&&(!fr||r.region===fr)
+    &&(!fq||r.quality===fq)&&(!ff||r.content_fetched)
+    &&(!kw||((r.title||'')+(r.summary||'')+(r.content||'')+(r.tags||[]).join('')).toLowerCase().includes(kw)));
+  items.sort((a,b)=>(b.date||'').localeCompare(a.date||''));
+  document.getElementById('kbStat').innerHTML='<span class="chip">命中 <b>'+items.length+'</b> 条</span>'
+    +'<span class="chip">全库 <b>'+RECORDS.length+'</b> 条</span>';
+  const byDate={};items.forEach(r=>(byDate[r.date||'未知日期']=byDate[r.date||'未知日期']||[]).push(r));
+  const dates=Object.keys(byDate).sort().reverse();
+  let html='';dates.forEach(dt=>{const sub=byDate[dt].sort((a,b)=>
+    (CAT_ORDER[a.category]??99)-(CAT_ORDER[b.category]??99)||deptPri(a.department)-deptPri(b.department));
+    html+='<section class="block"><h2>'+dt+'<span class="cnt">'+sub.length+' 条</span></h2><div class="grid">'
+      +sub.map(r=>cardHtml(r,RECORDS.indexOf(r))).join('')+'</div></section>';});
+  document.getElementById('kbBody').innerHTML=html||'<div class="empty">无匹配记录，试试放宽筛选条件。</div>';
+}
+
+/* ================= RAG ================= */
+let RAG_MODE='search';
+function hl(t,q){const qt=[...new Set(tokenize(q))].filter(x=>x.length>=2||/[a-z0-9]/.test(x));
+  let s=esc(t);qt.forEach(x=>{try{s=s.replace(new RegExp(x,'g'),'<em>'+x+'</em>');}catch(e){}});return s;}
+function runRag(){
+  if(!RAG_BUILT)ragBuild();
+  const q=val('rq').trim();if(!q)return;
+  const f={dept:val('rr-dept'),cat:val('rr-cat'),q:val('rr-q'),from:val('rr-from'),to:val('rr-to')};
+  const eco=document.getElementById('rr-eco').checked;const t0=performance.now();
+  const RES=document.getElementById('ragResults'),REP=document.getElementById('ragReport');
+  if(RAG_MODE==='report'){RES.style.display='none';REP.style.display='block';
+    REP.textContent=ragReport(q,12,eco);
+    document.getElementById('ragStat').textContent='报告生成完成，耗时 '+Math.round(performance.now()-t0)+' ms';return;}
+  REP.style.display='none';RES.style.display='block';
+  if(RAG_MODE==='ask'){const r=ragAsk(q,6,eco);
+    let h='<div class="result"><h3>💡 回答</h3><div class="chunk open">'+hl(r.answer,q)+'</div>'
+      +'<div class="muted" style="margin-top:8px">引用来源 '+r.citations.length+' 条：</div>';
+    r.citations.forEach(c=>h+='<div class="badges" style="margin-top:6px">'+badge('b-dept',c.dept||'')
+      +badge('b-cat',CATNAME[c.cat]||c.cat||'')+badge('b-q',c.quality||'')
+      +' <a href="'+esc(c.url)+'" target="_blank">'+esc(c.title)+' ↗</a></div>');
+    RES.innerHTML=h+'</div>';
+    document.getElementById('ragStat').textContent='问答完成，命中 '+r.citations.length+' 条，耗时 '+Math.round(performance.now()-t0)+' ms';return;}
+  const hits=ragSearch(q,8,f,eco);
+  RES.innerHTML=hits.length?hits.map(it=>'<div class="result"><h3>'+esc(it.title)+'</h3>'
+    +'<div class="badges">'+badge('b-dept',it.dept)+badge('b-cat',CATNAME[it.cat]||it.cat)
+    +badge('b-q','质量'+it.quality)+'<span class="muted">相关度 '+it.score+' ｜ '+it.date+' ｜ '+(it.region||'')+'</span></div>'
+    +'<div class="chunk">'+hl(it.chunk,q)+'</div>'
+    +'<span class="more">展开/收起</span> ｜ <a href="'+esc(it.url)+'" target="_blank">查看原文 ↗</a></div>').join('')
+    :'<div class="empty">未命中，换个关键词或放宽筛选。</div>';
+  document.getElementById('ragStat').textContent='命中 '+hits.length+' 个片段，耗时 '+Math.round(performance.now()-t0)+' ms';
+}
+
+/* ================= 知识管理 ================= */
+function renderManage(){
+  const full=RECORDS.filter(r=>r.content_fetched).length;
+  const yrs={};RECORDS.forEach(r=>{const y=(r.date||'').slice(0,4);if(y)yrs[y]=(yrs[y]||0)+1;});
+  document.getElementById('dash').innerHTML=
+    dcard(RECORDS.length,'知识总量')+dcard(full,'全文入库')+dcard(RECORDS.length-full,'仅摘要')
+    +dcard(Object.keys(yrs).length,'覆盖年份')+dcard(NEW_RECORDS.length,'本地新增(待导出)');
+  // 分布条形
+  const byDept={},byCat={};RECORDS.forEach(r=>{const d=DEPT_NAME[deptPri(r.department)];byDept[d]=(byDept[d]||0)+1;
+    byCat[r.category]=(byCat[r.category]||0)+1;});
+  let bars='<div class="muted" style="margin-bottom:6px">按部门优先级分布</div>';
+  DEPT_NAME.forEach(d=>{const n=byDept[d]||0;bars+=barRow(d,n,RECORDS.length);});
+  bars+='<div class="muted" style="margin:10px 0 6px">按分类分布</div>';
+  CATS.forEach(([cid,cn])=>{bars+=barRow(cn,byCat[cid]||0,RECORDS.length);});
+  document.getElementById('distBars').innerHTML=bars;
+  renderMgTable();
+}
+function dcard(n,l){return '<div class="dcard"><div class="n">'+n+'</div><div class="l">'+l+'</div></div>';}
+function barRow(lab,n,total){const pct=total?Math.round(n/total*100):0;
+  return '<div class="row"><div class="lab">'+esc(lab)+'</div><div class="track"><div class="fill" style="width:'+pct+'%"></div></div><div class="v">'+n+'</div></div>';}
+function renderMgTable(){
+  const kw=val('fm-kw').trim().toLowerCase(),fd=val('fm-dept'),fc=val('fm-cat');
+  let items=RECORDS.map((r,i)=>[r,i]).filter(([r])=>(!fd||r.department===fd)&&(!fc||r.category===fc)
+    &&(!kw||((r.title||'')+(r.department||'')).toLowerCase().includes(kw)));
+  document.getElementById('mgBody').innerHTML=items.map(([r,i])=>
+    '<tr><td>'+esc(r.title)+'</td><td>'+esc(r.department||'')+'</td><td>'+esc(CATNAME[r.category]||r.category||'')
+    +'</td><td>'+esc(r.date||'')+'</td><td>'+esc(r.quality||'')+'</td>'
+    +'<td>'+(r.content_fetched?'✓':'—')+'</td>'
+    +'<td><button class="ghost mini" data-view="'+i+'">查看</button> <button class="ghost mini" data-edit="'+i+'">编辑</button></td></tr>').join('')
+    ||'<tr><td colspan="7" class="empty">无匹配记录</td></tr>';
+}
+
+/* ================= 弹窗：详情 / 编辑 / 新增 ================= */
+function openModal(html){document.getElementById('modal').innerHTML='<button class="x" onclick="closeModal()">×</button>'+html;
+  document.getElementById('mask').classList.add('on');}
+function closeModal(){document.getElementById('mask').classList.remove('on');}
+function showDetail(i){const r=RECORDS[i];
+  openModal('<h2>'+esc(r.title)+'</h2>'
+    +'<div class="badges">'+badge('b-dept',r.department||'其他')+badge('b-cat',CATNAME[r.category]||r.category||'')
+    +badge('b-q','质量'+(r.quality||'-'))+(r.region?badge('b-region',r.region):'')
+    +(r.content_fetched?badge('b-full','✓ 全文入库'):badge('b-none','仅摘要'))+'</div>'
+    +'<div class="muted" style="margin-top:8px">📅 发布 '+esc(r.date||'-')+' ｜ 收录 '+esc(r.added_at||'-')
+    +' ｜ 来源 '+esc(r.source||'-')+'</div>'
+    +(r.tags&&r.tags.length?'<div class="muted" style="margin-top:4px">🏷 '+r.tags.map(esc).join(' · ')+'</div>':'')
+    +'<div style="margin-top:8px"><a href="'+esc(r.url)+'" target="_blank">查看原文链接 ↗</a></div>'
+    +'<div class="content">'+esc(r.content||r.summary||'（暂无正文，仅摘要）')+'</div>');
+}
+function editForm(r,i){
+  const isNew=(i===undefined);
+  const catOpts=CATS.map(c=>'<option value="'+c[0]+'"'+(r.category===c[0]?' selected':'')+'>'+c[1]+'</option>').join('');
+  const qOpts=['A','B','C'].map(q=>'<option'+(r.quality===q?' selected':'')+'>'+q+'</option>').join('');
+  return '<h2>'+(isNew?'➕ 新增知识':'✏️ 编辑知识')+'</h2>'
+    +'<div class="fld"><label>标题</label><input type="text" id="m-title" value="'+esc(r.title||'')+'"></div>'
+    +'<div class="row2"><div class="fld"><label>原文链接 URL</label><input type="text" id="m-url" value="'+esc(r.url||'')+'"></div>'
+    +'<div class="fld"><label>来源</label><input type="text" id="m-source" value="'+esc(r.source||'')+'"></div></div>'
+    +'<div class="row2"><div class="fld"><label>部门</label><input type="text" id="m-dept" value="'+esc(r.department||'')+'" placeholder="生态环境 / 发改委 / 经信(工信) / 市场监管 / 其他"></div>'
+    +'<div class="fld"><label>地域</label><input type="text" id="m-region" value="'+esc(r.region||'')+'" placeholder="全国 / 浙江 / 杭州…"></div></div>'
+    +'<div class="row2"><div class="fld"><label>分类</label><select id="m-cat">'+catOpts+'</select></div>'
+    +'<div class="fld"><label>质量</label><select id="m-q">'+qOpts+'</select></div></div>'
+    +'<div class="row2"><div class="fld"><label>发布日期</label><input type="text" id="m-date" value="'+esc(r.date||'')+'" placeholder="YYYY-MM-DD"></div>'
+    +'<div class="fld"><label>标签（逗号分隔）</label><input type="text" id="m-tags" value="'+esc((r.tags||[]).join(','))+'"></div></div>'
+    +'<div class="fld"><label>摘要</label><textarea id="m-summary" rows="3">'+esc(r.summary||'')+'</textarea></div>'
+    +'<div class="fld"><label>正文内容（可留空，抓取后填入）</label><textarea id="m-content" rows="6">'+esc(r.content||'')+'</textarea></div>'
+    +'<div style="margin-top:12px;display:flex;gap:10px">'
+    +'<button onclick="saveRecord('+(isNew?'null':i)+')">保存到本地</button>'
+    +'<button class="ghost" onclick="closeModal()">取消</button></div>'
+    +'<div class="note">保存仅更新当前浏览器内的数据，用于预览/整理。永久生效请在管理页点「导出」下载 JSON 并提交入库。</div>';
+}
+function saveRecord(i){
+  const g=id=>document.getElementById(id).value.trim();
+  const rec={title:g('m-title'),url:g('m-url'),source:g('m-source'),department:g('m-dept'),
+    region:g('m-region'),category:g('m-cat'),quality:g('m-q'),date:g('m-date'),
+    tags:g('m-tags')?g('m-tags').split(/[,，]/).map(s=>s.trim()).filter(Boolean):[],
+    summary:g('m-summary'),content:g('m-content')};
+  if(!rec.title){alert('标题不能为空');return;}
+  rec.content_fetched=!!rec.content;
+  if(i===null){rec.added_at=new Date().toISOString().slice(0,10);
+    RECORDS.unshift(rec);NEW_RECORDS.push(rec);}
+  else{Object.assign(RECORDS[i],rec);}
+  RAG_BUILT=false;closeModal();refreshAll();
+  document.getElementById('btnExportNew').disabled=NEW_RECORDS.length===0;
+}
+function download(name,text){const b=new Blob([text],{type:'application/json'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=name;a.click();}
+
+/* ================= 工具 ================= */
+function val(id){const e=document.getElementById(id);return e?e.value:'';}
+function refreshAll(){renderFeed();renderKb();if(document.getElementById('v-manage').classList.contains('on'))renderManage();}
+
+/* ================= 初始化 ================= */
+function initSelects(){
+  const depts=uniqueDepts(),cats=CATS.map(c=>[c[0],c[1]]),regions=uniqueRegions();
+  fillSelect(document.getElementById('fe-dept'),depts,'部门：全部');
+  fillSelect(document.getElementById('fe-cat'),cats,'分类：全部');
+  fillSelect(document.getElementById('fk-dept'),depts,'部门：全部');
+  fillSelect(document.getElementById('fk-cat'),cats,'分类：全部');
+  fillSelect(document.getElementById('fk-region'),regions,'地域：全部');
+  fillSelect(document.getElementById('rr-dept'),depts,'部门：全部');
+  fillSelect(document.getElementById('rr-cat'),cats,'分类：全部');
+  fillSelect(document.getElementById('fm-dept'),depts,'部门：全部');
+  fillSelect(document.getElementById('fm-cat'),cats,'分类：全部');
+}
+function bindEvents(){
+  document.getElementById('tabs').addEventListener('click',e=>{const t=e.target.closest('.tab');if(!t)return;
+    document.querySelectorAll('.tab').forEach(x=>x.classList.remove('on'));t.classList.add('on');
+    document.querySelectorAll('.view').forEach(x=>x.classList.remove('on'));
+    document.getElementById('v-'+t.dataset.v).classList.add('on');
+    if(t.dataset.v==='manage')renderManage();if(t.dataset.v==='rag'&&!RAG_BUILT)ragBuild();});
+  ['fe-dept','fe-cat','fe-q'].forEach(id=>document.getElementById(id).addEventListener('change',renderFeed));
+  document.getElementById('fe-kw').addEventListener('input',renderFeed);
+  document.getElementById('dateNav').addEventListener('click',e=>{const p=e.target.closest('.dpill');if(!p)return;
+    FEED_DAY=p.dataset.d;renderFeed();});
+  ['fk-dept','fk-cat','fk-region','fk-q'].forEach(id=>document.getElementById(id).addEventListener('change',renderKb));
+  document.getElementById('fk-full').addEventListener('change',renderKb);
+  document.getElementById('fk-kw').addEventListener('input',renderKb);
+  document.getElementById('ragMode').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;
+    document.querySelectorAll('#ragMode button').forEach(x=>x.classList.remove('on'));b.classList.add('on');
+    RAG_MODE=b.dataset.m;document.getElementById('ragGo').textContent=RAG_MODE==='search'?'检索':(RAG_MODE==='ask'?'问答':'生成报告');});
+  document.getElementById('ragGo').addEventListener('click',runRag);
+  document.getElementById('rq').addEventListener('keydown',e=>{if(e.key==='Enter')runRag();});
+  document.getElementById('ragResults').addEventListener('click',e=>{if(e.target.classList.contains('more')){
+    const c=e.target.parentElement.querySelector('.chunk');if(c)c.classList.toggle('open');}});
+  // 卡片点击 → 详情
+  document.querySelector('.wrap').addEventListener('click',e=>{const c=e.target.closest('.card');
+    if(c&&c.dataset.idx!==undefined)showDetail(+c.dataset.idx);});
+  // 管理表格
+  ['fm-dept','fm-cat'].forEach(id=>document.getElementById(id).addEventListener('change',renderMgTable));
+  document.getElementById('fm-kw').addEventListener('input',renderMgTable);
+  document.getElementById('mgBody').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;
+    if(b.dataset.view!==undefined)showDetail(+b.dataset.view);
+    if(b.dataset.edit!==undefined)openModal(editForm(RECORDS[+b.dataset.edit],+b.dataset.edit));});
+  document.getElementById('btnAdd').addEventListener('click',()=>openModal(editForm({},undefined)));
+  document.getElementById('btnExportKb').addEventListener('click',()=>{
+    const clean=RECORDS.map(r=>{const c=Object.assign({},r);delete c._ev;return c;});
+    download('kb.json',JSON.stringify(clean,null,1));});
+  document.getElementById('btnExportNew').addEventListener('click',()=>{
+    if(!NEW_RECORDS.length){alert('暂无本地新增记录');return;}
+    download('inbox.json',JSON.stringify(NEW_RECORDS,null,1));});
+  document.getElementById('mask').addEventListener('click',e=>{if(e.target.id==='mask')closeModal();});
+  document.getElementById('fabFeedback').addEventListener('click',()=>{
+    if(CONFIG.feedback_url)window.open(CONFIG.feedback_url,'_blank');});
+  document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal();});
+}
+function applyConfig(){
+  if(CONFIG.project_name)document.querySelector('header h1').textContent=CONFIG.project_name+' · 一体化门户';
+  const foot=document.getElementById('foot');
+  foot.innerHTML='双碳领域知识库 · 自动采集更新 ｜ '
+    +(CONFIG.feedback_url?'<a href="'+CONFIG.feedback_url+'" target="_blank">填写反馈问卷</a> ｜ ':'')
+    +(CONFIG.owner_email?'负责人 <a href="mailto:'+CONFIG.owner_email+'">'+CONFIG.owner_email+'</a>':'')
+    +'<br><span class="muted">'+(CONFIG.update_note||'')+'</span>';
+}
+function boot(data){
+  RECORDS=data;initSelects();bindEvents();applyConfig();
+  renderFeed();renderKb();
+  document.getElementById('subtitle').textContent=
+    '共 '+RECORDS.length+' 条知识 ｜ 每日推送·知识库·RAG检索·知识管理 —— 一页搞定';
+}
+function loadAll(){
+  Promise.all([
+    fetch('config.json',{cache:'no-store'}).then(r=>r.ok?r.json():{}).catch(()=>({})),
+    fetch('kb/kb.json',{cache:'no-store'}).then(r=>{if(!r.ok)throw 0;return r.json();})
+  ]).then(([cfg,kb])=>{CONFIG=cfg;boot(kb);})
+    .catch(()=>{document.getElementById('picker-wrap').style.display='block';
+      bindEvents();initSelects&&null;});
+}
+document.getElementById('picker').addEventListener('change',e=>{const f=e.target.files[0];if(!f)return;
+  const rd=new FileReader();rd.onload=()=>{try{RECORDS=JSON.parse(rd.result);
+    document.getElementById('picker-wrap').style.display='none';
+    initSelects();bindEvents();applyConfig();renderFeed();renderKb();}catch(err){alert('解析失败');}};
+  rd.readAsText(f);});
+loadAll();
 </script>
-</body></html>
+</body>
+</html>
