@@ -7,7 +7,7 @@
 增量机制：kb/kb.json 只增不删（merge.py 去重），render 每次由最新 added_at 生成推送。
 用法：python render.py
 """
-import json, os, datetime
+import json, os, datetime, re
 
 BASE = os.path.dirname(os.path.abspath(__file__))
 KB = os.path.join(BASE, "kb", "kb.json")
@@ -278,13 +278,17 @@ def build_filters(with_window=True, with_cat=True):
     return inner
 
 
+def day_disp(d):
+    return "未知日期" if d == "unknown" else d
+
+
 def push_nav(days, current):
     parts = []
     for d in days:
         n = len(PUSHES[d])
         cls = "pday cur" if d == current else "pday"
         parts.append('<a class="%s" href="push-%s.html">%s <b>%d</b></a>'
-                     % (cls, esc(d), esc(d), n))
+                     % (cls, esc(d), esc(day_disp(d)), n))
     return '<div class="pushnav">%s</div>' % "".join(parts)
 
 
@@ -292,8 +296,8 @@ def pager(days, day):
     idx = days.index(day)
     newer = days[idx - 1] if idx - 1 >= 0 else None   # 更晚的日期
     older = days[idx + 1] if idx + 1 < len(days) else None  # 更早的日期
-    left = ('<a href="push-%s.html">← 更早：%s</a>' % (esc(older), esc(older))) if older else '<span class="dis">← 最早</span>'
-    right = ('<a href="push-%s.html">更新：%s →</a>' % (esc(newer), esc(newer))) if newer else '<span class="dis">最新 →</span>'
+    left = ('<a href="push-%s.html">← 更早：%s</a>' % (esc(older), esc(day_disp(older)))) if older else '<span class="dis">← 最早</span>'
+    right = ('<a href="push-%s.html">更新：%s →</a>' % (esc(newer), esc(day_disp(newer)))) if newer else '<span class="dis">最新 →</span>'
     return '<div class="pager">%s %s</div>' % (left, right)
 
 
@@ -361,7 +365,7 @@ def build_archive(kb):
     depts, regions = dept_region_options(items)
     by_date = {}
     for i in items:
-        by_date.setdefault(i.get("date", "未知日期"), []).append(i)
+        by_date.setdefault(i.get("date") or i.get("added_at") or "未知日期", []).append(i)
     dates = sorted(by_date.keys(), reverse=True)
     sections = ""
     for dt in dates:
@@ -415,7 +419,8 @@ def main():
     # 按收录日(added_at)分组，形成"每日推送"
     PUSHES = {}
     for i in kb:
-        key = i.get("added_at") or i.get("date") or "未知日期"
+        raw = i.get("added_at") or i.get("date") or ""
+        key = raw if re.match(r"^\d{4}-\d{2}-\d{2}$", raw or "") else "unknown"
         PUSHES.setdefault(key, []).append(i)
     days = sorted(PUSHES.keys(), reverse=True)
     # index.html 现为一体化门户 SPA（手写、运行时读取 kb/kb.json），render 不再覆盖它。
