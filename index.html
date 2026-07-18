@@ -120,6 +120,18 @@
   footer{margin-top:26px;padding:20px;text-align:center;color:var(--sub);font-size:12px;
          border-top:1px solid var(--line)}
   .pill-toggle{cursor:pointer}
+  /* 手动入库 */
+  .ingest-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:6px}
+  .panel{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px}
+  .panel h3{margin:0 0 4px;font-size:15px}
+  .drop{border:1.5px dashed var(--line);border-radius:10px;padding:18px;text-align:center;color:var(--sub);
+        cursor:pointer;margin:12px 0;background:#fafcfb;display:block;font-size:13px}
+  .drop:hover{border-color:var(--green);color:var(--green)}
+  .pending{border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin:8px 0}
+  .pending .pv{font-size:12px;color:var(--sub);margin-top:6px;white-space:pre-wrap;max-height:90px;overflow:auto;
+        background:#f7faf9;border-radius:6px;padding:6px 8px}
+  .aiq{border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin:8px 0;background:#f7fbfa}
+  @media(max-width:780px){.ingest-grid{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
@@ -133,6 +145,7 @@
     <div class="tab" data-v="kb">🗂️ 知识库</div>
     <div class="tab" data-v="rag">🧠 智能检索</div>
     <div class="tab" data-v="manage">⚙️ 知识管理</div>
+    <div class="tab" data-v="ingest">📥 手动入库</div>
   </div>
 </header>
 
@@ -212,6 +225,30 @@
         <thead><tr><th style="width:38%">标题</th><th>部门</th><th>分类</th><th>日期</th><th>质量</th><th>全文</th><th>操作</th></tr></thead>
         <tbody id="mgBody"></tbody>
       </table>
+    </div>
+  </section>
+
+  <!-- ============ 手动入库 ============ -->
+  <section class="view" id="v-ingest">
+    <div class="note">📥 把你认为重要的知识补充进库：① <b>上传本地文件</b>——自动抽取正文，整理后可导出入库；② <b>把网页链接交给 AI</b>——由助手在服务器端抓取 → 分析 → 智能分类 → 入库上线（比浏览器端跨域抓取更可靠）。</div>
+    <div class="ingest-grid">
+      <div class="panel">
+        <h3>① 上传本地文件</h3>
+        <div class="muted" style="font-size:12px">支持 .txt / .md / .csv / .json / .html（可多选批量）。文章内容会自动抽取为「正文」；.json 若为数组则逐条导入。</div>
+        <label class="drop" id="dropZone"><input type="file" id="up-file" multiple accept=".txt,.md,.csv,.json,.html,.htm" style="display:none">📎 点击选择文件，或把文件拖到这里</label>
+        <div id="pendingList"><div class="muted">尚未选择文件。</div></div>
+      </div>
+      <div class="panel">
+        <h3>② 网页交给 AI 入库存档</h3>
+        <div class="muted" style="font-size:12px">粘贴网页链接 → 加入「待 AI 处理」队列 → 点「复制提交文案」后在对话里 @助手，AI 会自动抓取、智能分类并入库上线。</div>
+        <div class="fld"><label>网页链接 URL</label><input type="text" id="webUrl" placeholder="https://..."></div>
+        <div class="fld"><label>备注（可选，如：重点关注 / 属浙江案例）</label><input type="text" id="webNote"></div>
+        <div style="display:flex;gap:8px"><button id="webAdd">加入待 AI 处理</button>
+          <button class="ghost" id="webCopyAll">复制全部提交文案</button></div>
+        <div id="webPreview"></div>
+        <div style="margin-top:12px;font-weight:600;font-size:13px">待 AI 处理队列</div>
+        <div id="aiQueue"><div class="muted">暂无待 AI 处理的网页。</div></div>
+      </div>
     </div>
   </section>
 </div>
@@ -494,6 +531,96 @@ function saveRecord(i){
 function download(name,text){const b=new Blob([text],{type:'application/json'});
   const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=name;a.click();}
 
+/* ================= 手动入库：文件上传 + 网页交 AI ================= */
+let PENDING=[];
+function extractTextFromFile(file){
+  return new Promise((res)=>{
+    const rd=new FileReader();const name=file.name.replace(/\.[^.]+$/,'');
+    if(/\.json$/i.test(file.name)){
+      rd.onload=()=>{try{const j=JSON.parse(rd.result);
+        if(Array.isArray(j))res({records:j.map(x=>normRec(x,name))});
+        else if(j&&typeof j==='object')res({records:[normRec(j,name)]});
+        else res({text:'',name});}catch(e){res({text:String(rd.result),name});}};
+      rd.readAsText(file);
+    }else if(/\.(html?|txt|md|csv)$/i.test(file.name)){
+      rd.onload=()=>{let t=rd.result||'';
+        if(/\.html?$/i.test(file.name)){t=t.replace(/<script[\s\S]*?<\/script>/gi,' ').replace(/<style[\s\S]*?<\/style>/gi,' ').replace(/<[^>]+>/g,'\n');}
+        t=t.replace(/\r/g,'').replace(/[ \t]+\n/g,'\n').replace(/\n{2,}/g,'\n').trim();
+        res({records:[{title:name,source:file.name,content:t}]});};
+      rd.readAsText(file);
+    }else{res({text:'',name});}
+  });
+}
+function normRec(x,fallback){x=x||{};return {title:x.title||fallback,url:x.url||'',source:x.source||'',
+  department:x.department||'',region:x.region||'',category:x.category||'',quality:x.quality||'B',date:x.date||'',
+  tags:Array.isArray(x.tags)?x.tags:(x.tags?String(x.tags).split(/[,，]/):[]),summary:x.summary||'',content:x.content||''};}
+function handleFiles(e){const files=[...(e.target.files||(e.dataTransfer&&e.dataTransfer.files)||[])];if(!files.length)return;
+  let done=0;files.forEach(f=>{extractTextFromFile(f).then(r=>{
+    if(r.records&&r.records.length){r.records.forEach(rec=>{rec._id='f'+Date.now()+Math.random().toString(36).slice(2,6);PENDING.push(rec);});}
+    else if(r.text){PENDING.push({title:r.name,source:f.name,content:r.text,_id:'f'+Date.now()+Math.random().toString(36).slice(2,6)});}
+    if(++done===files.length)renderPending();});});}
+function renderPending(){const box=document.getElementById('pendingList');
+  if(!PENDING.length){box.innerHTML='<div class="muted">尚未选择文件。</div>';updateIngestExport();return;}
+  box.innerHTML=PENDING.map((r,i)=>{
+    const catOpts=CATS.map(c=>'<option value="'+c[0]+'"'+(r.category===c[0]?' selected':'')+'>'+c[1]+'</option>').join('');
+    return '<div class="pending"><div class="ph"><b>'+esc(r.title||'(无标题)')+'</b>'
+      +'<span class="muted">'+(r.content?(r.content.length+' 字正文'):'无正文')+'</span></div>'
+      +'<div class="row2"><div class="fld"><label>标题</label><input id="p-title-'+i+'" value="'+esc(r.title||'')+'"></div>'
+      +'<div class="fld"><label>部门</label><input id="p-dept-'+i+'" value="'+esc(r.department||'')+'" placeholder="生态环境/发改委/经信/市场监管/其他"></div></div>'
+      +'<div class="row2"><div class="fld"><label>分类</label><select id="p-cat-'+i+'">'+catOpts+'</select></div>'
+      +'<div class="fld"><label>质量</label><select id="p-q-'+i+'">'+['A','B','C'].map(q=>'<option'+(r.quality===q?' selected':'')+'>'+q+'</option>').join('')+'</select></div></div>'
+      +'<div class="fld"><label>标签(逗号分隔)</label><input id="p-tags-'+i+'" value="'+esc((r.tags||[]).join(','))+'"></div>'
+      +'<div class="pv">'+esc((r.content||'').slice(0,300))+'</div>'
+      +'<div style="margin-top:6px;display:flex;gap:8px"><button class="mini" onclick="confirmOne('+i+')">加入知识库</button>'
+      +'<button class="ghost mini" onclick="removePending('+i+')">移除</button></div></div>';
+  }).join('')+'<div style="margin-top:8px"><button onclick="confirmAll()">全部加入知识库</button></div>';
+  updateIngestExport();}
+function pendingVal(i){const g=id=>{const e=document.getElementById(id);return e?e.value.trim():'';};
+  const r=PENDING[i];if(!r)return null;
+  return {title:g('p-title-'+i)||r.title,department:g('p-dept-'+i),category:g('p-cat-'+i),quality:g('p-q-'+i),
+    tags:g('p-tags-'+i)?g('p-tags-'+i).split(/[,，]/).map(s=>s.trim()).filter(Boolean):[],
+    source:r.source,url:r.url||'',region:r.region||'',date:r.date||'',summary:r.summary||'',content:r.content||''};}
+function confirmOne(i){const rec=pendingVal(i);if(!rec||!rec.title){alert('标题不能为空');return;}
+  rec.content_fetched=!!rec.content;rec.added_at=new Date().toISOString().slice(0,10);
+  RECORDS.unshift(rec);NEW_RECORDS.push(rec);RAG_BUILT=false;
+  PENDING.splice(i,1);renderPending();refreshAll();}
+function confirmAll(){if(!PENDING.length){alert('没有待加入的文件');return;}
+  PENDING.forEach((r,i)=>{const rec=pendingVal(i)||r;rec.content_fetched=!!rec.content;rec.added_at=new Date().toISOString().slice(0,10);
+    RECORDS.unshift(rec);NEW_RECORDS.push(rec);});RAG_BUILT=false;PENDING=[];renderPending();refreshAll();
+  alert('已加入 '+NEW_RECORDS.length+' 条本地记录，可在「知识管理」导出 inbox.json 后由助手入库');}
+function removePending(i){PENDING.splice(i,1);renderPending();}
+function updateIngestExport(){const b=document.getElementById('btnExportNew');if(b)b.disabled=NEW_RECORDS.length===0;}
+
+/* 网页 → 待 AI 处理队列（localStorage） */
+function getAIQueue(){try{return JSON.parse(localStorage.getItem('dc_aiq')||'[]');}catch(e){return [];}}
+function setAIQueue(q){localStorage.setItem('dc_aiq',JSON.stringify(q));renderAIQueue();}
+function buildAIPrompt(url,note){return '请抓取并分析以下网页，进行智能分类（部门/地域/分类/质量/标签）、提取摘要与正文，处理后加入双碳知识库：\n链接：'+url+(note?'\n备注：'+note:'')+'\n（用 digest/ingest_url.py 处理并部署上线）';}
+function queueForAI(){const url=val('webUrl').trim();if(!url){alert('请输入网页链接');return;}
+  const note=val('webNote').trim();const q=getAIQueue();
+  if(q.some(x=>x.url===url)){alert('该链接已在待处理队列中');return;}
+  q.unshift({url,note,time:new Date().toISOString().slice(0,16).replace('T',' ')});setAIQueue(q);tryLocalFetch(url);}
+function tryLocalFetch(url){const box=document.getElementById('webPreview');box.innerHTML='<div class="muted">正在尝试本地抓取…</div>';
+  fetch(url,{mode:'cors'}).then(r=>r.text()).then(h=>{
+    h=h.replace(/<script[\s\S]*?<\/script>/gi,' ').replace(/<style[\s\S]*?<\/style>/gi,' ').replace(/<[^>]+>/g,'\n');
+    h=h.replace(/\s+/g,' ').trim();
+    if(h.length>120){box.innerHTML='<div class="note">✅ 本地可直接抓取（'+h.length+' 字）。如需 AI 智能分类并正式入库，请把链接发给助手。</div>'
+      +'<div class="pv" style="max-height:160px;overflow:auto">'+esc(h.slice(0,1200))+'</div>';}
+    else{box.innerHTML='<div class="note">⚠️ 本地抓取内容过少或被跨域阻止，建议把链接发给 AI 助手处理。</div>';}
+  }).catch(()=>{box.innerHTML='<div class="note">⚠️ 浏览器跨域(CORS)阻止了本地抓取。请把链接发给 AI 助手，由助手在服务器端抓取、分析、分类并入库。</div>';});}
+function renderAIQueue(){const box=document.getElementById('aiQueue');const q=getAIQueue();
+  if(!q.length){box.innerHTML='<div class="muted">暂无待 AI 处理的网页。</div>';return;}
+  box.innerHTML=q.map((x,i)=>'<div class="aiq"><div><b>'+esc(x.url)+'</b> <span class="muted">'+x.time+'</span></div>'
+    +(x.note?'<div class="muted">备注：'+esc(x.note)+'</div>':'')
+    +'<div style="margin-top:6px;display:flex;gap:8px"><button class="mini" onclick="copyOne('+i+')">复制提交文案</button>'
+    +'<button class="ghost mini" onclick="removeAI('+i+')">移除</button></div></div>').join('');}
+function copyOne(i){const x=getAIQueue()[i];if(!x)return;copyText(buildAIPrompt(x.url,x.note));}
+function copyAllAI(){const q=getAIQueue();if(!q.length){alert('队列为空');return;}
+  copyText(q.map(x=>buildAIPrompt(x.url,x.note)).join('\n\n----\n\n'));}
+function removeAI(i){const q=getAIQueue();q.splice(i,1);setAIQueue(q);}
+function copyText(t){if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(t).then(()=>alert('已复制，去对话里 @助手 粘贴发送即可')).catch(()=>{window.prompt('复制以下内容发给助手：',t);});}
+  else{window.prompt('复制以下内容发给助手：',t);}}
+function renderIngest(){renderPending();renderAIQueue();}
+
 /* ================= 工具 ================= */
 function val(id){const e=document.getElementById(id);return e?e.value:'';}
 function refreshAll(){renderFeed();renderKb();if(document.getElementById('v-manage').classList.contains('on'))renderManage();}
@@ -516,7 +643,8 @@ function bindEvents(){
     document.querySelectorAll('.tab').forEach(x=>x.classList.remove('on'));t.classList.add('on');
     document.querySelectorAll('.view').forEach(x=>x.classList.remove('on'));
     document.getElementById('v-'+t.dataset.v).classList.add('on');
-    if(t.dataset.v==='manage')renderManage();if(t.dataset.v==='rag'&&!RAG_BUILT)ragBuild();});
+    if(t.dataset.v==='manage')renderManage();if(t.dataset.v==='rag'&&!RAG_BUILT)ragBuild();
+    if(t.dataset.v==='ingest')renderIngest();});
   ['fe-dept','fe-cat','fe-q'].forEach(id=>document.getElementById(id).addEventListener('change',renderFeed));
   document.getElementById('fe-kw').addEventListener('input',renderFeed);
   document.getElementById('dateNav').addEventListener('click',e=>{const p=e.target.closest('.dpill');if(!p)return;
@@ -541,6 +669,13 @@ function bindEvents(){
     if(b.dataset.view!==undefined)showDetail(+b.dataset.view);
     if(b.dataset.edit!==undefined)openModal(editForm(RECORDS[+b.dataset.edit],+b.dataset.edit));});
   document.getElementById('btnAdd').addEventListener('click',()=>openModal(editForm({},undefined)));
+  // 手动入库：文件上传 + 网页交 AI
+  document.getElementById('up-file').addEventListener('change',handleFiles);
+  document.getElementById('webAdd').addEventListener('click',queueForAI);
+  document.getElementById('webCopyAll').addEventListener('click',copyAllAI);
+  const drop=document.getElementById('dropZone');
+  if(drop){drop.addEventListener('dragover',e=>{e.preventDefault();drop.style.borderColor='var(--green)';});
+    drop.addEventListener('drop',e=>{e.preventDefault();handleFiles(e);});}
   document.getElementById('btnExportKb').addEventListener('click',()=>{
     const clean=RECORDS.map(r=>{const c=Object.assign({},r);delete c._ev;return c;});
     download('kb.json',JSON.stringify(clean,null,1));});
