@@ -91,6 +91,13 @@
   .ksec-h .cnt{font-size:12px;color:var(--sub)}
   .ksec-h .go{margin-left:auto;font-size:12px;color:var(--green);font-weight:600}
   .kgrid{grid-template-columns:repeat(3,1fr)}
+  .kb-list{display:block}
+  .toplist{display:flex;flex-direction:column;gap:6px;margin-top:4px}
+  .top-row{display:flex;align-items:baseline;gap:8px;padding:7px 10px;background:var(--card);border:1px solid var(--line);border-radius:9px;cursor:pointer;font-size:13px}
+  .top-row:hover{background:var(--chip);border-color:var(--green)}
+  .top-row .rk{color:var(--green);font-weight:800;font-size:12px;min-width:22px}
+  .top-row .tt{flex:1;font-weight:600;color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .top-row .mt{color:var(--sub);font-size:11.5px;white-space:nowrap}
   @media(max-width:1180px){.kgrid{grid-template-columns:repeat(2,1fr)}}
   @media(max-width:680px){.kgrid{grid-template-columns:1fr}}
   .b-dept{background:#e7f0ec;color:#0f766e}
@@ -357,7 +364,7 @@
           </span>
         </div>
         <div class="statbar" id="kbStat"></div>
-        <div class="grid" id="kbGrid"></div>
+        <div id="kbGrid" class="kb-list"></div>
         <div class="muted" id="kbPage" style="margin-top:10px"></div>
       </div>
     </div>
@@ -822,7 +829,7 @@ function renderKbGrid(arr){
     const shown=expanded?items:items.slice(0,LIMIT);
     const collapsed=!expanded && items.length>LIMIT;
     const hd='<div class="ksec-h" onclick="'+pickFn+'"><span class="dot" style="background:'+col+'"></span><h2>'+esc(label)+'</h2><span class="cnt">'+items.length+' 条</span><span class="go">查看全部 →</span></div>';
-    const body='<div class="grid cat-grid">'+shown.map(recCard).join('')+'</div>';
+    const body='<div class="grid kgrid">'+shown.map(recCard).join('')+'</div>';
     let more='';
     if(collapsed) more='<div class="more-row"><button class="mini ghost" onclick="event.stopPropagation();kbToggleGroup(\''+key+'\')">展开更多 '+(items.length-LIMIT)+' 条 ▾</button></div>';
     else if(expanded && items.length>LIMIT) more='<div class="more-row"><button class="mini ghost" onclick="event.stopPropagation();kbToggleGroup(\''+key+'\')">收起 ▴</button></div>';
@@ -1189,18 +1196,18 @@ const GraphViz = {
       for(let j=0;j<ns.length;j++){
         if(i===j) continue; const b=ns[j];
         let dx=a.x-b.x, dy=a.y-b.y; let d2=dx*dx+dy*dy; if(d2<1) d2=1;
-        const f=1800/d2; const d=Math.sqrt(d2);
+        const f=Math.min(14000/d2, 50); const d=Math.sqrt(d2);
         a.vx+=(dx/d)*f*k; a.vy+=(dy/d)*f*k;
       }
-      a.vx+=(this.W/2-a.x)*0.002; a.vy+=(this.H/2-a.y)*0.002;
+      a.vx+=(this.W/2-a.x)*0.00035; a.vy+=(this.H/2-a.y)*0.00035;
     }
     for(const e of this.edges){
       const a=all.find(n=>n.id===e.source), b=all.find(n=>n.id===e.target); if(!a||!b) continue;
       if(!this._vis(a)||!this._vis(b)) continue;
-      let dx=b.x-a.x, dy=b.y-a.y; let d=Math.sqrt(dx*dx+dy*dy)||1; const L=80;
-      const f=(d-L)*0.02; a.vx+=(dx/d)*f; a.vy+=(dy/d)*f; b.vx-=(dx/d)*f; b.vy-=(dy/d)*f;
+      let dx=b.x-a.x, dy=b.y-a.y; let d=Math.sqrt(dx*dx+dy*dy)||1; const L=120;
+      const f=(d-L)*0.03; a.vx+=(dx/d)*f; a.vy+=(dy/d)*f; b.vx-=(dx/d)*f; b.vy-=(dy/d)*f;
     }
-    for(const n of ns){ if(n===this.drag) continue; n.x+=n.vx*0.6; n.y+=n.vy*0.6; n.vx*=0.82; n.vy*=0.82;
+    for(const n of ns){ if(n===this.drag) continue; n.vx=Math.max(-9,Math.min(9,n.vx)); n.vy=Math.max(-9,Math.min(9,n.vy)); n.x+=n.vx*0.7; n.y+=n.vy*0.7; n.vx*=0.85; n.vy*=0.85;
       n.x=Math.max(16,Math.min(this.W-16,n.x)); n.y=Math.max(16,Math.min(this.H-16,n.y)); }
     this.alpha*=0.985;
   },
@@ -1299,6 +1306,11 @@ function curAiMode(){return $('#aiMode').querySelector('.on').dataset.m;}
 function getDsKey(){ return localStorage.getItem('dc_ds_key')||''; }
 function getDsBase(){ return localStorage.getItem('dc_ds_base')||'https://api.deepseek.com'; }
 function getTavKey(){ return localStorage.getItem('dc_tav_key')||''; }
+/* 默认密钥：用户在本轮提供，便于开箱即用。注意：本站点为公开 GitHub Pages，
+   密钥会出现在页面源码中、任何人可查看——仅适合个人工具；如担心被冒用请到 DeepSeek 后台吊销并更换。
+   安全做法是用本项目 FastAPI 后端（密钥在服务端）或 Serverless 代理。 */
+const DC_DEFAULT_DS='sk-0924fdf61ea64728a5625c0d300ad0da';
+const DC_DEFAULT_TAV='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';
 function saveDsKey(){
   const k=$('#dsKey').value.trim(), b=$('#dsBase').value.trim(), t=$('#tavKey').value.trim();
   if(k) localStorage.setItem('dc_ds_key',k); else localStorage.removeItem('dc_ds_key');
@@ -1317,14 +1329,35 @@ async function webSearch(q){
 }
 async function callDeepSeek(q, mode){
   const key=getDsKey(); if(!key) return null;
-  const rows=staticSearch(q, mode==='ask'?6:12);
-  let ctx=rows.map((r,i)=>`[${i+1}] 《${r.title}》（${r.department||''}·${r.region||''}·${r.quality||''}）\n${String(r.summary||'').slice(0,200)}\n${String(r.content||r.content_fetched||'').slice(0,300).replace(/\n/g,' ')}`).join('\n\n');
+  const rows=staticSearch(q, mode==='ask'?8:18);
+  let ctx=rows.map((r,i)=>`[${i+1}] 《${r.title}》（${r.department||''}·${r.region||''}·${r.quality||''}）\n摘要：${String(r.summary||'').slice(0,280)}\n要点：${String(r.content||r.content_fetched||'').slice(0,520).replace(/\n/g,' ')}`).join('\n\n');
   let web='';
-  if($('#dsWeb') && $('#dsWeb').checked){ const ws=await webSearch(q); if(ws.length) web='\n\n【联网检索补充】\n'+ws.map((x,i)=>`(${i+1}) ${x.title} — ${String(x.snippet||'').slice(0,160)} ${x.url||''}`).join('\n'); }
-  const sys='你是资深双碳（碳达峰碳中和）领域政策与技术专家，熟悉中国生态环境、发改、工信等政策体系。请基于下方「本地知识库」相关资料与（可选的）联网检索结果，用中文作答；引用资料编号；若资料不足，明确说明并给出合理建议。尽量专业、结构化、可操作。';
-  const user='用户问题：'+q+'\n\n本地知识库相关资料：\n'+(ctx||'（无）')+web+'\n\n请回答'+(mode==='ask'?'（问答，简明有条理）':'（专题报告，分章节，含政策、举措、建议）')+'。';
-  const body=JSON.stringify({model:'deepseek-chat',messages:[{role:'system',content:sys},{role:'user',content:user}],temperature:0.3,stream:false});
-  const ctrl=new AbortController(); const to=setTimeout(()=>ctrl.abort(),60000);
+  if($('#dsWeb') && $('#dsWeb').checked){ const ws=await webSearch(q); if(ws.length) web='\n\n【联网检索补充（来自公开网络）】\n'+ws.map((x,i)=>`(${i+1}) ${x.title} — ${String(x.snippet||'').slice(0,180)} ${x.url||''}`).join('\n'); }
+  const sys=('你是一位兼具生态环境政策与人工智能视野的「双碳（碳达峰、碳中和）」资深专家顾问，长期跟踪中国生态环境、发展改革、工业和信息化、住建、交通运输、能源、金融等政策体系，以及 IPCC、主要经济体（欧盟、美国）的气候治理进展。\n'
+    +'作答要求：\n'
+    +'1) 严格基于下方「本地知识库」资料与（若有）「联网检索补充」作答，优先引用带编号资料，如「据[3]《……》」；不编造政策文号、数据与文件。\n'
+    +'2) 立场专业、客观、可操作；区分「已出台政策 / 规划目标 / 研究建议」；对不确定或资料不足处明确说明，并给出可执行的下一步建议。\n'
+    +'3) 使用中文、Markdown 结构化输出（标题、列表、表格均可），重点加粗；面向政策研究与管理决策人员，避免空话。\n'
+    +'4) 末尾给出「参考来源」清单（列资料编号与标题）。');
+  let instr;
+  if(mode==='ask'){
+    instr=('请用「问答」方式回答，结构如下：\n'
+      +'一、核心结论（2-4 句话直击要点）\n'
+      +'二、依据与要点（分条，引用资料编号，必要时对比不同部门/地方做法）\n'
+      +'三、影响与建议（对政策落地、行业转型或研究的可操作建议）');
+  } else {
+    instr=('请撰写「专题报告」，结构如下（章节标题用 ##）：\n'
+      +'## 一、背景与目标（双碳战略定位、关键时间节点：碳达峰/2030/2060 碳中和等）\n'
+      +'## 二、关键政策与文件（按部门/层级梳理，引用资料编号与文件名称）\n'
+      +'## 三、重点举措（分条详述，如能耗双控转碳排放双控、碳市场、绿电绿证、减污降碳协同、钢铁/水泥/化工等重点行业路径）\n'
+      +'## 四、地方与行业实践（浙江/杭州等先行做法、典型行业案例）\n'
+      +'## 五、挑战与风险\n'
+      +'## 六、对策建议（短期/中期/长期，分条）\n'
+      +'## 七、参考来源');
+  }
+  const user='用户问题/主题：'+q+'\n\n本地知识库相关资料：\n'+(ctx||'（无）')+web+'\n\n'+instr+'\n\n请直接输出回答内容（不要重复指令）。';
+  const body=JSON.stringify({model:'deepseek-chat',messages:[{role:'system',content:sys},{role:'user',content:user}],temperature:0.25,max_tokens:mode==='ask'?1800:3600,stream:false});
+  const ctrl=new AbortController(); const to=setTimeout(()=>ctrl.abort(),90000);
   try{
     const r=await fetch(getDsBase()+'/v1/chat/completions',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+key},body,signal:ctrl.signal});
     clearTimeout(to);
@@ -1609,7 +1642,11 @@ function renderQuality(kb){
 function renderTop(kb){
   const top=kb.slice().sort((a,b)=>(Number(b.importance)||0)-(Number(a.importance)||0)).slice(0,10);
   if(!top.length){$('#vizTop').innerHTML='<div class="muted">暂无数据</div>';return;}
-  $('#vizTop').innerHTML='<ol style="margin:4px 0 0;padding-left:22px">'+top.map(r=>'<li style="margin:4px 0"><b>'+esc(r.title)+'</b> <span class="muted">· '+(r.department||'')+' · '+(CAT_LABELS[r.category||'other']||r.category||'')+' · ★'+Number(r.importance||0).toFixed(1)+'</span></li>').join('')+'</ol>';
+  $('#vizTop').innerHTML='<div class="toplist">'+top.map(r=>'<div class="top-row" onclick="openDetail('+(r.id!=null?r.id:'null')+')" title="点击查看详情">'
+    +'<span class="rk">'+('#'+(top.indexOf(r)+1))+'</span>'
+    +'<span class="tt">'+esc(r.title)+'</span>'
+    +'<span class="mt">· '+(r.department||'')+' · '+(CAT_LABELS[r.category||'other']||r.category||'')+' · ★'+Number(r.importance||0).toFixed(1)+'</span>'
+    +'</div>').join('')+'</div>';
 }
 
 /* ===================== 情报推送（日/周/月/季/年简报） ===================== */
@@ -1739,10 +1776,13 @@ async function boot(){
   if($('#kbBrowse')) $('#kbBrowse').querySelectorAll('button').forEach(b=>b.onclick=()=>{ $('#kbBrowse').querySelectorAll('button').forEach(x=>x.classList.remove('on')); b.classList.add('on'); App.kbBrowse=b.dataset.b; App.kbPage=1; loadKB(); });
   if($('#kbSort')) $('#kbSort').querySelectorAll('button').forEach(b=>b.onclick=()=>{ $('#kbSort').querySelectorAll('button').forEach(x=>x.classList.remove('on')); b.classList.add('on'); App.kbSort=b.dataset.s; App.kbPage=1; loadKB(); });
   $('#aiMode').querySelectorAll('button').forEach(b=>b.onclick=()=>{ $('#aiMode').querySelectorAll('button').forEach(x=>x.classList.remove('on')); b.classList.add('on'); $('#aiQuery').placeholder = b.dataset.m==='ask'?'输入问题，如：十五五碳达峰有哪些关键举措？':'输入专题，如：钢铁行业低碳转型'; });
-  // AI 密钥回填（本地保存）
+  // AI 密钥回填（本地保存）；首次访问时写入用户提供的默认密钥，开箱即用
+  if(!localStorage.getItem('dc_ds_key')) localStorage.setItem('dc_ds_key', DC_DEFAULT_DS);
+  if(!localStorage.getItem('dc_tav_key')) localStorage.setItem('dc_tav_key', DC_DEFAULT_TAV);
   if($('#dsKey')) $('#dsKey').value=getDsKey();
   if($('#dsBase')) $('#dsBase').value=getDsBase();
   if($('#tavKey')) $('#tavKey').value=getTavKey();
+  if($('#dsWeb') && getTavKey()) $('#dsWeb').checked=true;
   $('#briefPeriod').querySelectorAll('button').forEach(b=>b.onclick=()=>{ $('#briefPeriod').querySelectorAll('button').forEach(x=>x.classList.remove('on')); b.classList.add('on'); loadBrief(); });
   $('#tabs').querySelectorAll('.tab').forEach(t=>t.onclick=()=>switchTab(t.dataset.t));
   $('#mask').addEventListener('click',e=>{ if(e.target.id==='mask') closeMask(); });
