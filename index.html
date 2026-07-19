@@ -70,10 +70,20 @@
   .badge.b-future{background:#fff7ed;color:#c2410c;border:1px solid #fed7aa}
   /* 统一知识库布局 */
   .kb-layout{display:grid;grid-template-columns:170px 1fr;gap:16px;align-items:start}
-  @media(max-width:880px){.kb-layout{grid-template-columns:1fr}}
+  @media(max-width:880px){
+    .kb-layout{grid-template-columns:1fr}
+    .kb-nav-toggle{display:inline-flex}
+    .kb-nav{position:fixed;top:0;left:0;height:100%;width:82%;max-width:330px;z-index:40;transform:translateX(-106%);transition:transform .26s ease;box-shadow:2px 0 18px rgba(0,0,0,.18);overflow:auto;padding:14px 13px 30px;background:var(--card)}
+    .kb-nav.open{transform:none}
+    .kb-nav .nav-close{display:inline-block}
+  }
   .kb-nav{position:sticky;top:96px;background:var(--card);border:1px solid var(--line);border-radius:12px;
           padding:10px 11px;box-shadow:var(--shadow);max-height:calc(100vh - 128px);overflow:auto}
-  .kb-nav .nav-h{font-size:12px;color:var(--sub);font-weight:700;margin:2px 2px 7px}
+  .kb-nav .nav-h{font-size:12px;color:var(--sub);font-weight:700;margin:2px 2px 7px;display:flex;align-items:center;justify-content:space-between}
+  .kb-nav .nav-close{display:none;border:none;background:var(--chip);color:var(--green);border-radius:6px;padding:2px 8px;font-size:13px;cursor:pointer}
+  .kb-nav-toggle{display:none;align-items:center;gap:5px;background:var(--green);color:#fff;border:none;border-radius:8px;padding:7px 12px;font-size:13px;font-weight:600;cursor:pointer}
+  .kb-nav-mask{display:none;position:fixed;inset:0;background:rgba(15,23,42,.42);z-index:39}
+  .kb-nav-mask.on{display:block}
   .kb-nav .nav-i{display:flex;justify-content:space-between;gap:6px;font-size:12.5px;color:#334;
             padding:6px 9px;border-radius:8px;cursor:pointer;margin-bottom:2px;border:1px solid transparent}
   .kb-nav .nav-i:hover{background:var(--chip);color:var(--green);border-color:var(--line)}
@@ -346,6 +356,7 @@
       <aside class="kb-nav" id="kbNav"></aside>
       <div class="kb-main">
         <div class="kb-subbar">
+          <button class="kb-nav-toggle" id="kbNavToggle" onclick="toggleKbNav()">☰ 栏目</button>
           <span class="seg" id="kbBrowse"><button class="on" data-b="category">按分类</button><button data-b="department">按部门</button><button data-b="time">按时间</button></span>
           <select id="kbRange" onchange="onKbRangeChange()" style="margin-left:auto">
             <option value="">全部时间</option>
@@ -368,6 +379,7 @@
         <div class="muted" id="kbPage" style="margin-top:10px"></div>
       </div>
     </div>
+    <div class="kb-nav-mask" id="kbNavMask" onclick="toggleKbNav()"></div>
   </section>
 
   <!-- 知识图谱 -->
@@ -790,14 +802,16 @@ function kbNavPick(dim,val){
   if(dim==='category'){ $('#kbCat').value=val||''; }
   else if(dim==='department'){ $('#kbDept').value=val||''; }
   else if(dim==='time'){ App.kbRange=val||''; $('#kbRange').value=App.kbRange; $('#kbCustom').style.display='none'; }
-  App.kbExpanded={}; App.kbPage=1; loadKB();
+  App.kbExpanded={}; App.kbPage=1; closeKbNav(); loadKB();
 }
-function clearKbNav(){ App.kbExpanded={}; $('#kbCat').value=''; $('#kbDept').value=''; App.kbRange=''; $('#kbRange').value=''; $('#kbCustom').style.display='none'; App.kbPage=1; loadKB(); }
+function clearKbNav(){ App.kbExpanded={}; $('#kbCat').value=''; $('#kbDept').value=''; App.kbRange=''; $('#kbRange').value=''; $('#kbCustom').style.display='none'; App.kbPage=1; closeKbNav(); loadKB(); }
+function toggleKbNav(){ const n=$('#kbNav'), m=$('#kbNavMask'); if(n) n.classList.toggle('open'); if(m) m.classList.toggle('on'); }
+function closeKbNav(){ const n=$('#kbNav'), m=$('#kbNavMask'); if(n) n.classList.remove('open'); if(m) m.classList.remove('on'); }
 function renderKbNav(arr){
   const host=$('#kbNav'); if(!host) return;
   const dim=App.kbBrowse;
   const curCat=$('#kbCat').value, curDept=$('#kbDept').value, curRange=App.kbRange;
-  let html='<div class="nav-h">栏目导航</div>';
+  let html='<div class="nav-h">栏目导航<button class="nav-close" onclick="toggleKbNav()">✕</button></div>';
   html+='<div class="nav-i'+(!curCat&&!curDept&&!curRange?' on':'')+'" onclick="clearKbNav()">全部</div>';
   if(dim==='category'){
     CATS.forEach(c=>{ const n=arr.filter(r=>(r.category||'other')===c).length; if(!n) return;
@@ -1479,11 +1493,12 @@ function qualColor(q){ if(QUAL_COLORS[q]) return QUAL_COLORS[q]; const n=Number(
 function bars(id, map, labelFn, colorFn){
   const el=$('#'+id); if(!el) return;
   const h2=el.querySelector('h2'); const title=h2?h2.textContent:'分布';
+  const labOf=(k)=> labelFn?(typeof labelFn==='function'?labelFn(k):(labelFn[k]!=null?labelFn[k]:k)):k;
   const entries=Object.entries(map).sort((a,b)=>b[1]-a[1]); const max=Math.max(1,...entries.map(e=>e[1]));
   el.innerHTML='<h2 style="margin-top:0">'+esc(title)+'</h2>'+entries.map(([k,v])=>{
     const col=colorFn?colorFn(k,v):'#1a7f5a';
     const pct=Math.max(2, v/max*100).toFixed(1);
-    return `<div class="row"><span class="lab">${esc(labelFn?labelFn(k):k)}</span><span class="track"><span class="fill" style="width:${pct}%;background:linear-gradient(90deg,${col},${col}aa)"></span></span><span class="v">${v}</span></div>`;
+    return `<div class="row"><span class="lab">${esc(labOf(k))}</span><span class="track"><span class="fill" style="width:${pct}%;background:linear-gradient(90deg,${col},${col}aa)"></span></span><span class="v">${v}</span></div>`;
   }).join('');
 }
 async function loadAdmin(){
