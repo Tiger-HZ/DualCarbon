@@ -69,7 +69,7 @@
   .badge{display:inline-block;padding:1.5px 9px;border-radius:20px;font-size:11px;font-weight:600}
   .badge.b-future{background:#fff7ed;color:#c2410c;border:1px solid #fed7aa}
   /* 统一知识库布局 */
-  .kb-layout{display:grid;grid-template-columns:212px 1fr;gap:16px;align-items:start}
+  .kb-layout{display:grid;grid-template-columns:170px 1fr;gap:16px;align-items:start}
   @media(max-width:880px){.kb-layout{grid-template-columns:1fr}}
   .kb-nav{position:sticky;top:96px;background:var(--card);border:1px solid var(--line);border-radius:12px;
           padding:10px 11px;box-shadow:var(--shadow);max-height:calc(100vh - 128px);overflow:auto}
@@ -153,7 +153,7 @@
   .bars .row{display:flex;align-items:center;gap:8px;margin:5px 0;font-size:12.5px}
   .bars .lab{width:120px;color:var(--sub);text-align:right;flex-shrink:0}
   .bars .track{flex:1;background:#eef2f0;border-radius:6px;height:14px;overflow:hidden}
-  .bars .fill{height:100%;background:linear-gradient(90deg,#1a7f5a,#0f766e);border-radius:6px}
+  .bars .fill{display:block;height:100%;background:linear-gradient(90deg,#1a7f5a,#0f766e);border-radius:6px}
   .bars .v{width:36px;color:var(--sub)}
   /* modal */
   .mask{position:fixed;inset:0;background:rgba(16,30,24,.5);display:none;z-index:50;
@@ -172,6 +172,12 @@
   .row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
   .note{font-size:12px;color:var(--sub);background:#f0f5f3;border:1px solid var(--line);
         border-radius:9px;padding:10px 12px;margin:10px 0}
+  .ai-keys{margin:6px 0 2px}
+  .ai-keys details{border:1px solid var(--line);border-radius:9px;background:#fafcfb;padding:8px 12px}
+  .ai-keys summary{cursor:pointer;font-size:13px;font-weight:600;color:var(--green)}
+  .ai-key-row{display:flex;flex-wrap:wrap;gap:10px 14px;align-items:center;margin:10px 0 6px}
+  .ai-key-row label{font-size:12.5px;color:var(--sub);display:flex;align-items:center;gap:5px}
+  .ai-key-row input[type=text],.ai-key-row input[type=password]{padding:5px 8px;border:1px solid var(--line);border-radius:6px;font-size:12.5px}
   .fab{position:fixed;right:22px;bottom:22px;background:var(--green);color:#fff;border-radius:26px;
        padding:12px 18px;box-shadow:var(--shadow-l);font-size:14px;z-index:20}
   footer{margin-top:26px;padding:20px;text-align:center;color:var(--sub);font-size:12px}
@@ -224,9 +230,8 @@
   .cat-h .dot{width:11px;height:11px;border-radius:50%}
   .cat-h h2{font-size:16px;margin:0;padding-bottom:6px;border-bottom:2px solid var(--green);color:var(--green-d)}
   .cat-h .cnt{font-size:12.5px;color:var(--sub)}
-  .cat-grid{grid-template-columns:repeat(3,1fr)}
-  @media(max-width:1100px){.cat-grid{grid-template-columns:repeat(2,1fr)}}
-  @media(max-width:680px){.cat-grid{grid-template-columns:1fr}}
+  .cat-grid{grid-template-columns:repeat(auto-fill,minmax(248px,1fr))}
+  @media(max-width:560px){.cat-grid{grid-template-columns:1fr}}
   .cat-grid[data-collapsed="1"] > .card:nth-child(n+16){display:none}
   .more-row{margin-top:10px;text-align:center}
   .more-row button{padding:6px 18px}
@@ -411,6 +416,20 @@
       <button id="aiBtn" onclick="runAI()">生成</button>
     </div>
     <div class="note" id="aiNote"></div>
+    <div class="ai-keys">
+      <details>
+        <summary>🔑 接入 AI 模型（可选·本地保存，不增加后端）</summary>
+        <div class="ai-key-row">
+          <label>DeepSeek API Key：<input type="password" id="dsKey" placeholder="sk-... 留空则用离线汇总" style="width:280px"></label>
+          <label>接口地址：<input type="text" id="dsBase" placeholder="https://api.deepseek.com" style="width:220px"></label>
+          <label><input type="checkbox" id="dsWeb"> 联网检索(Tavily)</label>
+          <label>Tavily Key：<input type="password" id="tavKey" placeholder="tvly-...（可选）" style="width:200px"></label>
+          <button class="mini" onclick="saveDsKey()">保存</button>
+          <span class="muted" id="dsSaved"></span>
+        </div>
+        <div class="muted" style="font-size:12px;line-height:1.6">说明：密钥仅保存在你本机浏览器（localStorage），不会上传到任何服务器。浏览器直连大模型接口可能被跨域(CORS)拦截；若提示 CORS 错误，建议部署后端代理（本项目 FastAPI 后端已内置 DeepSeek，部署后即自动走服务端生成）。</div>
+      </details>
+    </div>
     <div id="aiOut"></div>
   </section>
 
@@ -438,6 +457,20 @@
     <div class="sub-card" style="margin-top:14px">
       <h2 style="margin-top:0;font-size:15px">🌡️ 主题热度榜（按分类聚合的重要度）</h2>
       <div id="vizHeat" class="viz-box"></div>
+    </div>
+    <div class="row2" style="margin-top:14px">
+      <div class="sub-card">
+        <h2 style="margin-top:0;font-size:15px">🌏 地域分布</h2>
+        <div id="vizRegion" class="viz-box"></div>
+      </div>
+      <div class="sub-card">
+        <h2 style="margin-top:0;font-size:15px">⭐ 质量分布</h2>
+        <div id="vizQuality" class="viz-box"></div>
+      </div>
+    </div>
+    <div class="sub-card" style="margin-top:14px">
+      <h2 style="margin-top:0;font-size:15px">🏆 重要性 Top 10 榜单</h2>
+      <div id="vizTop" class="viz-box"></div>
     </div>
   </section>
 
@@ -491,7 +524,7 @@
 const App = {
   mode:'static', health:null,   token: localStorage.getItem('dc_token')||'',
   user:null, kb:[], /* 静态回退数据 */
-  kbPage:1, graphData:null, kbSort:'importance', kbBrowse:'category', kbRange:'', kbFrom:'', kbTo:'', kbArr:[]
+  kbPage:1, graphData:null, kbSort:'importance', kbBrowse:'category', kbRange:'', kbFrom:'', kbTo:'', kbArr:[], kbExpanded:{}
 };
 
 const DEPTS = ['生态环境','发改委','经信','市监','住建','交通','农业','能源','科技','金融','商务','其他'];
@@ -737,22 +770,22 @@ async function loadKB(){
     if(sort==='date'){ arr.sort((a,b)=> effDate(b).localeCompare(effDate(a))); }
     else { arr.sort((a,b)=> (Number(b.importance)||0)-(Number(a.importance)||0) || effDate(b).localeCompare(effDate(a))); }
     $('#kbStat').innerHTML='<span class="chip">共 <b>'+arr.length+'</b> 条 · 按'+(sort==='date'?'时间':'重要性')+'排序 · '+browseLabel()+(App.kbRange?' · '+rangeLabel(App.kbRange):'')+' · 静态只读</span>';
+    App.kbArr=arr;
     renderKbNav(arr);
     renderKbGrid(arr);
-    App.kbArr=arr;
   }
 }
 function browseLabel(){ return App.kbBrowse==='department'?'按部门浏览':App.kbBrowse==='time'?'按时间浏览':'按分类浏览'; }
 function rangeLabel(r){ return r==='custom'?((App.kbFrom||'')+'~'+(App.kbTo||'')||'自定义'):(RANGE_TO_BUCKET[r]||'全部时间'); }
-function kbFilter(){ App.kbPage=1; if($('#kbRange').value==='custom'){ App.kbFrom=$('#kbFrom').value; App.kbTo=$('#kbTo').value; } loadKB(); }
+function kbFilter(){ App.kbExpanded={}; App.kbPage=1; if($('#kbRange').value==='custom'){ App.kbFrom=$('#kbFrom').value; App.kbTo=$('#kbTo').value; } loadKB(); }
 function onKbRangeChange(){ const v=$('#kbRange').value; App.kbRange=v; $('#kbCustom').style.display=(v==='custom')?'inline-flex':'none'; App.kbPage=1; if(v!=='custom') loadKB(); }
 function kbNavPick(dim,val){
   if(dim==='category'){ $('#kbCat').value=val||''; }
   else if(dim==='department'){ $('#kbDept').value=val||''; }
   else if(dim==='time'){ App.kbRange=val||''; $('#kbRange').value=App.kbRange; $('#kbCustom').style.display='none'; }
-  App.kbPage=1; loadKB();
+  App.kbExpanded={}; App.kbPage=1; loadKB();
 }
-function clearKbNav(){ $('#kbCat').value=''; $('#kbDept').value=''; App.kbRange=''; $('#kbRange').value=''; $('#kbCustom').style.display='none'; App.kbPage=1; loadKB(); }
+function clearKbNav(){ App.kbExpanded={}; $('#kbCat').value=''; $('#kbDept').value=''; App.kbRange=''; $('#kbRange').value=''; $('#kbCustom').style.display='none'; App.kbPage=1; loadKB(); }
 function renderKbNav(arr){
   const host=$('#kbNav'); if(!host) return;
   const dim=App.kbBrowse;
@@ -782,17 +815,27 @@ function renderKbGrid(arr){
     $('#kbPage').innerHTML = pageBtns(App.kbPage, arr.length, 30, 'App.kbPage', 'loadKB');
     return;
   }
+  const LIMIT=9;
+  const secFor=(key, label, col, items, pickFn)=>{
+    if(!items.length) return '';
+    const expanded=!!App.kbExpanded[key];
+    const shown=expanded?items:items.slice(0,LIMIT);
+    const collapsed=!expanded && items.length>LIMIT;
+    const hd='<div class="ksec-h" onclick="'+pickFn+'"><span class="dot" style="background:'+col+'"></span><h2>'+esc(label)+'</h2><span class="cnt">'+items.length+' 条</span><span class="go">查看全部 →</span></div>';
+    const body='<div class="grid cat-grid">'+shown.map(recCard).join('')+'</div>';
+    let more='';
+    if(collapsed) more='<div class="more-row"><button class="mini ghost" onclick="event.stopPropagation();kbToggleGroup(\''+key+'\')">展开更多 '+(items.length-LIMIT)+' 条 ▾</button></div>';
+    else if(expanded && items.length>LIMIT) more='<div class="more-row"><button class="mini ghost" onclick="event.stopPropagation();kbToggleGroup(\''+key+'\')">收起 ▴</button></div>';
+    return '<section class="ksec">'+hd+body+more+'</section>';
+  };
+  let html='';
   if(dim==='time'){
-    const groups={}; TIME_BUCKETS.forEach(b=>groups[b]=[]);
-    arr.forEach(r=>{ groups[timeBucketLabel(effDate(r))].push(r); });
-    const html = TIME_BUCKETS.map(b=>{
-      const items=groups[b]; if(!items.length) return '';
+    TIME_BUCKETS.forEach(b=>{
+      const items=arr.filter(r=>timeBucketLabel(effDate(r))===b);
+      if(!items.length) return;
       const val=Object.keys(RANGE_TO_BUCKET).find(k=>RANGE_TO_BUCKET[k]===b);
-      const hd='<div class="ksec-h" onclick="kbNavPick(\'time\',\''+val+'\')"><span class="dot" style="background:#1a7f5a"></span><h2>'+b+'</h2><span class="cnt">'+items.length+' 条</span><span class="go">筛选此区间 →</span></div>';
-      const body='<div class="grid cat-grid" data-collapsed="1">'+items.map(recCard).join('')+'</div>';
-      const more='<div class="more-row"><button class="mini ghost" onclick="kbNavPick(\'time\',\''+val+'\')">展开全部 '+items.length+' 条 ▾</button></div>';
-      return '<section class="ksec">'+hd+body+more+'</section>';
-    }).join('');
+      html+=secFor('time:'+b, b, '#1a7f5a', items, "kbNavPick('time','"+val+"')");
+    });
     host.innerHTML = html || '<div class="empty">暂无匹配结果</div>';
     $('#kbPage').innerHTML='';
     return;
@@ -800,18 +843,14 @@ function renderKbGrid(arr){
   const dims = dim==='department'
     ? DEPTS.map(d=>({k:d,label:d,col:DEPT_COLORS[d]||'#64748b',pick:'department'}))
     : CATS.map(c=>({k:c,label:CAT_LABELS[c]||c,col:CAT_COLORS[c]||'#475569',pick:'category'}));
-  let any=false, html='';
   dims.forEach(o=>{
     const items=arr.filter(r=>(dim==='department'?r.department:r.category||'other')===o.k);
-    if(!items.length) return; any=true;
-    const hd='<div class="ksec-h" onclick="kbNavPick(\''+o.pick+'\',\''+o.k+'\')"><span class="dot" style="background:'+o.col+'"></span><h2>'+o.label+'</h2><span class="cnt">'+items.length+' 条</span><span class="go">查看全部 →</span></div>';
-    const body='<div class="grid cat-grid" data-collapsed="1">'+items.map(recCard).join('')+'</div>';
-    const more='<div class="more-row"><button class="mini ghost" onclick="kbNavPick(\''+o.pick+'\',\''+o.k+'\')">展开全部 '+items.length+' 条 ▾</button></div>';
-    html+='<section class="ksec">'+hd+body+more+'</section>';
+    html+=secFor(dim+':'+o.k, o.label, o.col, items, "kbNavPick('"+o.pick+"','"+o.k+"')");
   });
-  host.innerHTML = any? html : '<div class="empty">暂无匹配结果</div>';
+  host.innerHTML = html || '<div class="empty">暂无匹配结果</div>';
   $('#kbPage').innerHTML='';
 }
+function kbToggleGroup(key){ App.kbExpanded[key]=!App.kbExpanded[key]; renderKbGrid(App.kbArr); }
 
 /* ===================== 详情（后端） ===================== */
 async function loadDetailBackend(id){
@@ -1063,8 +1102,9 @@ const GraphViz = {
   mount(id, nodes, edges){
     this.canvas=document.getElementById(id); if(!this.canvas) return;
     this.ctx=this.canvas.getContext('2d'); this.nodes=nodes; this.edges=edges; this.alpha=1; this.drag=null; this.hover=null;
-    this.scale=1; this.tx=0; this.ty=0; this.focus=null; this.panning=false;
+    this.scale=1; this.tx=0; this.ty=0; this.focus=null; this.panning=false; this._autofit=true;
     this._resize(); this._init(); this.fitView(); this._bind(); this._loop();
+    setTimeout(()=>{ if(this.canvas && document.body.contains(this.canvas)){ this.fitView(); this._autofit=false; this._loop(); } }, 1100);
   },
   _resize(){
     const rect=this.canvas.getBoundingClientRect();
@@ -1074,7 +1114,7 @@ const GraphViz = {
   },
   _init(){
     const cx=this.W/2, cy=this.H/2;
-    this.nodes.forEach((n,i)=>{ if(n.x==null){ const a=i/this.nodes.length*Math.PI*2; n.x=cx+Math.cos(a)*(Math.min(this.W,this.H)*0.45)*(0.6+Math.random()*0.4); n.y=cy+Math.sin(a)*(Math.min(this.W,this.H)*0.45)*(0.6+Math.random()*0.4); n.vx=0;n.vy=0; } });
+    this.nodes.forEach((n,i)=>{ if(n.x==null){ const a=i/this.nodes.length*Math.PI*2; n.x=cx+Math.cos(a)*(this.W*0.46)*(0.72+Math.random()*0.28); n.y=cy+Math.sin(a)*(this.H*0.46)*(0.72+Math.random()*0.28); n.vx=0;n.vy=0; } });
   },
   _bind(){
     const c=this.canvas; if(c._gvbound) return; c._gvbound=true;
@@ -1107,15 +1147,15 @@ const GraphViz = {
   },
   _updateMeta(){ const el=document.getElementById('graphMeta'); if(!el) return; const vis=this.nodes.filter(n=>this._vis(n)).length;
     el.textContent='静态模式 · 显示 '+vis+' / '+this.nodes.length+' 节点（缩放 '+this.scale.toFixed(1)+'×，放大滚轮可展开更多概念与知识节点）'; },
-  resetView(){ this.focus=null; this.alpha=1; this.fitView(); this._loop(); },
+  resetView(){ this.focus=null; this.alpha=1; this._autofit=true; this.fitView(); this._loop(); },
   fitView(){
     if(!this.nodes.length) return;
     let minX=Infinity,minY=Infinity,maxX=-Infinity,maxY=-Infinity;
     this.nodes.forEach(n=>{ if(n.x==null||n.y==null) return; if(n.x<minX)minX=n.x; if(n.y<minY)minY=n.y; if(n.x>maxX)maxX=n.x; if(n.y>maxY)maxY=n.y; });
     if(!isFinite(minX)) return;
-    const pad=50, bw=Math.max(1,maxX-minX), bh=Math.max(1,maxY-minY);
-    const s=Math.min((this.W-pad*2)/bw,(this.H-pad*2)/bh,2.4);
-    this.scale=Math.max(0.25,s);
+    const pad=32, bw=Math.max(1,maxX-minX), bh=Math.max(1,maxY-minY);
+    const s=Math.min((this.W-pad*2)/bw,(this.H-pad*2)/bh,3.4);
+    this.scale=s;
     const cx=(minX+maxX)/2, cy=(minY+maxY)/2;
     this.tx=this.W/2-cx*this.scale; this.ty=this.H/2-cy*this.scale;
     this._updateMeta();
@@ -1139,7 +1179,7 @@ const GraphViz = {
   relayout(){ this.alpha=1; this.nodes.forEach(n=>{n.x=null;}); this._init(); },
   _loop(){
     cancelAnimationFrame(this.raf);
-    const step=()=>{ this._tick(); this._draw(); if(this.alpha>0.02){ this.raf=requestAnimationFrame(step); } };
+    const step=()=>{ this._tick(); this._draw(); if(this.alpha>0.02){ this.raf=requestAnimationFrame(step); } else if(this._autofit){ this._autofit=false; this.fitView(); } };
     this.raf=requestAnimationFrame(step);
   },
   _tick(){
@@ -1256,10 +1296,55 @@ function buildGraphStatic(dept,cat,concept){
 
 /* ===================== 智能检索（AI） ===================== */
 function curAiMode(){return $('#aiMode').querySelector('.on').dataset.m;}
+function getDsKey(){ return localStorage.getItem('dc_ds_key')||''; }
+function getDsBase(){ return localStorage.getItem('dc_ds_base')||'https://api.deepseek.com'; }
+function getTavKey(){ return localStorage.getItem('dc_tav_key')||''; }
+function saveDsKey(){
+  const k=$('#dsKey').value.trim(), b=$('#dsBase').value.trim(), t=$('#tavKey').value.trim();
+  if(k) localStorage.setItem('dc_ds_key',k); else localStorage.removeItem('dc_ds_key');
+  if(b) localStorage.setItem('dc_ds_base',b); else localStorage.removeItem('dc_ds_base');
+  if(t) localStorage.setItem('dc_tav_key',t); else localStorage.removeItem('dc_tav_key');
+  $('#dsSaved').textContent='已保存（本机）'; setTimeout(()=>{$('#dsSaved').textContent='';},2500);
+}
+async function webSearch(q){
+  const tk=getTavKey(); if(!tk) return [];
+  try{
+    const r=await fetch('https://api.tavily.com/search',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({api_key:tk,query:q,max_results:5,search_depth:'basic'})});
+    const d=await r.json();
+    return (d.results||[]).map(x=>({title:x.title,url:x.url,snippet:x.content}));
+  }catch(e){ return []; }
+}
+async function callDeepSeek(q, mode){
+  const key=getDsKey(); if(!key) return null;
+  const rows=staticSearch(q, mode==='ask'?6:12);
+  let ctx=rows.map((r,i)=>`[${i+1}] 《${r.title}》（${r.department||''}·${r.region||''}·${r.quality||''}）\n${String(r.summary||'').slice(0,200)}\n${String(r.content||r.content_fetched||'').slice(0,300).replace(/\n/g,' ')}`).join('\n\n');
+  let web='';
+  if($('#dsWeb') && $('#dsWeb').checked){ const ws=await webSearch(q); if(ws.length) web='\n\n【联网检索补充】\n'+ws.map((x,i)=>`(${i+1}) ${x.title} — ${String(x.snippet||'').slice(0,160)} ${x.url||''}`).join('\n'); }
+  const sys='你是资深双碳（碳达峰碳中和）领域政策与技术专家，熟悉中国生态环境、发改、工信等政策体系。请基于下方「本地知识库」相关资料与（可选的）联网检索结果，用中文作答；引用资料编号；若资料不足，明确说明并给出合理建议。尽量专业、结构化、可操作。';
+  const user='用户问题：'+q+'\n\n本地知识库相关资料：\n'+(ctx||'（无）')+web+'\n\n请回答'+(mode==='ask'?'（问答，简明有条理）':'（专题报告，分章节，含政策、举措、建议）')+'。';
+  const body=JSON.stringify({model:'deepseek-chat',messages:[{role:'system',content:sys},{role:'user',content:user}],temperature:0.3,stream:false});
+  const ctrl=new AbortController(); const to=setTimeout(()=>ctrl.abort(),60000);
+  try{
+    const r=await fetch(getDsBase()+'/v1/chat/completions',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+key},body,signal:ctrl.signal});
+    clearTimeout(to);
+    if(!r.ok){ const t=await r.text(); throw new Error('DeepSeek HTTP '+r.status+': '+t.slice(0,200)); }
+    const d=await r.json();
+    const text=d.choices&&d.choices[0]&&d.choices[0].message&&d.choices[0].message.content;
+    if(!text) throw new Error('DeepSeek 返回为空');
+    const sources=rows.map(r=>({title:r.title,url:r.url,department:r.department,quality:r.quality}));
+    return {text, sources, mode:'ai'};
+  }catch(e){
+    // 浏览器直连常被 CORS / 网络拦截：把错误透传给调用方以决定是否回退
+    throw e;
+  }
+}
 async function runAI(){
   const btn=$('#aiBtn'); const q=$('#aiQuery').value.trim(); if(!q) return toast('请输入问题或主题');
   btn.disabled=true; btn.innerHTML='<span class="spinner"></span>生成中';
-  $('#aiNote').textContent = App.mode==='backend' ? (App.health&&App.health.ai_configured?'已接入 AI 模型（DeepSeek），生成式回答。':'未配置 AI 密钥，使用离线富检索汇总。') : '静态只读模式：本地关键词检索 + 离线汇总。';
+  const useDs = !!getDsKey();
+  $('#aiNote').textContent = App.mode==='backend' ? (App.health&&App.health.ai_configured?'已接入 AI 模型（DeepSeek），生成式回答。':'未配置 AI 密钥，使用离线富检索汇总。')
+    : (useDs?'静态模式 + 本地 DeepSeek 密钥：知识库检索 + AI 生成。':'静态只读模式：本地关键词检索 + 离线汇总（在上方填入 DeepSeek Key 可启用 AI 生成）。');
   try{
     if(App.mode==='backend'){
       const mode=curAiMode();
@@ -1269,6 +1354,17 @@ async function runAI(){
       } else {
         const j=await api('/api/ai/report',{method:'POST',body:JSON.stringify({topic:q,top_k:12,use_ai:true})});
         $('#aiOut').innerHTML = `<div class="result"><div class="md">${mdToHtml(j.report)}</div>${renderSources(j.sources, j.mode)}</div>`;
+      }
+    } else if(useDs){
+      try{
+        const res=await callDeepSeek(q, curAiMode());
+        $('#aiOut').innerHTML = `<div class="result"><div class="md">${mdToHtml(res.text)}</div>${renderSources(res.sources,'ai')}</div>`;
+      }catch(e){
+        const cors = /cors|failed to fetch|networkerror|blocked/i.test(e.message||'');
+        const tip = cors?'（提示：浏览器直连被跨域/CORS 拦截，可部署本项目 FastAPI 后端走服务端生成，或在支持 CORS 的环境使用。）':'';
+        $('#aiOut').innerHTML='<div class="empty">AI 生成失败：'+esc(e.message)+tip+' 已回退离线汇总。</div>';
+        const res=staticAI(q, curAiMode());
+        $('#aiOut').innerHTML += `<div class="result" style="margin-top:10px"><div class="md">${mdToHtml(res.text)}</div>${renderSources(res.sources,'offline')}</div>`;
       }
     } else {
       const res = staticAI(q, curAiMode());
@@ -1301,14 +1397,20 @@ function staticAI(q,mode){
     text+='\n### 三、建议\n\n- 部署后端并配置 AI 密钥后，可获取更深入的分析式回答。';
     return {text, sources: rows.map(r=>({title:r.title,url:r.url,department:r.department,quality:r.quality}))};
   } else {
-    let text='# 双碳知识简报：'+q+'\n\n> 基于本地知识库 '+rows.length+' 条相关记录自动生成（静态离线版）。\n\n## 1. 政策规划\n'+joinCat(rows,'policy')+
+    let overview=rows.slice(0,6).map((r,i)=>(i+1)+'. **'+r.title+'** — '+String(r.summary||'').slice(0,90)).join('\n');
+    let text='# 双碳知识简报：'+q+'\n\n> 基于本地知识库检索到 '+rows.length+' 条相关记录（静态离线版，未接入 AI 模型）。\n\n## 0. 综合研判\n'+(overview||'_（暂无相关记录）_')+'\n\n## 1. 政策规划\n'+joinCat(rows,'policy')+
       '\n\n## 2. 碳市场\n'+joinCat(rows,'carbon_market')+'\n\n## 3. 减污降碳协同\n'+joinCat(rows,'synergy')+
       '\n\n## 4. 行业低碳\n'+joinCat(rows,'industry')+'\n\n## 5. 技术创研\n'+joinCat(rows,'tech')+
       '\n\n## 6. 参考来源\n'+rows.slice(0,10).map(r=>'- ['+r.title+']('+(r.url||'#')+') — '+(r.department||'')).join('\n');
     return {text, sources: rows.map(r=>({title:r.title}))};
   }
 }
-function joinCat(rows,cat){ const it=rows.filter(r=>(r.category||'')===cat).slice(0,4); if(!it.length) return '_（暂无相关记录）_'; return it.map(r=>'- **'+r.title+'**：'+String(r.summary||'').slice(0,100)).join('\n'); }
+function joinCat(rows,cat){
+  let it=rows.filter(r=>(r.category||'')===cat).slice(0,4);
+  if(!it.length) it=App.kb.filter(r=>(r.category||'')===cat).sort((a,b)=>(Number(b.importance)||0)-(Number(a.importance)||0)).slice(0,4);
+  if(!it.length) return '_（暂无相关记录）_';
+  return it.map(r=>'- **'+r.title+'**：'+String(r.summary||'').slice(0,100)).join('\n');
+}
 
 /* ===================== 知识管理 ===================== */
 async function loadManage(){
@@ -1439,7 +1541,7 @@ function _dOf(r){ return String(r.added_at||r.date||'').slice(0,10); }
 function loadViz(){
   const kb=App.kb||[];
   $('#vizStat').innerHTML='<span class="chip">共 <b>'+kb.length+'</b> 条 · 多维度可视化分析（趋势 / 分布 / 词云 / 热度）</span>';
-  renderTrend(kb); renderStack(kb); renderYear(kb); renderCloud(kb); renderHeat(kb);
+  renderTrend(kb); renderStack(kb); renderYear(kb); renderCloud(kb); renderHeat(kb); renderRegion(kb); renderQuality(kb); renderTop(kb);
 }
 function renderTrend(kb){
   const m={}; kb.forEach(r=>{const d=_dOf(r); if(d){const k=d.slice(0,7); m[k]=(m[k]||0)+1;}});
@@ -1488,6 +1590,26 @@ function renderHeat(kb){
   const m={}; kb.forEach(r=>{const c=r.category||'other'; m[c]=m[c]||{n:0,imp:0}; m[c].n++; m[c].imp+=(Number(r.importance)||0);});
   const arr=Object.entries(m).map(([c,v])=>[c,v.imp,v.n]).sort((a,b)=>b[1]-a[1]); const max=Math.max(1,...arr.map(a=>a[1]));
   $('#vizHeat').innerHTML=arr.map(([c,imp,n])=>'<div class="vbar-row"><span class="vlab">'+(CAT_LABELS[c]||c)+'</span><span class="vtrack"><span class="vseg" style="width:'+(imp/max*100).toFixed(2)+'%;background:'+(CAT_COLORS[c]||'#64748b')+'"></span></span><span class="vval" title="'+n+' 条 · 累计重要度">'+Math.round(imp)+'</span></div>').join('');
+}
+function renderRegion(kb){
+  const m={}; kb.forEach(r=>{const k=r.region||'全国'; m[k]=(m[k]||0)+1;});
+  const order=Object.entries(m).sort((a,b)=>b[1]-a[1]);
+  if(!order.length){$('#vizRegion').innerHTML='<div class="muted">暂无地域数据</div>';return;}
+  const max=Math.max(1,...order.map(o=>o[1]));
+  $('#vizRegion').innerHTML=order.map(([k,v])=>'<div class="vbar-row"><span class="vlab">'+esc(k)+'</span><span class="vtrack"><span class="vseg" style="width:'+(v/max*100).toFixed(2)+'%;background:#0891b2"></span></span><span class="vval">'+v+'</span></div>').join('');
+}
+function renderQuality(kb){
+  const m={}; kb.forEach(r=>{const k=r.quality||'未评级'; m[k]=(m[k]||0)+1;});
+  const order=Object.entries(m).sort((a,b)=>b[1]-a[1]);
+  if(!order.length){$('#vizQuality').innerHTML='<div class="muted">暂无质量数据</div>';return;}
+  const max=Math.max(1,...order.map(o=>o[1]));
+  const col={'A':'#16a34a','B':'#2563eb','C':'#d97706','未评级':'#94a3b8'};
+  $('#vizQuality').innerHTML=order.map(([k,v])=>'<div class="vbar-row"><span class="vlab">'+esc(k)+'</span><span class="vtrack"><span class="vseg" style="width:'+(v/max*100).toFixed(2)+'%;background:'+(col[k]||'#64748b')+'"></span></span><span class="vval">'+v+'</span></div>').join('');
+}
+function renderTop(kb){
+  const top=kb.slice().sort((a,b)=>(Number(b.importance)||0)-(Number(a.importance)||0)).slice(0,10);
+  if(!top.length){$('#vizTop').innerHTML='<div class="muted">暂无数据</div>';return;}
+  $('#vizTop').innerHTML='<ol style="margin:4px 0 0;padding-left:22px">'+top.map(r=>'<li style="margin:4px 0"><b>'+esc(r.title)+'</b> <span class="muted">· '+(r.department||'')+' · '+(CAT_LABELS[r.category||'other']||r.category||'')+' · ★'+Number(r.importance||0).toFixed(1)+'</span></li>').join('')+'</ol>';
 }
 
 /* ===================== 情报推送（日/周/月/季/年简报） ===================== */
@@ -1617,6 +1739,10 @@ async function boot(){
   if($('#kbBrowse')) $('#kbBrowse').querySelectorAll('button').forEach(b=>b.onclick=()=>{ $('#kbBrowse').querySelectorAll('button').forEach(x=>x.classList.remove('on')); b.classList.add('on'); App.kbBrowse=b.dataset.b; App.kbPage=1; loadKB(); });
   if($('#kbSort')) $('#kbSort').querySelectorAll('button').forEach(b=>b.onclick=()=>{ $('#kbSort').querySelectorAll('button').forEach(x=>x.classList.remove('on')); b.classList.add('on'); App.kbSort=b.dataset.s; App.kbPage=1; loadKB(); });
   $('#aiMode').querySelectorAll('button').forEach(b=>b.onclick=()=>{ $('#aiMode').querySelectorAll('button').forEach(x=>x.classList.remove('on')); b.classList.add('on'); $('#aiQuery').placeholder = b.dataset.m==='ask'?'输入问题，如：十五五碳达峰有哪些关键举措？':'输入专题，如：钢铁行业低碳转型'; });
+  // AI 密钥回填（本地保存）
+  if($('#dsKey')) $('#dsKey').value=getDsKey();
+  if($('#dsBase')) $('#dsBase').value=getDsBase();
+  if($('#tavKey')) $('#tavKey').value=getTavKey();
   $('#briefPeriod').querySelectorAll('button').forEach(b=>b.onclick=()=>{ $('#briefPeriod').querySelectorAll('button').forEach(x=>x.classList.remove('on')); b.classList.add('on'); loadBrief(); });
   $('#tabs').querySelectorAll('.tab').forEach(t=>t.onclick=()=>switchTab(t.dataset.t));
   $('#mask').addEventListener('click',e=>{ if(e.target.id==='mask') closeMask(); });
