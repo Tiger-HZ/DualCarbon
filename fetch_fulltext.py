@@ -218,6 +218,7 @@ def run_batch(only=None, mode="images", recent=0):
         todo = [r for r in todo if rx.search(r.get("title", ""))]
     done = 0
     fail = 0
+    saved = 0
     for r in todo:
         url = r.get("url", "")
         if not url or not url.startswith("http"):
@@ -245,9 +246,14 @@ def run_batch(only=None, mode="images", recent=0):
         else:
             fail += 1
             print("SKIP %s" % r.get("title", "")[:40])
-        time.sleep(0.4)
+        time.sleep(0.3)
+        saved += 1
+        # 增量落盘：每 25 条写一次，保证中断也可恢复（已写入图片的记录下次自动跳过）
+        if saved % 25 == 0:
+            json.dump(kb, open(KB, "w", encoding="utf-8"), ensure_ascii=False, separators=(",", ":"))
+            print("  ..saved %d/%d (images so far: %d)" % (saved, len(todo), sum(1 for x in kb if x.get("images"))))
     json.dump(kb, open(KB, "w", encoding="utf-8"), ensure_ascii=False, separators=(",", ":"))
-    print("----\nbatch done: filled=%d skipped=%d total=%d" % (done, fail, len(kb)))
+    print("----\nbatch done: filled=%d skipped=%d total=%d (images: %d)" % (done, fail, len(kb), sum(1 for x in kb if x.get("images"))))
     return done
 
 
