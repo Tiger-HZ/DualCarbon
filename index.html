@@ -179,6 +179,40 @@
   .spinner{display:inline-block;width:15px;height:15px;border:2px solid #fff;border-top-color:transparent;
            border-radius:50%;animation:spin .7s linear infinite;vertical-align:-2px;margin-right:6px}
   @keyframes spin{to{transform:rotate(360deg)}}
+  /* 信息流分类 + 竖条目录 */
+  .feed-toc{position:fixed;right:12px;top:104px;width:142px;max-height:74vh;overflow:auto;
+            background:rgba(255,255,255,.92);border:1px solid var(--line);border-radius:12px;
+            padding:8px 9px;box-shadow:var(--shadow);z-index:15}
+  .feed-toc .toc-h{font-size:12px;color:var(--sub);font-weight:700;margin:2px 2px 6px}
+  .feed-toc .toc-i{display:flex;justify-content:space-between;gap:6px;font-size:12.5px;color:#334;
+            padding:5px 9px;border-radius:8px;cursor:pointer;margin-bottom:2px}
+  .feed-toc .toc-i:hover{background:var(--chip);color:var(--green)}
+  .feed-toc .toc-i b{color:var(--green-d)}
+  @media(max-width:1080px){.feed-toc{display:none}}
+  .feed-cat{margin:18px 0 6px;margin-right:162px}
+  @media(max-width:1080px){.feed-cat{margin-right:0}}
+  .cat-h{display:flex;align-items:center;gap:9px;margin:6px 0 10px}
+  .cat-h .dot{width:11px;height:11px;border-radius:50%}
+  .cat-h h2{font-size:16px;margin:0;padding-bottom:6px;border-bottom:2px solid var(--green);color:var(--green-d)}
+  .cat-h .cnt{font-size:12.5px;color:var(--sub)}
+  .cat-grid.collapsed > .card:nth-child(n+16){display:none}
+  .more-row{margin-top:8px}
+  /* 思维导图 */
+  .mmap-card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px;box-shadow:var(--shadow);margin-top:14px}
+  .mmap{display:flex;gap:18px;align-items:flex-start;flex-wrap:wrap}
+  .mm-root{flex:0 0 auto;min-width:120px;background:#0f172a;color:#fff;border-radius:12px;padding:12px 16px;text-align:center;box-shadow:0 2px 8px rgba(15,23,42,.18)}
+  .mm-rt{font-size:11px;color:#94a3b8;margin-bottom:4px}
+  .mm-rx{font-size:14px;font-weight:700;line-height:1.4;word-break:break-all}
+  .mm-branches{flex:1 1 360px;display:flex;flex-direction:column;gap:10px;border-left:2px solid #e2e8f0;padding-left:16px}
+  .mm-branch{display:flex;align-items:flex-start;gap:10px}
+  .mm-gh{flex:0 0 84px;font-size:12px;font-weight:700;color:#fff;background:var(--c);border-radius:8px;padding:5px 8px;text-align:center}
+  .mm-chips{display:flex;flex-wrap:wrap;gap:6px;padding-top:3px}
+  .mm-chip{font-size:12px;color:#334155;background:color-mix(in srgb,var(--c) 12%,#fff);border:1px solid color-mix(in srgb,var(--c) 35%,#fff);border-radius:20px;padding:3px 10px}
+  /* 知识图谱工具条 */
+  .graph-tools{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-top:10px}
+  .graph-tools button{padding:6px 11px;font-size:12.5px}
+  .graph-tools .zm{font-weight:700;width:34px}
+  .graph-tools .sp{flex:1}
 </style>
 </head>
 <body>
@@ -189,8 +223,8 @@
       <p>自动采集 · 智能分类 · 知识图谱 · 混合检索 · 公开只读</p>
     </div>
     <div class="acct">
-      <span class="pill-mode" id="modePill">○ 只读公开</span>
-      <span class="who">🌐 公开站点 · 免登录</span>
+      <span class="pill-mode" id="modePill">🌐 公开知识库</span>
+      <span class="who">碳达峰碳中和 · 政策 / 碳市场 / 技术 / 协同</span>
     </div>
   </div>
   <div class="tabs" id="tabs">
@@ -218,7 +252,8 @@
       </span>
     </div>
     <div class="statbar" id="feedStat"></div>
-    <div class="grid" id="feedGrid"></div>
+    <nav class="feed-toc" id="feedToc"></nav>
+    <div id="feedGrid"></div>
     <div class="muted" id="feedPage" style="margin-top:10px"></div>
     <div class="datenav" id="feedDates" style="margin-top:14px"><span class="lbl">按收录日期：</span></div>
   </section>
@@ -256,13 +291,18 @@
           <canvas class="graph-canvas" id="graphCanvas"></canvas>
           <div class="graph-tip" id="graphTip"></div>
         </div>
-        <div class="toolbar" style="margin-top:10px">
+        <div class="graph-tools">
           <select id="graphDept"><option value="">全部部门</option></select>
           <select id="graphCat"><option value="">全部分类</option></select>
+          <label class="chk"><input type="checkbox" id="graphConcept"> 含实体概念节点</label>
           <button onclick="loadGraph()">重新聚合</button>
           <button class="ghost" onclick="GraphViz.relayout()">重新布局</button>
-          <span class="muted" id="graphMeta"></span>
+          <span class="sp"></span>
+          <button class="zm" title="放大" onclick="GraphViz.zoom(1.2)">＋</button>
+          <button class="zm" title="缩小" onclick="GraphViz.zoom(1/1.2)">－</button>
+          <button class="ghost" onclick="GraphViz.resetView()">重置视图</button>
         </div>
+        <div class="muted" id="graphMeta" style="margin-top:8px"></div>
       </div>
       <div>
         <div class="sub-card">
@@ -309,8 +349,8 @@
 </div>
 
 <footer>
-  双碳领域知识中台 · 仅收录双碳（碳达峰碳中和）主题 · 纯静态前端 + GitHub Pages 托管（零成本）· 数据随仓库自动更新<br>
-  数据来源：生态环境 / 发改 / 经信 / 市监等官方渠道（自动采集入库）
+  双碳领域知识库 · 数据来源：生态环境 / 发改 / 经信 / 市监等官方渠道（自动采集入库）<br>
+  问题或建议？<a href="https://wj.qq.com/s2/27342859/4455" target="_blank" rel="noopener">填写反馈问卷</a> · 负责人邮箱 <a href="mailto:tjhjxhlin@163.com">tjhjxhlin@163.com</a>
 </footer>
 
 <!-- 通用模态 -->
@@ -332,7 +372,10 @@ const App = {
 const DEPTS = ['生态环境','发改委','经信','市监','住建','交通','农业','能源','科技','金融','商务','其他'];
 const CATS  = ['policy','carbon_market','synergy','industry','tech','standard','finance','intl','literature','other'];
 const CAT_LABELS = {policy:'政策规划',carbon_market:'碳市场',synergy:'减污降碳协同',industry:'行业低碳',tech:'技术创研',standard:'法规标准',finance:'气候投融资',intl:'国际动态',literature:'研究文献',other:'其他'};
+const CAT_COLORS = {policy:'#1a7f5a',carbon_market:'#2563eb',synergy:'#7c3aed',industry:'#b45309',tech:'#0891b2',standard:'#0f766e',finance:'#db2777',intl:'#475569',literature:'#be185d',other:'#64748b'};
+const DEPT_COLORS = {'生态环境':'#1a7f5a','发改委':'#0f766e','经信':'#2563eb','市监':'#b45309','住建':'#7c3aed','交通':'#0891b2','农业':'#16a34a','能源':'#ea580c','科技':'#db2777','金融':'#9333ea','商务':'#0d9488','其他':'#64748b'};
 const REGIONS = ['全国','浙江','杭州','国际','北京','上海','广东','江苏','山东','新疆','安徽','重庆','陕西','湖州','舟山'];
+const FEED_CAT_MAX = 15; /* 信息流每类最多展示 15 条（约 5 行） */
 /* 站点基址：兼容 GitHub Pages 子路径（/DualCarbon/）与根域部署 */
 const SITE_BASE = location.pathname.replace(/[^/]*$/, '');
 
@@ -525,10 +568,9 @@ async function loadFeed(){
     } else {
       arr.sort((a,b)=> (b.date||'').localeCompare(a.date||''));
     }
-    $('#feedStat').innerHTML='<span class="chip">共 <b>'+arr.length+'</b> 条 · 静态只读</span>';
-    const slice=arr.slice((App.feedPage-1)*30,App.feedPage*30);
-    $('#feedGrid').innerHTML = slice.length? slice.map(recCard).join('') : '<div class="empty">暂无匹配结果</div>';
-    $('#feedPage').innerHTML = pageBtns(App.feedPage, arr.length, 30, 'App.feedPage', 'loadFeed');
+    App.feedPage=1;
+    $('#feedStat').innerHTML='<span class="chip">共 <b>'+arr.length+'</b> 条 · 按分类浏览</span>';
+    renderFeedCats(arr);
     loadDatesStatic(arr);
   }
 }
@@ -559,6 +601,35 @@ function pageBtns(page,total,size,varName,fn){
   if(page<pages) s+=' <button class="mini ghost" onclick="'+varName+'='+(page+1)+';'+fn+'()">下一页</button>';
   return s;
 }
+
+/* ===================== 信息流分类视图 ===================== */
+function renderFeedCats(arr){
+  const host=$('#feedGrid'); host.innerHTML='';
+  const toc=$('#feedToc'); let tocHtml='<div class="toc-h">分类目录</div>';
+  let any=false;
+  CATS.forEach(cat=>{
+    const items=arr.filter(r=>(r.category||'other')===cat);
+    if(!items.length) return; any=true;
+    const label=CAT_LABELS[cat]||cat; const col=CAT_COLORS[cat]||'#475569';
+    const sec=document.createElement('section'); sec.className='feed-cat'; sec.id='fc-'+cat;
+    const head='<div class="cat-h"><span class="dot" style="background:'+col+'"></span><h2 style="border-color:'+col+'">'+label+'</h2><span class="cnt">'+items.length+' 条</span></div>';
+    const collapsed = items.length>FEED_CAT_MAX ? ' data-collapsed="1"' : '';
+    const body='<div class="grid cat-grid"'+collapsed+'>'+items.map(recCard).join('')+'</div>';
+    const more= items.length>FEED_CAT_MAX ? '<div class="more-row"><button class="mini ghost" onclick="toggleCat(\''+cat+'\')">展开全部 '+items.length+' 条 ▾</button></div>' : '';
+    sec.innerHTML=head+body+more; host.appendChild(sec);
+    tocHtml+='<a class="toc-i" href="javascript:void(0)" onclick="scrollToCat(\''+cat+'\')">'+label+' <b>'+items.length+'</b></a>';
+  });
+  if(!any) host.innerHTML='<div class="empty">暂无匹配结果</div>';
+  toc.innerHTML=tocHtml;
+}
+function toggleCat(cat){
+  const grid=document.querySelector('#fc-'+cat+' .cat-grid'); if(!grid) return;
+  const collapsed = grid.getAttribute('data-collapsed')==='1';
+  if(collapsed){ grid.removeAttribute('data-collapsed'); } else { grid.setAttribute('data-collapsed','1'); }
+  const btn=document.querySelector('#fc-'+cat+' .more-row button');
+  if(btn) btn.textContent = collapsed ? '收起 ▴' : '展开全部 '+grid.children.length+' 条 ▾';
+}
+function scrollToCat(cat){ const el=document.getElementById('fc-'+cat); if(el) el.scrollIntoView({behavior:'smooth',block:'start'}); }
 
 /* ===================== 知识库 ===================== */
 async function loadKB(){
@@ -683,6 +754,7 @@ function loadDetailStatic(idx){
   [['department','dept',r.department],['category','cat',r.category?CAT_LABELS[r.category]:null],['region','region',r.region]].forEach(([f,t,v])=>{
     if(v){localNodes.push({id:f,label:v,type:t,weight:3});localEdges.push({source:'r',target:f});}});
   (r.tags||[]).forEach(t=>{localNodes.push({id:'t'+t,label:t,type:'tag',weight:2});localEdges.push({source:'r',target:'t'+t});});
+  (r.kg_terms||[]).slice(0,16).forEach((t,i)=>{localNodes.push({id:'k'+i,label:t,type:'concept',weight:1});localEdges.push({source:'r',target:'k'+i});});
   $('#modal').innerHTML=`
     <button class="x" onclick="closeMask()">×</button>
     <h2>${esc(r.title)}</h2>
@@ -701,18 +773,37 @@ function loadDetailStatic(idx){
           <div class="graph-wrap" style="border:none;box-shadow:none"><canvas class="graph-canvas" id="localCanvas" style="height:240px"></canvas></div></div>
       </div>
     </div>
-    <div class="note">🌐 当前为只读静态模式，批注与图片画廊需在部署后端后使用。</div>`;
+    <div class="mmap-card"><h3 style="font-size:13.5px;margin:0 0 8px">思维导图 · 实体与关系</h3>${buildMindMapHtml(r)}</div>`;
   $('#mask').classList.add('on');
   GraphViz.mount('localCanvas', localNodes, localEdges);
+}
+function buildMindMapHtml(r){
+  const groups=[];
+  if(r.department) groups.push({t:'部门', c:(DEPT_COLORS[r.department]||'#1a7f5a'), items:[r.department]});
+  if(r.category) groups.push({t:'分类', c:(CAT_COLORS[r.category]||'#2563eb'), items:[CAT_LABELS[r.category]||r.category]});
+  if(r.region) groups.push({t:'地域', c:'#0891b2', items:[r.region]});
+  if((r.tags||[]).length) groups.push({t:'关键词标签', c:'#7c3aed', items:r.tags.slice(0,14)});
+  const kg=(r.kg_terms||[]);
+  if(kg.length) groups.push({t:'实体概念', c:'#b45309', items:kg.slice(0,18)});
+  if(!groups.length) return '<div class="muted">暂无可用结构信息</div>';
+  const root=(r.title||'知识条目').slice(0,16);
+  let html='<div class="mmap"><div class="mm-root"><div class="mm-rt">知识条目</div><div class="mm-rx">'+esc(root)+'</div></div><div class="mm-branches">';
+  groups.forEach(g=>{
+    html+='<div class="mm-branch" style="--c:'+g.c+'"><div class="mm-gh">'+esc(g.t)+'</div><div class="mm-chips">'+g.items.map(it=>'<span class="mm-chip">'+esc(String(it))+'</span>').join('')+'</div></div>';
+  });
+  html+='</div></div>';
+  return html;
 }
 
 /* ===================== 知识图谱（全局） ===================== */
 const GCOLORS={record:'#0f766e',dept:'#1a7f5a',cat:'#2563eb',region:'#64748b',tag:'#7c3aed',concept:'#b45309'};
 const GraphViz = {
   canvas:null, ctx:null, nodes:[], edges:[], raf:null, dpr:1, W:0, H:0, drag:null, hover:null, alpha:1, onNode:null,
+  scale:1, tx:0, ty:0, focus:null, panning:false, _pm:null, _dn:null, _moved:false,
   mount(id, nodes, edges){
     this.canvas=document.getElementById(id); if(!this.canvas) return;
     this.ctx=this.canvas.getContext('2d'); this.nodes=nodes; this.edges=edges; this.alpha=1; this.drag=null; this.hover=null;
+    this.scale=1; this.tx=0; this.ty=0; this.focus=null; this.panning=false;
     this._resize(); this._init(); this._bind(); this._loop();
   },
   _resize(){
@@ -720,7 +811,6 @@ const GraphViz = {
     this.dpr=window.devicePixelRatio||1;
     this.W=rect.width||this.canvas.clientWidth||600; this.H=rect.height||this.canvas.clientHeight||400;
     this.canvas.width=this.W*this.dpr; this.canvas.height=this.H*this.dpr;
-    this.ctx.setTransform(this.dpr,0,0,this.dpr,0,0);
   },
   _init(){
     const cx=this.W/2, cy=this.H/2;
@@ -730,31 +820,38 @@ const GraphViz = {
     const c=this.canvas; if(c._gvbound) return; c._gvbound=true;
     c.addEventListener('mousemove',e=>{
       const rect=c.getBoundingClientRect(); const mx=e.clientX-rect.left, my=e.clientY-rect.top;
-      if(this.drag){ this.drag.x=mx; this.drag.y=my; this.drag.vx=0; this.drag.vy=0; return; }
+      if(this.panning){ this.tx=this._pm.tx+(mx-this._pm.mx); this.ty=this._pm.ty+(my-this._pm.my); if(Math.abs(mx-this._pm.mx)+Math.abs(my-this._pm.my)>3) this._moved=true; return; }
+      if(this.drag){ this.drag.x=mx; this.drag.y=my; this.drag.vx=0; this.drag.vy=0; if(this._dn&&(Math.abs(mx-this._dn.x)+Math.abs(my-this._dn.y)>3)) this._moved=true; return; }
       const n=this._pick(mx,my); this.hover=n;
       const tip=$('#graphTip');
       if(n){ tip.style.display='block'; tip.style.left=(mx+12)+'px'; tip.style.top=(my+12)+'px'; tip.textContent=n.label+' · '+(n.type==='record'?'知识':n.type); c.style.cursor='pointer'; }
-      else { tip.style.display='none'; c.style.cursor='default'; }
+      else { tip.style.display='none'; c.style.cursor='grab'; }
     });
-    c.addEventListener('mousedown',e=>{ const rect=c.getBoundingClientRect(); const n=this._pick(e.clientX-rect.left,e.clientY-rect.top); if(n){this.drag=n;} });
+    c.addEventListener('mousedown',e=>{ const rect=c.getBoundingClientRect(); const mx=e.clientX-rect.left, my=e.clientY-rect.top; const n=this._pick(mx,my);
+      if(n){ this.drag=n; this._dn={x:mx,y:my}; this._moved=false; } else { this.panning=true; this._pm={mx,my,tx:this.tx,ty:this.ty}; this._moved=false; c.style.cursor='grabbing'; } });
     c.addEventListener('mouseup',e=>{
-      if(this.drag && !this._moved){ // click
-        this._click(this.drag);
-      }
-      this.drag=null;
+      if(this.drag && !this._moved){ this._click(this.drag); }
+      else if(this.panning && !this._moved){ this.focus=null; this._loop(); }
+      this.drag=null; this.panning=false; c.style.cursor='grab';
     });
-    c.addEventListener('mouseleave',()=>{ this.hover=null; $('#graphTip').style.display='none'; });
+    c.addEventListener('mouseleave',()=>{ this.hover=null; this.panning=false; $('#graphTip').style.display='none'; });
+    c.addEventListener('wheel',e=>{ e.preventDefault(); const rect=c.getBoundingClientRect(); this.zoom(e.deltaY<0?1.12:1/1.12, e.clientX-rect.left, e.clientY-rect.top); },{passive:false});
     window.addEventListener('resize',()=>{ if(this.canvas && document.body.contains(this.canvas)){ this._resize(); this.alpha=Math.max(this.alpha,0.4);} });
   },
-  _pick(mx,my){
-    for(const n of this.nodes){ const r=this._radius(n)+4; if((mx-n.x)**2+(my-n.y)**2<=r*r) return n; }
-    return null;
+  zoom(f, mx, my){
+    mx=mx==null?this.W/2:mx; my=my==null?this.H/2:my;
+    const s2=Math.max(0.2, Math.min(4, this.scale*f));
+    const wx=(mx-this.tx)/this.scale, wy=(my-this.ty)/this.scale;
+    this.scale=s2; this.tx=mx-wx*s2; this.ty=my-wy*s2; this.alpha=Math.max(this.alpha,0.5); this._loop();
   },
+  resetView(){ this.scale=1; this.tx=0; this.ty=0; this.focus=null; this.alpha=1; this._loop(); },
+  _pick(mx,my){ const wx=(mx-this.tx)/this.scale, wy=(my-this.ty)/this.scale; for(const n of this.nodes){ const r=this._radius(n)+5; if((wx-n.x)**2+(wy-n.y)**2<=r*r) return n; } return null; },
   _radius(n){ return n.type==='record'?14:6+Math.min(n.weight||1,8); },
   _click(n){
     $('#graphSelInfo').innerHTML='<b>'+esc(n.label)+'</b><br><span class="muted">类型：'+(n.type==='record'?'知识条目':n.type)+' · 关联度 '+(n.weight||0)+'</span>';
     if(n.type==='record'){ openDetail(n._id!=null?n._id:n.ref); }
-    else { // 按维度筛选
+    else {
+      this.focus=n.id; this.alpha=Math.max(this.alpha,0.6); this._loop();
       const dim={dept:'department',cat:'category',region:'region',tag:'tag',concept:'concept'}[n.type];
       if(dim && dim!=='tag' && dim!=='concept'){
         $('#kb'+ (dim==='department'?'Dept':dim==='category'?'Cat':'Region') ).value = n.label;
@@ -767,27 +864,21 @@ const GraphViz = {
   relayout(){ this.alpha=1; this.nodes.forEach(n=>{n.x=null;}); this._init(); },
   _loop(){
     cancelAnimationFrame(this.raf);
-    const step=()=>{
-      this._tick(); this._draw();
-      if(this.alpha>0.02){ this.raf=requestAnimationFrame(step); }
-    };
+    const step=()=>{ this._tick(); this._draw(); if(this.alpha>0.02){ this.raf=requestAnimationFrame(step); } };
     this.raf=requestAnimationFrame(step);
   },
   _tick(){
     const ns=this.nodes, k=this.alpha;
     for(let i=0;i<ns.length;i++){
       const a=ns[i]; if(a===this.drag) continue;
-      // 斥力
       for(let j=0;j<ns.length;j++){
         if(i===j) continue; const b=ns[j];
         let dx=a.x-b.x, dy=a.y-b.y; let d2=dx*dx+dy*dy; if(d2<1) d2=1;
         const f=1800/d2; const d=Math.sqrt(d2);
         a.vx+=(dx/d)*f*k; a.vy+=(dy/d)*f*k;
       }
-      // 居中
       a.vx+=(this.W/2-a.x)*0.002; a.vy+=(this.H/2-a.y)*0.002;
     }
-    // 弹簧
     for(const e of this.edges){
       const a=ns.find(n=>n.id===e.source), b=ns.find(n=>n.id===e.target); if(!a||!b) continue;
       let dx=b.x-a.x, dy=b.y-a.y; let d=Math.sqrt(dx*dx+dy*dy)||1; const L=80;
@@ -798,16 +889,28 @@ const GraphViz = {
     this.alpha*=0.985;
   },
   _draw(){
-    const ctx=this.ctx; ctx.clearRect(0,0,this.W,this.H);
-    ctx.lineWidth=1; ctx.strokeStyle='rgba(100,116,139,.28)';
-    for(const e of this.edges){ const a=this.nodes.find(n=>n.id===e.source), b=this.nodes.find(n=>n.id===e.target); if(!a||!b) continue; ctx.beginPath(); ctx.moveTo(a.x,a.y); ctx.lineTo(b.x,b.y); ctx.stroke(); }
-    for(const n of this.nodes){
-      const r=this._radius(n); ctx.beginPath(); ctx.arc(n.x,n.y,r,0,Math.PI*2);
-      ctx.fillStyle=GCOLORS[n.type]||'#94a3b8'; ctx.fill();
-      if(n===this.hover){ ctx.lineWidth=2; ctx.strokeStyle='#0f172a'; ctx.stroke(); }
-      if(r>=9 || (this.hover===n)){ ctx.fillStyle='#1e2b25'; ctx.font='11px sans-serif'; ctx.textAlign='center'; ctx.fillText(n.label.length>10?n.label.slice(0,10)+'…':n.label, n.x, n.y+r+12); }
+    const ctx=this.ctx;
+    ctx.setTransform(1,0,0,1,0,0); ctx.clearRect(0,0,this.canvas.width,this.canvas.height);
+    ctx.setTransform(this.dpr*this.scale,0,0,this.dpr*this.scale, this.dpr*this.tx, this.dpr*this.ty);
+    ctx.lineWidth=1;
+    const focus=this.focus; const fneigh=this._neighbors(focus);
+    for(const e of this.edges){
+      const a=this.nodes.find(n=>n.id===e.source), b=this.nodes.find(n=>n.id===e.target); if(!a||!b) continue;
+      if(focus && !(a.id===focus||b.id===focus)){ ctx.strokeStyle='rgba(148,163,184,.08)'; } else { ctx.strokeStyle='rgba(100,116,139,.32)'; }
+      ctx.beginPath(); ctx.moveTo(a.x,a.y); ctx.lineTo(b.x,b.y); ctx.stroke();
     }
-  }
+    for(const n of this.nodes){
+      const r=this._radius(n);
+      const dim = focus && n.id!==focus && !fneigh.has(n.id);
+      ctx.globalAlpha = dim?0.2:1;
+      ctx.beginPath(); ctx.arc(n.x,n.y,r,0,Math.PI*2); ctx.fillStyle=GCOLORS[n.type]||'#94a3b8'; ctx.fill();
+      if(n===this.hover){ ctx.lineWidth=2; ctx.strokeStyle='#0f172a'; ctx.stroke(); }
+      if(n.id===focus){ ctx.lineWidth=3; ctx.strokeStyle='#f59e0b'; ctx.stroke(); }
+      if((r>=9 || this.hover===n) && !dim){ ctx.fillStyle='#1e2b25'; ctx.font='11px sans-serif'; ctx.textAlign='center'; ctx.fillText(n.label.length>10?n.label.slice(0,10)+'…':n.label, n.x, n.y+r+12); }
+      ctx.globalAlpha=1;
+    }
+  },
+  _neighbors(id){ const s=new Set(); if(!id) return s; this.edges.forEach(e=>{ if(e.source===id) s.add(e.target); if(e.target===id) s.add(e.source); }); return s; }
 };
 async function loadGraph(){
   const dept=$('#graphDept').value, cat=$('#graphCat').value;
@@ -821,20 +924,29 @@ async function loadGraph(){
       GraphViz.mount('graphCanvas', g.nodes.map(n=>({...n, ref: n._id})), g.edges);
     }catch(e){ toast('图谱加载失败：'+e.message); }
   } else {
-    const g=buildGraphStatic(dept,cat);
+    const g=buildGraphStatic(dept,cat,$('#graphConcept').checked);
     $('#graphMeta').textContent='静态模式 · '+g.nodes.length+' 节点 / '+g.edges.length+' 边';
     GraphViz.mount('graphCanvas', g.nodes, g.edges);
   }
 }
-function buildGraphStatic(dept,cat){
+function buildGraphStatic(dept,cat,concept){
   const nodes={}, edges=[];
-  const node=(id,label,type)=>{ if(!nodes[id]) nodes[id]={id,label,type,weight:0}; nodes[id].weight++; };
+  const node=(id,label,type)=>{ if(!nodes[id]) nodes[id]={id,label,type,weight:0}; nodes[id].weight++; return nodes[id]; };
   App.kb.forEach((r,i)=>{
     if(dept && r.department!==dept) return; if(cat && r.category!==cat) return;
-    const rid='r'+i; node(rid,(r.title||'').slice(0,20),'record');
+    const rid='r'+i; const rn=node(rid,(r.title||'').slice(0,20),'record'); rn._id=i;
     [['department','dept',r.department],['category','cat',r.category?CAT_LABELS[r.category]:null],['region','region',r.region]].forEach(([f,t,v])=>{ if(v){ const id=f+':'+v; node(id,v,t); edges.push({source:rid,target:id}); }});
-    (r.tags||[]).forEach(t=>{ const id='tag:'+t; node(id,t,'tag'); edges.push({source:rid,target:id}); });
+    (r.tags||[]).forEach(t=>{ if(t){ const id='tag:'+t; node(id,t,'tag'); edges.push({source:rid,target:id}); }});
   });
+  if(concept){
+    const cmap={};
+    App.kb.forEach((r)=>{ if(dept&&r.department!==dept)return; if(cat&&r.category!==cat)return;
+      (r.kg_terms||[]).forEach(t=>{ if(!cmap[t]) cmap[t]={count:0,cats:new Set()}; cmap[t].count++; if(r.category) cmap[t].cats.add(r.category); }); });
+    Object.keys(cmap).filter(t=>cmap[t].count>=2).sort((a,b)=>cmap[b].count-cmap[a].count).slice(0,120).forEach(t=>{
+      const id='concept:'+t; node(id,t,'concept');
+      cmap[t].cats.forEach(c=>{ const cid='category:'+c; if(nodes[cid]) edges.push({source:id,target:cid}); });
+    });
+  }
   return {nodes:Object.values(nodes), edges};
 }
 
@@ -908,7 +1020,7 @@ async function loadManage(){
         <div class="dcard"><div class="n">${Object.keys(dDept).length}</div><div class="l">涉及部门</div></div>
         <div class="dcard"><div class="n">${Object.keys(dCat).length}</div><div class="l">分类维度</div></div>
         <div class="dcard"><div class="n">${items.filter(r=>r.content_fetched).length}</div><div class="l">已抓全文</div></div>`;
-      bars('mDeptBars', dDept); bars('mQualBars', dQual); bars('mCatBars', dCat, CAT_LABELS);
+      bars('mDeptBars', dDept, null, k=>DEPT_COLORS[k]||'#64748b'); bars('mQualBars', dQual, null, qualColor); bars('mCatBars', dCat, CAT_LABELS, k=>CAT_COLORS[k]||'#475569');
       await loadAdmin();
     }catch(e){ $('#mDash').innerHTML='<div class="empty">加载失败：'+esc(e.message)+'</div>'; }
   } else {
@@ -919,14 +1031,16 @@ async function loadManage(){
       <div class="dcard"><div class="n">${Object.keys(dDept).length}</div><div class="l">涉及部门</div></div>
       <div class="dcard"><div class="n">${Object.keys(dCat).length}</div><div class="l">分类维度</div></div>
       <div class="dcard"><div class="n">静态</div><div class="l">只读模式</div></div>`;
-    bars('mDeptBars', dDept); bars('mQualBars', dQual); bars('mCatBars', dCat, CAT_LABELS);
+    bars('mDeptBars', dDept, null, k=>DEPT_COLORS[k]||'#64748b'); bars('mQualBars', dQual, null, qualColor); bars('mCatBars', dCat, CAT_LABELS, k=>CAT_COLORS[k]||'#475569');
     $('#mAdmin').innerHTML='<div class="note">🌐 静态只读模式：用户 / 团队 / 质量扫描需在部署后端后使用。</div>';
   }
 }
-function bars(id, map, labelFn){
+function qualColor(q){ q=Number(q)||0; if(q>=80) return '#16a34a'; if(q>=60) return '#2563eb'; if(q>=40) return '#d97706'; return '#94a3b8'; }
+function bars(id, map, labelFn, colorFn){
   const el=$('#'+id); const entries=Object.entries(map).sort((a,b)=>b[1]-a[1]); const max=Math.max(1,...entries.map(e=>e[1]));
   el.innerHTML='<h2 style="margin-top:0">'+el.querySelector('h2').textContent+'</h2>'+entries.map(([k,v])=>{
-    return `<div class="row"><span class="lab">${esc(labelFn?labelFn(k):k)}</span><span class="track"><span class="fill" style="width:${v/max*100}%"></span></span><span class="v">${v}</span></div>`;
+    const col=colorFn?colorFn(k,v):'#16a34a';
+    return `<div class="row"><span class="lab">${esc(labelFn?labelFn(k):k)}</span><span class="track"><span class="fill" style="width:${v/max*100}%;background:${col}"></span></span><span class="v">${v}</span></div>`;
   }).join('');
 }
 async function loadAdmin(){
@@ -1051,7 +1165,7 @@ async function boot(){
     $('#bannerHost').innerHTML='<div class="banner ok">🟢 已连接知识库后端（FastAPI）· '+ai+' · 共 '+((App.health&&App.health.records)||0)+' 条知识</div>';
   } else {
     mp.textContent='○ 只读静态'; mp.style.background='rgba(255,255,255,.18)';
-    $('#bannerHost').innerHTML='<div class="banner">🌐 当前为<b>只读公开站点</b>（GitHub Pages 零成本托管）。可浏览、检索、查看知识图谱与离线问答；手动入库 / AI 生成等高级能力需在部署后端后启用。</div>';
+    $('#bannerHost').innerHTML='<div class="banner ok">📚 双碳领域知识库 · 已收录 '+App.kb.length+' 条政策 / 碳市场 / 技术 / 协同知识 · 支持分类浏览、全文检索与知识图谱分析</div>';
   }
 
   // 顶部分段按钮
