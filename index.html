@@ -127,7 +127,7 @@
   .bars .row{display:flex;align-items:center;gap:8px;margin:5px 0;font-size:12.5px}
   .bars .lab{width:120px;color:var(--sub);text-align:right;flex-shrink:0}
   .bars .track{flex:1;background:#eef2f0;border-radius:6px;height:14px;overflow:hidden}
-  .bars .fill{height:100%;background:var(--green);border-radius:6px}
+  .bars .fill{height:100%;background:linear-gradient(90deg,#1a7f5a,#0f766e);border-radius:6px}
   .bars .v{width:36px;color:var(--sub)}
   /* modal */
   .mask{position:fixed;inset:0;background:rgba(16,30,24,.5);display:none;z-index:50;
@@ -161,7 +161,7 @@
   .graph-legend i{display:inline-block;width:11px;height:11px;border-radius:50%;margin-right:5px;vertical-align:-1px}
   .ggrid{display:grid;grid-template-columns:1fr 320px;gap:14px}
   @media(max-width:880px){.ggrid{grid-template-columns:1fr}.graph-canvas{height:420px}}
-  .graph-full .graph-canvas{height:min(68vh,680px)}
+  .graph-full .graph-canvas{height:calc(100vh - 205px);min-height:560px;max-height:920px}
   .graph-info-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:12px}
   @media(max-width:760px){.graph-info-row{grid-template-columns:1fr}}
   .sub-card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px;box-shadow:var(--shadow)}
@@ -264,7 +264,7 @@
   .hist-pill{display:inline-block;border:1px solid var(--line);border-radius:8px;padding:5px 10px;margin:3px 5px 3px 0;font-size:12px;cursor:pointer;background:#fff}
   .hist-pill:hover{border-color:var(--green);color:var(--green)}
   .hist-pill b{color:var(--green)}
-  @media print{header,.tabs,.toolbar,#briefHistory,#briefDelivery,footer,#briefNote{display:none!important}}
+  @media print{header,.tabs,.toolbar,#briefHistory,footer,#briefNote{display:none!important}}
 </style>
 </head>
 <body>
@@ -280,13 +280,12 @@
     </div>
   </div>
   <div class="tabs" id="tabs">
-    <div class="tab on" data-t="feed">📰 信息流</div>
-    <div class="tab" data-t="kb">🗂️ 知识库</div>
-    <div class="tab" data-t="graph">🕸️ 知识图谱</div>
-    <div class="tab" data-t="viz">📊 可视化分析</div>
-    <div class="tab" data-t="ai">🧠 智能检索</div>
-    <div class="tab" data-t="brief">📮 情报推送</div>
-    <div class="tab" data-t="manage">⚙️ 知识管理</div>
+    <div class="tab on" data-t="brief">📡 今日情报</div>
+    <div class="tab" data-t="kb">📚 知识库</div>
+    <div class="tab" data-t="graph">🕸️ 关系图谱</div>
+    <div class="tab" data-t="viz">📊 智能分析</div>
+    <div class="tab" data-t="ai">🤖 智能问答</div>
+    <div class="tab" data-t="manage">⚙️ 系统管理</div>
   </div>
 </header>
 
@@ -322,11 +321,13 @@
       <select id="kbQuality"><option value="">全部质量</option><option value="A">A 高</option><option value="B">B 中</option><option value="C">C 低</option></select>
       <label class="chk"><input type="checkbox" id="kbFull"> 仅全文</label>
       <label class="chk"><input type="checkbox" id="kbFlag"> 仅疑似重复</label>
-      <button onclick="loadKB()">筛选</button>
+      <span class="seg" id="kbSort"><button class="on" data-s="importance">按重要性</button><button data-s="date">按时间</button></span>
+      <button onclick="kbFilter()">筛选</button>
     </div>
     <div class="statbar" id="kbStat"></div>
     <div class="grid" id="kbGrid"></div>
     <div class="muted" id="kbPage" style="margin-top:10px"></div>
+    <div class="datenav" id="kbDates" style="margin-top:14px"><span class="lbl">按收录日期：</span></div>
   </section>
 
   <!-- 知识图谱 -->
@@ -426,10 +427,9 @@
       <button class="ghost" onclick="copyBriefLink()">🔗 复制分享链接</button>
       <button class="ghost" onclick="printBrief()">🖨️ 打印/导出</button>
     </div>
-    <div class="note" id="briefNote">📮 情报推送：按周期聚合近期新增知识，便于快速掌握动态。可复制链接分享给他人；如需每日邮件/微信定时推送，见页面底部说明。</div>
+    <div class="note" id="briefNote">📮 按周期聚合近期新增双碳知识，便于快速掌握政策、碳市场与技术动态；可复制链接分享给同事。</div>
     <div id="briefBody"></div>
     <div class="sub-card" id="briefHistory" style="margin-top:14px"></div>
-    <div class="sub-card" id="briefDelivery" style="margin-top:14px"></div>
   </section>
 
   <!-- 知识管理 -->
@@ -463,7 +463,7 @@
 const App = {
   mode:'static', health:null,   token: localStorage.getItem('dc_token')||'',
   user:null, kb:[], /* 静态回退数据 */
-  feedPage:1, kbPage:1, graphData:null, feedDate:''
+  feedPage:1, kbPage:1, graphData:null, feedDate:'', kbSort:'importance', kbDate:''
 };
 
 const DEPTS = ['生态环境','发改委','经信','市监','住建','交通','农业','能源','科技','金融','商务','其他'];
@@ -744,18 +744,33 @@ async function loadKB(){
       $('#kbPage').innerHTML = pageBtns(App.kbPage, data.total, 30, 'App.kbPage', 'loadKB');
     }catch(e){ $('#kbGrid').innerHTML='<div class="empty">加载失败：'+esc(e.message)+'</div>'; }
   } else {
+    App.kbSort=App.kbSort||'importance'; App.kbDate=App.kbDate||'';
+    const sort=App.kbSort;
     let arr=App.kb.slice();
     if(q) arr=arr.filter(r=>(r.title+' '+(r.summary||'')+' '+(r.content||'')).toLowerCase().includes(q.toLowerCase()));
     if(dept) arr=arr.filter(r=>r.department===dept);
     if(cat) arr=arr.filter(r=>r.category===cat);
     if(region) arr=arr.filter(r=>r.region===region);
     if(quality) arr=arr.filter(r=>r.quality===quality);
-    arr.sort((a,b)=> (Number(b.importance)||0)-(Number(a.importance)||0) || (b.date||'').localeCompare(a.date||''));
-    $('#kbStat').innerHTML='<span class="chip">共 <b>'+arr.length+'</b> 条 · 静态只读</span>';
+    if(App.kbDate) arr=arr.filter(r=>(r.added_at||'').slice(0,10)===App.kbDate);
+    if(sort==='date'){ arr.sort((a,b)=> (b.date||'').localeCompare(a.date||'')); }
+    else { arr.sort((a,b)=> (Number(b.importance)||0)-(Number(a.importance)||0) || (b.date||'').localeCompare(a.date||'')); }
+    $('#kbStat').innerHTML='<span class="chip">共 <b>'+arr.length+'</b> 条 · 按'+(sort==='date'?'时间':'重要性')+'排序 · 静态只读</span>';
+    renderDatesKb(arr);
     const slice=arr.slice((App.kbPage-1)*30,App.kbPage*30);
     $('#kbGrid').innerHTML = slice.length? slice.map(recCard).join('') : '<div class="empty">暂无匹配结果</div>';
     $('#kbPage').innerHTML = pageBtns(App.kbPage, arr.length, 30, 'App.kbPage', 'loadKB');
   }
+}
+function kbFilter(){ App.kbPage=1; App.kbDate=''; loadKB(); }
+function setKbDate(d){ App.kbDate=d; App.kbPage=1; loadKB(); }
+function renderDatesKb(arr){
+  const map={}; arr.forEach(r=>{const d=(r.added_at||'').slice(0,10); if(d) map[d]=(map[d]||0)+1;});
+  const ds=Object.keys(map).sort().reverse().slice(0,40).map(d=>({date:d,count:map[d]}));
+  const host=$('#kbDates'); if(!host) return;
+  let html='<span class="lbl">按收录日期：</span><span class="dpill'+(!App.kbDate?' on':'')+'" onclick="setKbDate(\'\')">全部</span>';
+  ds.forEach(d=>{ html+='<span class="dpill'+(App.kbDate===d.date?' on':'')+'" onclick="setKbDate(\''+esc(d.date)+'\')">'+esc(d.date)+' <span class="muted">('+d.count+')</span></span>'; });
+  host.innerHTML=html;
 }
 
 /* ===================== 详情（后端） ===================== */
@@ -1009,7 +1024,7 @@ const GraphViz = {
     this.canvas=document.getElementById(id); if(!this.canvas) return;
     this.ctx=this.canvas.getContext('2d'); this.nodes=nodes; this.edges=edges; this.alpha=1; this.drag=null; this.hover=null;
     this.scale=1; this.tx=0; this.ty=0; this.focus=null; this.panning=false;
-    this._resize(); this._init(); this._bind(); this._loop();
+    this._resize(); this._init(); this.fitView(); this._bind(); this._loop();
   },
   _resize(){
     const rect=this.canvas.getBoundingClientRect();
@@ -1019,7 +1034,7 @@ const GraphViz = {
   },
   _init(){
     const cx=this.W/2, cy=this.H/2;
-    this.nodes.forEach((n,i)=>{ if(n.x==null){ const a=i/this.nodes.length*Math.PI*2; n.x=cx+Math.cos(a)*(Math.min(this.W,this.H)/3)*(0.4+Math.random()*0.6); n.y=cy+Math.sin(a)*(Math.min(this.W,this.H)/3)*(0.4+Math.random()*0.6); n.vx=0;n.vy=0; } });
+    this.nodes.forEach((n,i)=>{ if(n.x==null){ const a=i/this.nodes.length*Math.PI*2; n.x=cx+Math.cos(a)*(Math.min(this.W,this.H)*0.45)*(0.6+Math.random()*0.4); n.y=cy+Math.sin(a)*(Math.min(this.W,this.H)*0.45)*(0.6+Math.random()*0.4); n.vx=0;n.vy=0; } });
   },
   _bind(){
     const c=this.canvas; if(c._gvbound) return; c._gvbound=true;
@@ -1052,9 +1067,21 @@ const GraphViz = {
   },
   _updateMeta(){ const el=document.getElementById('graphMeta'); if(!el) return; const vis=this.nodes.filter(n=>this._vis(n)).length;
     el.textContent='静态模式 · 显示 '+vis+' / '+this.nodes.length+' 节点（缩放 '+this.scale.toFixed(1)+'×，放大滚轮可展开更多概念与知识节点）'; },
-  resetView(){ this.scale=1; this.tx=0; this.ty=0; this.focus=null; this.alpha=1; this._updateMeta(); this._loop(); },
+  resetView(){ this.focus=null; this.alpha=1; this.fitView(); this._loop(); },
+  fitView(){
+    if(!this.nodes.length) return;
+    let minX=Infinity,minY=Infinity,maxX=-Infinity,maxY=-Infinity;
+    this.nodes.forEach(n=>{ if(n.x==null||n.y==null) return; if(n.x<minX)minX=n.x; if(n.y<minY)minY=n.y; if(n.x>maxX)maxX=n.x; if(n.y>maxY)maxY=n.y; });
+    if(!isFinite(minX)) return;
+    const pad=50, bw=Math.max(1,maxX-minX), bh=Math.max(1,maxY-minY);
+    const s=Math.min((this.W-pad*2)/bw,(this.H-pad*2)/bh,2.4);
+    this.scale=Math.max(0.25,s);
+    const cx=(minX+maxX)/2, cy=(minY+maxY)/2;
+    this.tx=this.W/2-cx*this.scale; this.ty=this.H/2-cy*this.scale;
+    this._updateMeta();
+  },
   _pick(mx,my){ const wx=(mx-this.tx)/this.scale, wy=(my-this.ty)/this.scale; for(const n of this.nodes){ if(!this._vis(n)) continue; const r=(this._radius(n)+6)/this.scale; if((wx-n.x)**2+(wy-n.y)**2<=r*r) return n; } return null; },
-  _radius(n){ return n.type==='record'?14:6+Math.min(n.weight||1,8); },
+  _radius(n){ return n.type==='record'?9:3+Math.min(n.weight||1,8)*0.6; },
   _click(n){
     $('#graphSelInfo').innerHTML='<b>'+esc(n.label)+'</b><br><span class="muted">类型：'+(n.type==='record'?'知识条目':n.type)+' · 关联度 '+(n.weight||0)+'</span>';
     if(n.type==='record'){ openDetail(n._id!=null?n._id:n.ref); }
@@ -1110,7 +1137,7 @@ const GraphViz = {
       if(focus && !(a.id===focus||b.id===focus)){ ctx.strokeStyle='rgba(148,163,184,.08)'; } else { ctx.strokeStyle='rgba(100,116,139,.32)'; }
       ctx.beginPath(); ctx.moveTo(a.x,a.y); ctx.lineTo(b.x,b.y); ctx.stroke();
     }
-    const fs=Math.max(9,11/s), off=12/s;
+    const fs=Math.max(8,9/s), off=10/s;
     for(const n of this.nodes){
       if(!this._vis(n)) continue;
       const r=this._radius(n)/s;
@@ -1275,10 +1302,13 @@ async function loadManage(){
 const QUAL_COLORS={'A':'#16a34a','B':'#2563eb','C':'#d97706','未知':'#94a3b8'};
 function qualColor(q){ if(QUAL_COLORS[q]) return QUAL_COLORS[q]; const n=Number(q); if(!isNaN(n)){ if(n>=80) return '#16a34a'; if(n>=60) return '#2563eb'; if(n>=40) return '#d97706'; } return '#94a3b8'; }
 function bars(id, map, labelFn, colorFn){
-  const el=$('#'+id); const entries=Object.entries(map).sort((a,b)=>b[1]-a[1]); const max=Math.max(1,...entries.map(e=>e[1]));
-  el.innerHTML='<h2 style="margin-top:0">'+el.querySelector('h2').textContent+'</h2>'+entries.map(([k,v])=>{
-    const col=colorFn?colorFn(k,v):'#16a34a';
-    return `<div class="row"><span class="lab">${esc(labelFn?labelFn(k):k)}</span><span class="track"><span class="fill" style="width:${v/max*100}%;background:${col}"></span></span><span class="v">${v}</span></div>`;
+  const el=$('#'+id); if(!el) return;
+  const h2=el.querySelector('h2'); const title=h2?h2.textContent:'分布';
+  const entries=Object.entries(map).sort((a,b)=>b[1]-a[1]); const max=Math.max(1,...entries.map(e=>e[1]));
+  el.innerHTML='<h2 style="margin-top:0">'+esc(title)+'</h2>'+entries.map(([k,v])=>{
+    const col=colorFn?colorFn(k,v):'#1a7f5a';
+    const pct=Math.max(2, v/max*100).toFixed(1);
+    return `<div class="row"><span class="lab">${esc(labelFn?labelFn(k):k)}</span><span class="track"><span class="fill" style="width:${pct}%;background:linear-gradient(90deg,${col},${col}aa)"></span></span><span class="v">${v}</span></div>`;
   }).join('');
 }
 async function loadAdmin(){
@@ -1397,9 +1427,13 @@ function renderStack(kb){
   $('#vizStack').innerHTML=html;
 }
 function renderYear(kb){
-  const m={}; kb.forEach(r=>{const y=String(r.date||'').slice(0,4); if(/^\d{4}$/.test(y)) m[y]=(m[y]||0)+1;});
+  const cur=new Date().getFullYear();
+  const m={}; let skipped=0;
+  kb.forEach(r=>{ const y=String(r.date||'').slice(0,4); if(!/^\d{4}$/.test(y)) return; const yi=+y; if(yi<1990||yi>cur){ skipped++; return; } m[y]=(m[y]||0)+1; });
   const keys=Object.keys(m).sort(); const max=Math.max(1,...keys.map(k=>m[k]));
-  $('#vizYear').innerHTML=keys.map(k=>'<div class="vbar-row"><span class="vlab">'+k+' 年</span><span class="vtrack"><span class="vseg" style="width:'+(m[k]/max*100).toFixed(2)+'%;background:#1a7f5a"></span></span><span class="vval">'+m[k]+'</span></div>').join('')||'<div class="muted">无发布年份数据</div>';
+  if(!keys.length){ $('#vizYear').innerHTML='<div class="muted">无发布年份数据</div>'; return; }
+  $('#vizYear').innerHTML=keys.map(k=>'<div class="vbar-row"><span class="vlab">'+k+' 年</span><span class="vtrack"><span class="vseg" style="width:'+(m[k]/max*100).toFixed(2)+'%;background:linear-gradient(90deg,#1a7f5a,#0f766e)"></span></span><span class="vval">'+m[k]+'</span></div>').join('')
+    + (skipped? '<div class="muted" style="font-size:11px;margin-top:5px">注：'+skipped+' 条记录的发布年份缺失或为未来日期，未计入（发布时间以知识原文为准，规划目标年如2030/2050不算作产生时间）。</div>' : '');
 }
 function renderCloud(kb){
   const m={}; kb.forEach(r=>(r.kg_terms||[]).forEach(t=>{ if(t&&t.length>=2) m[t]=(m[t]||0)+1; }));
@@ -1447,7 +1481,7 @@ function loadBrief(key){
   const period=curBriefPeriod(); const kb=App.kb||[];
   const groups={}; kb.forEach(r=>{ const k=bucketKey(_dOf(r),period); if(!k) return; (groups[k]=groups[k]||[]).push(r); });
   const keys=Object.keys(groups).sort().reverse();
-  if(!keys.length){ $('#briefBody').innerHTML='<div class="empty">暂无带日期的记录</div>'; $('#briefHistory').innerHTML=''; renderDelivery(); return; }
+  if(!keys.length){ $('#briefBody').innerHTML='<div class="empty">暂无带日期的记录</div>'; $('#briefHistory').innerHTML=''; return; }
   const sel=(key&&groups[key])?key:keys[0]; _briefSel=sel;
   const recs=groups[sel].slice().sort((a,b)=>(Number(b.importance)||0)-(Number(a.importance)||0));
   const idx=keys.indexOf(sel); const prevCnt=keys[idx+1]?groups[keys[idx+1]].length:0; const delta=recs.length-prevCnt;
@@ -1479,14 +1513,6 @@ function loadBrief(key){
   // 历史
   const hist=keys.slice(0,20).map(k=>'<span class="hist-pill'+(k===sel?' on" style="border-color:#1a7f5a;color:#1a7f5a':'')+'" onclick="loadBrief(\''+k+'\')">'+esc(periodLabel(k,period))+' <b>'+groups[k].length+'</b></span>').join('');
   $('#briefHistory').innerHTML='<h3 style="margin:0 0 8px;font-size:14px">🕘 历史'+PERIOD_NAME[period]+'情报（点击查看）</h3>'+hist;
-  renderDelivery();
-}
-function renderDelivery(){
-  $('#briefDelivery').innerHTML='<h3 style="margin:0 0 8px;font-size:14px">📬 定时推送与分享</h3>'
-    +'<p class="muted" style="font-size:12.8px;margin:4px 0">• <b>分享链接</b>：本站为公开静态站点，点击上方「复制分享链接」即可把当前情报页发给他人浏览（无需登录）。</p>'
-    +'<p class="muted" style="font-size:12.8px;margin:4px 0">• <b>每日邮件推送</b>：可配置自动化每日定时把「每日情报」摘要发送到指定邮箱（需你提供收件邮箱并授权邮件发送工具）。</p>'
-    +'<p class="muted" style="font-size:12.8px;margin:4px 0">• <b>微信/企业微信推送</b>：可通过企业微信机器人 Webhook 或公众号模板消息定时下发（需相应账号与密钥授权）。</p>'
-    +'<p class="muted" style="font-size:12.8px;margin:4px 0">如需开通邮件或微信定时推送，请告知助手你的收件邮箱 / 机器人 Webhook，我会为你配置定时任务。</p>';
 }
 function copyBriefLink(){
   const period=curBriefPeriod(); const url=location.origin+location.pathname+'#brief='+period+(_briefSel?':'+_briefSel:'');
@@ -1550,6 +1576,7 @@ async function boot(){
 
   // 顶部分段按钮
   $('#feedSort').querySelectorAll('button').forEach(b=>b.onclick=()=>{ $('#feedSort').querySelectorAll('button').forEach(x=>x.classList.remove('on')); b.classList.add('on'); loadFeed(); });
+  if($('#kbSort')) $('#kbSort').querySelectorAll('button').forEach(b=>b.onclick=()=>{ $('#kbSort').querySelectorAll('button').forEach(x=>x.classList.remove('on')); b.classList.add('on'); App.kbSort=b.dataset.s; App.kbPage=1; loadKB(); });
   $('#aiMode').querySelectorAll('button').forEach(b=>b.onclick=()=>{ $('#aiMode').querySelectorAll('button').forEach(x=>x.classList.remove('on')); b.classList.add('on'); $('#aiQuery').placeholder = b.dataset.m==='ask'?'输入问题，如：十五五碳达峰有哪些关键举措？':'输入专题，如：钢铁行业低碳转型'; });
   $('#briefPeriod').querySelectorAll('button').forEach(b=>b.onclick=()=>{ $('#briefPeriod').querySelectorAll('button').forEach(x=>x.classList.remove('on')); b.classList.add('on'); loadBrief(); });
   $('#tabs').querySelectorAll('.tab').forEach(t=>t.onclick=()=>switchTab(t.dataset.t));
@@ -1558,7 +1585,7 @@ async function boot(){
   $('#imgMask').addEventListener('click',()=>$('#imgMask').classList.remove('on'));
 
   updateAuthUI();
-  if(!applyBriefHash()) switchTab('feed');
+  if(!applyBriefHash()) switchTab('brief');
   window.addEventListener('hashchange',applyBriefHash);
 }
 boot();

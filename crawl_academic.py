@@ -73,7 +73,14 @@ def main():
                 doi = w.get("doi") or ""
                 link = ("https://doi.org/" + doi) if doi else (w.get("id") or "")
                 if link and norm_url(link) in existing: continue
-                date = w.get("publication_date") or ""
+                _pd = w.get("publication_date") or ""
+                date = ""
+                if _pd:
+                    try:
+                        if int(_pd[:4]) <= datetime.date.today().year:
+                            date = _pd
+                    except Exception:
+                        date = ""
                 abs = abstract_text(w.get("abstract_inverted_index"))
                 concepts = [c["display_name"] for c in (w.get("concepts") or [])[:6] if c.get("display_name")]
                 # 机构国家 → 地域
