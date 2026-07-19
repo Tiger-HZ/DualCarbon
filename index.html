@@ -229,6 +229,42 @@
   .graph-tools button{padding:6px 11px;font-size:12.5px}
   .graph-tools .zm{font-weight:700;width:34px}
   .graph-tools .sp{flex:1}
+  /* 可视化分析 */
+  .viz-box{overflow-x:auto}
+  .vbar-row{display:flex;align-items:center;gap:8px;margin:4px 0;font-size:12.5px}
+  .vbar-row .vlab{width:96px;flex:none;text-align:right;color:var(--sub);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .vbar-row .vtrack{flex:1;background:#eef2f0;border-radius:5px;height:16px;position:relative;display:flex}
+  .vbar-row .vseg{height:100%;display:inline-block}
+  .vbar-row .vseg:first-child{border-radius:5px 0 0 5px}
+  .vbar-row .vseg:last-child{border-radius:0 5px 5px 0}
+  .vbar-row .vval{width:44px;flex:none;text-align:left;font-weight:600;color:var(--txt)}
+  .trend-svg{width:100%;height:200px;display:block}
+  .trend-bar{fill:var(--green);transition:.2s}
+  .trend-bar:hover{fill:#0f766e}
+  .cloud-box{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;padding:8px 2px;line-height:1.7}
+  .cloud-box .cw{cursor:pointer;transition:.15s;display:inline-block}
+  .cloud-box .cw:hover{transform:scale(1.12)}
+  .stack-legend{display:flex;flex-wrap:wrap;gap:6px 12px;margin:8px 0 4px;font-size:11.5px;color:var(--sub)}
+  .stack-legend i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:4px;vertical-align:middle}
+  /* 情报推送 */
+  .brief-hero{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin:12px 0}
+  .brief-kpi{background:linear-gradient(135deg,#0f766e,#1a7f5a);color:#fff;border-radius:13px;padding:16px 18px;box-shadow:var(--shadow)}
+  .brief-kpi .k{font-size:30px;font-weight:800;line-height:1}
+  .brief-kpi .t{font-size:12.5px;opacity:.92;margin-top:6px}
+  .brief-kpi.alt{background:linear-gradient(135deg,#2563eb,#0891b2)}
+  .brief-kpi.alt2{background:linear-gradient(135deg,#b45309,#db2777)}
+  .brief-kpi.alt3{background:linear-gradient(135deg,#7c3aed,#2563eb)}
+  .brief-sec{margin-top:6px}
+  .brief-cat-chip{display:inline-block;background:#eef4f1;border-radius:20px;padding:4px 12px;margin:3px 5px 3px 0;font-size:12.5px}
+  .brief-cat-chip b{color:var(--green)}
+  .brief-item{padding:8px 0;border-bottom:1px dashed var(--line);cursor:pointer}
+  .brief-item:hover{background:#f6faf8}
+  .brief-item .bt{font-weight:600;font-size:13.5px}
+  .brief-item .bm{font-size:11.5px;color:var(--sub);margin-top:2px}
+  .hist-pill{display:inline-block;border:1px solid var(--line);border-radius:8px;padding:5px 10px;margin:3px 5px 3px 0;font-size:12px;cursor:pointer;background:#fff}
+  .hist-pill:hover{border-color:var(--green);color:var(--green)}
+  .hist-pill b{color:var(--green)}
+  @media print{header,.tabs,.toolbar,#briefHistory,#briefDelivery,footer,#briefNote{display:none!important}}
 </style>
 </head>
 <body>
@@ -247,7 +283,9 @@
     <div class="tab on" data-t="feed">📰 信息流</div>
     <div class="tab" data-t="kb">🗂️ 知识库</div>
     <div class="tab" data-t="graph">🕸️ 知识图谱</div>
+    <div class="tab" data-t="viz">📊 可视化分析</div>
     <div class="tab" data-t="ai">🧠 智能检索</div>
+    <div class="tab" data-t="brief">📮 情报推送</div>
     <div class="tab" data-t="manage">⚙️ 知识管理</div>
   </div>
 </header>
@@ -345,6 +383,53 @@
     </div>
     <div class="note" id="aiNote"></div>
     <div id="aiOut"></div>
+  </section>
+
+  <!-- 可视化分析 -->
+  <section class="view" id="v-viz">
+    <div class="statbar" id="vizStat"></div>
+    <div class="sub-card" style="margin-bottom:14px">
+      <h2 style="margin-top:0;font-size:15px">📈 月度入库趋势（近 24 个月）</h2>
+      <div id="vizTrend" class="viz-box"></div>
+    </div>
+    <div class="row2">
+      <div class="sub-card">
+        <h2 style="margin-top:0;font-size:15px">🏛️ 部门 × 分类 分布</h2>
+        <div id="vizStack" class="viz-box"></div>
+      </div>
+      <div class="sub-card">
+        <h2 style="margin-top:0;font-size:15px">🗓️ 发布年份分布</h2>
+        <div id="vizYear" class="viz-box"></div>
+      </div>
+    </div>
+    <div class="sub-card" style="margin-top:14px">
+      <h2 style="margin-top:0;font-size:15px">☁️ 关键概念词云（Top 80 · 字号=出现频次）</h2>
+      <div id="vizCloud" class="cloud-box"></div>
+    </div>
+    <div class="sub-card" style="margin-top:14px">
+      <h2 style="margin-top:0;font-size:15px">🌡️ 主题热度榜（按分类聚合的重要度）</h2>
+      <div id="vizHeat" class="viz-box"></div>
+    </div>
+  </section>
+
+  <!-- 情报推送 -->
+  <section class="view" id="v-brief">
+    <div class="toolbar">
+      <span class="seg" id="briefPeriod">
+        <button class="on" data-p="day">📅 每日情报</button>
+        <button data-p="week">📆 本周情报</button>
+        <button data-p="month">🗓️ 本月情报</button>
+        <button data-p="quarter">📊 本季度</button>
+        <button data-p="year">📈 本年度</button>
+      </span>
+      <span class="grow"></span>
+      <button class="ghost" onclick="copyBriefLink()">🔗 复制分享链接</button>
+      <button class="ghost" onclick="printBrief()">🖨️ 打印/导出</button>
+    </div>
+    <div class="note" id="briefNote">📮 情报推送：按周期聚合近期新增知识，便于快速掌握动态。可复制链接分享给他人；如需每日邮件/微信定时推送，见页面底部说明。</div>
+    <div id="briefBody"></div>
+    <div class="sub-card" id="briefHistory" style="margin-top:14px"></div>
+    <div class="sub-card" id="briefDelivery" style="margin-top:14px"></div>
   </section>
 
   <!-- 知识管理 -->
@@ -600,7 +685,7 @@ function loadDatesStatic(arr){
   const ds=Object.keys(map).sort().reverse().slice(0,40).map(d=>({date:d,count:map[d]}));
   const host=$('#feedDates');
   let html='<span class="lbl">按收录日期：</span><span class="dpill'+(!App.feedDate?' on':'')+'" onclick="setFeedDate(\'\')">全部</span>';
-  ds.forEach(d=>{ html+='<span class="dpill'+(App.feedDate===d?' on':'')+'" onclick="setFeedDate(\''+esc(d)+'\')">'+esc(d)+' ('+d.count+')</span>'; });
+  ds.forEach(d=>{ html+='<span class="dpill'+(App.feedDate===d.date?' on':'')+'" onclick="setFeedDate(\''+esc(d.date)+'\')">'+esc(d.date)+' <span class="muted">('+d.count+')</span></span>'; });
   host.innerHTML=html;
 }
 function setFeedDate(d){ App.feedDate=d; App.feedPage=1; if(App.mode==='backend'){ /* 后端按 added_at 筛选需额外参数，这里简化：后端日期过滤暂用 date 字段近似 */ loadFeed(); } else loadFeed(); }
@@ -1269,7 +1354,9 @@ function switchTab(t){
   if(t==='feed') loadFeed();
   else if(t==='kb') loadKB();
   else if(t==='graph') loadGraph();
+  else if(t==='viz') loadViz();
   else if(t==='ai') {/* 等待用户输入 */}
+  else if(t==='brief') loadBrief();
   else if(t==='manage') loadManage();
   else if(t==='ingest') updateAuthUI();
 }
@@ -1305,6 +1392,7 @@ async function boot(){
   // 顶部分段按钮
   $('#feedSort').querySelectorAll('button').forEach(b=>b.onclick=()=>{ $('#feedSort').querySelectorAll('button').forEach(x=>x.classList.remove('on')); b.classList.add('on'); loadFeed(); });
   $('#aiMode').querySelectorAll('button').forEach(b=>b.onclick=()=>{ $('#aiMode').querySelectorAll('button').forEach(x=>x.classList.remove('on')); b.classList.add('on'); $('#aiQuery').placeholder = b.dataset.m==='ask'?'输入问题，如：十五五碳达峰有哪些关键举措？':'输入专题，如：钢铁行业低碳转型'; });
+  $('#briefPeriod').querySelectorAll('button').forEach(b=>b.onclick=()=>{ $('#briefPeriod').querySelectorAll('button').forEach(x=>x.classList.remove('on')); b.classList.add('on'); loadBrief(); });
   $('#tabs').querySelectorAll('.tab').forEach(t=>t.onclick=()=>switchTab(t.dataset.t));
   $('#mask').addEventListener('click',e=>{ if(e.target.id==='mask') closeMask(); });
   $('#loginMask').addEventListener('click',e=>{ if(e.target.id==='loginMask') closeLogin(); });
