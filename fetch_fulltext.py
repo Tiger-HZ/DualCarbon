@@ -6,7 +6,8 @@
   python fetch_fulltext.py --only "标题关键词"   # 仅抓取标题命中的若干条
   python fetch_fulltext.py --test URL  # 测试单条 URL 抽取效果
 """
-import json, os, re, sys, time, html, urllib.request, urllib.error
+import json, os, re, sys, time, html, datetime, urllib.request, urllib.error, urllib.parse
+from urllib.parse import urljoin
 
 BASE = os.path.dirname(os.path.abspath(__file__))
 KB = os.path.join(BASE, "kb", "kb.json")
@@ -142,19 +143,76 @@ def _block_text(block):
     return "\n".join(lines)
 
 
+def extract_images(html, base_url=""):
+    """从正文容器内抽取图片绝对 URL（最多 8 张），过滤图标/追踪像素。"""
+    if not html:
+        return []
+    container = html
+    best = ""
+    for key in CONTENT_KEYS:
+        for pat in (r"class=[\"'][^\"']*%s[^\"']*[\"']" % re.escape(key),
+                    r"id=[\"']%s[\"']" % re.escape(key)):
+            m = re.search(pat, html, re.I)
+            if m:
+                ot = html.rfind("<", 0, m.start())
+                block = _grab_block(html, ot)
+                if block and len(block) > len(best):
+                    best = block
+    if best:
+        container = best
+    out = []
+    seen = set()
+    for m in re.finditer(r"<img\b[^>]*>", container, re.I):
+        tag = m.group(0)
+        sm = re.search(r"src=[\"']([^\"']+)[\"']", tag, re.I)
+        if not sm:
+            continue
+        src = sm.group(1).strip()
+        if not src or src.startswith("data:") or src.startswith("javascript:"):
+            continue
+        low = src.lower()
+        # 跳过明显的装饰/图标/追踪图（仅当不是 jpg/png 等正文图时）
+        if (re.search(r"(pixel|spacer|icon|logo|arrow|tracking|bg\.|background)", low)
+                and not re.search(r"\.(jpg|jpeg|png|webp)", low)):
+            continue
+        if re.search(r"(weixin\.qq\.com|qpic\.cn|qq\.com/q\?|mpvote|head_img)", low):
+            # 微信头像/投票/二维码图，非正文
+            continue
+        abs_src = urljoin(base_url, src)
+        if abs_src in seen:
+            continue
+        seen.add(abs_src)
+        out.append(abs_src)
+        if len(out) >= 8:
+            break
+    return out
+
+
 def fetch_one(url):
     html = download(url)
     if not html:
-        return None
+        return None, []
     text = extract_main_text(html)
     # 去除与正文无关的超短噪声
     text = "\n".join(l for l in text.split("\n") if len(l) >= 4)
-    return text if len(text) >= 120 else None
+    imgs = extract_images(html, url)
+    return (text if len(text) >= 120 else None), imgs
 
 
-def run_batch(only=None):
+def run_batch(only=None, mode="images", recent=0):
     kb = json.load(open(KB, encoding="utf-8"))
-    todo = [r for r in kb if not r.get("content_fetched")]
+    if mode == "text":
+        todo = [r for r in kb if not r.get("content_fetched")]
+    elif mode == "all":
+        # 全量补：正文缺失或图片缺失都处理
+        todo = [r for r in kb if (not r.get("content_fetched") or not r.get("images"))]
+    else:
+        # 默认(images)：仅对「已有正文(已验证可下载)」的存量记录补图片，
+        # 避免对不可达站点空等超时，卡住批量任务。
+        todo = [r for r in kb if (not r.get("images") and r.get("content_fetched"))]
+    if recent > 0:
+        cut = (datetime.date.today() - datetime.timedelta(days=recent)).isoformat()
+        todo = [r for r in todo if (r.get("added_at") or "") >= cut]
     if only:
         rx = re.compile(only)
         todo = [r for r in todo if rx.search(r.get("title", ""))]
@@ -162,37 +220,55 @@ def run_batch(only=None):
     fail = 0
     for r in todo:
         url = r.get("url", "")
-        if not url or url.startswith("http") is False:
+        if not url or not url.startswith("http"):
             continue
-        if any(b in url for b in ("people.com.cn", "163.com", "qq.com", "nfnews.com",
-                                  ".pdf", "wulanchabu")):
-            # 这些镜像/聚合/PDF 站点正文抽取不稳定，跳过（留待人工或后续补）
+        if any(b in url for b in ("people.com.cn", "163.com", "nfnews.com",
+                                  ".pdf", "wulanchabu", "qpic.cn")):
+            # 这些镜像/聚合/PDF 站点正文或图片抽取不稳定，跳过（留待人工或后续补）
             continue
         try:
-            txt = fetch_one(url)
+            txt, imgs = fetch_one(url)
         except Exception:
-            txt = None
-        if txt:
+            txt, imgs = None, []
+        changed = False
+        if txt and not r.get("content_fetched"):
             r["content"] = txt
             r["content_fetched"] = True
-            done += 1
+            changed = True
             print("OK  [%d字] %s" % (len(txt), r.get("title", "")[:40]))
+        if imgs:
+            r["images"] = imgs
+            changed = True
+            print("IMG x%d %s" % (len(imgs), r.get("title", "")[:36]))
+        if changed:
+            done += 1
         else:
             fail += 1
             print("SKIP %s" % r.get("title", "")[:40])
         time.sleep(0.4)
-    json.dump(kb, open(KB, "w", encoding="utf-8"), ensure_ascii=False, indent=1)
-    print("----\nbatch done: fetched=%d skipped=%d total=%d" % (done, fail, len(kb)))
+    json.dump(kb, open(KB, "w", encoding="utf-8"), ensure_ascii=False, separators=(",", ":"))
+    print("----\nbatch done: filled=%d skipped=%d total=%d" % (done, fail, len(kb)))
     return done
 
 
 if __name__ == "__main__":
-    if len(sys.argv) > 1 and sys.argv[1] == "--test":
-        u = sys.argv[2]
-        t = fetch_one(u)
-        print("LEN", len(t) if t else 0)
+    args = sys.argv[1:]
+    if args and args[0] == "--test":
+        u = args[1]
+        t, imgs = fetch_one(u)
+        print("TEXT_LEN", len(t) if t else 0)
         print(t[:1500] if t else "(none)")
-    elif len(sys.argv) > 1 and sys.argv[1] == "--only":
-        run_batch(sys.argv[2] if len(sys.argv) > 2 else None)
+        print("IMAGES", len(imgs), imgs[:5])
+    elif args and args[0] == "--only":
+        run_batch(args[1] if len(args) > 1 else None)
+    elif args and args[0] == "--text":
+        run_batch(mode="text")
+    elif args and args[0] == "--all":
+        # 全量补正文+图片（耗时较长，建议后台运行）
+        run_batch(mode="all")
+    elif args and args[0] == "--recent":
+        n = int(args[1]) if len(args) > 1 and args[1].isdigit() else 2
+        run_batch(mode="all", recent=n)
     else:
+        # 默认：为已有正文的存量记录补图片（快速、不空等不可达站点）
         run_batch()

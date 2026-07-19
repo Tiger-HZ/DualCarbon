@@ -346,7 +346,7 @@
     <div class="graph-tools">
       <select id="graphDept"><option value="">全部部门</option></select>
       <select id="graphCat"><option value="">全部分类</option></select>
-      <label class="chk"><input type="checkbox" id="graphConcept"> 含实体概念节点</label>
+      <label class="chk"><input type="checkbox" id="graphConcept" checked> 含实体概念节点</label>
       <button onclick="loadGraph()">重新聚合</button>
       <button class="ghost" onclick="GraphViz.relayout()">重新布局</button>
       <span class="sp"></span>
@@ -676,7 +676,7 @@ async function loadDates(){
     const ds=await api('/api/records/dates');
     const host=$('#feedDates');
     let html='<span class="lbl">按收录日期：</span><span class="dpill'+(!App.feedDate?' on':'')+'" onclick="setFeedDate(\'\')">全部</span>';
-    ds.slice(0,40).forEach(d=>{ html+='<span class="dpill'+(App.feedDate===d.date?' on':'')+'" onclick="setFeedDate(\''+esc(d.date)+'\')">'+esc(d.date)+' <span class="muted">('+d.count+')</span></span>'; });
+    ds.slice(0,40).forEach(d=>{ const dt=d.date||d; html+='<span class="dpill'+(App.feedDate===dt?' on':'')+'" onclick="setFeedDate(\''+esc(dt)+'\')">'+esc(dt)+' <span class="muted">('+d.count+')</span></span>'; });
     host.innerHTML=html;
   }catch(e){}
 }
@@ -872,7 +872,9 @@ function loadDetailStatic(idx){
     </div>
     <p class="muted" style="font-size:12.5px">来源：${esc(r.source||'')} · 发布 ${esc(r.date||'')} · 入库 ${esc(r.added_at||'')} ${r.url?`· <a href="${esc(r.url)}" target="_blank" rel="noopener">原文↗</a>`:''}</p>
     <div class="ggrid" style="grid-template-columns:1fr 280px">
-      <div><h3 style="font-size:14px;margin:10px 0 4px">正文</h3><div class="content md">${mdToHtml((r.content||r.summary||'（无正文）').slice(0,6000))}</div></div>
+      <div><h3 style="font-size:14px;margin:10px 0 4px">正文</h3><div class="content md">${mdToHtml((r.content||r.summary||'（无正文）').slice(0,6000))}</div>
+        ${r.images && r.images.length ? `<div class="gal" style="margin:10px 0">${r.images.map(src=>`<img class="gimg" src="${esc(src)}" loading="lazy" onclick="openImg('${esc(src)}')" onerror="this.replaceWith(Object.assign(document.createElement('div'),{className:'ph',textContent:'图片不可预览'}))">`).join('')}</div><p class="muted" style="font-size:11.5px;margin:2px 0 0">🖼️ 正文配图 ${r.images.length} 张（点击放大；部分站点防盗链可能不可预览）</p>` : ''}
+      </div>
       <div>
         <div class="sub-card" style="margin-bottom:12px"><h3 style="font-size:13.5px;margin:0 0 6px">标签</h3><div>${tags||'<span class="muted">无</span>'}</div>
           <h3 style="font-size:13.5px;margin:10px 0 6px">本条目知识图谱</h3>
@@ -1041,14 +1043,17 @@ const GraphViz = {
     c.addEventListener('wheel',e=>{ e.preventDefault(); const rect=c.getBoundingClientRect(); this.zoom(e.deltaY<0?1.12:1/1.12, e.clientX-rect.left, e.clientY-rect.top); },{passive:false});
     window.addEventListener('resize',()=>{ if(this.canvas && document.body.contains(this.canvas)){ this._resize(); this.alpha=Math.max(this.alpha,0.4);} });
   },
+  _vis(n){ return !n.minS || this.scale >= n.minS - 0.001; },
   zoom(f, mx, my){
     mx=mx==null?this.W/2:mx; my=my==null?this.H/2:my;
-    const s2=Math.max(0.2, Math.min(4, this.scale*f));
+    const s2=Math.max(0.2, Math.min(5, this.scale*f));
     const wx=(mx-this.tx)/this.scale, wy=(my-this.ty)/this.scale;
-    this.scale=s2; this.tx=mx-wx*s2; this.ty=my-wy*s2; this.alpha=Math.max(this.alpha,0.5); this._loop();
+    this.scale=s2; this.tx=mx-wx*s2; this.ty=my-wy*s2; this.alpha=Math.max(this.alpha,0.5); this._updateMeta(); this._loop();
   },
-  resetView(){ this.scale=1; this.tx=0; this.ty=0; this.focus=null; this.alpha=1; this._loop(); },
-  _pick(mx,my){ const wx=(mx-this.tx)/this.scale, wy=(my-this.ty)/this.scale; for(const n of this.nodes){ const r=(this._radius(n)+6)/this.scale; if((wx-n.x)**2+(wy-n.y)**2<=r*r) return n; } return null; },
+  _updateMeta(){ const el=document.getElementById('graphMeta'); if(!el) return; const vis=this.nodes.filter(n=>this._vis(n)).length;
+    el.textContent='静态模式 · 显示 '+vis+' / '+this.nodes.length+' 节点（缩放 '+this.scale.toFixed(1)+'×，放大滚轮可展开更多概念与知识节点）'; },
+  resetView(){ this.scale=1; this.tx=0; this.ty=0; this.focus=null; this.alpha=1; this._updateMeta(); this._loop(); },
+  _pick(mx,my){ const wx=(mx-this.tx)/this.scale, wy=(my-this.ty)/this.scale; for(const n of this.nodes){ if(!this._vis(n)) continue; const r=(this._radius(n)+6)/this.scale; if((wx-n.x)**2+(wy-n.y)**2<=r*r) return n; } return null; },
   _radius(n){ return n.type==='record'?14:6+Math.min(n.weight||1,8); },
   _click(n){
     $('#graphSelInfo').innerHTML='<b>'+esc(n.label)+'</b><br><span class="muted">类型：'+(n.type==='record'?'知识条目':n.type)+' · 关联度 '+(n.weight||0)+'</span>';
@@ -1071,7 +1076,7 @@ const GraphViz = {
     this.raf=requestAnimationFrame(step);
   },
   _tick(){
-    const ns=this.nodes, k=this.alpha;
+    const all=this.nodes, k=this.alpha; const ns=all.filter(n=>this._vis(n));
     for(let i=0;i<ns.length;i++){
       const a=ns[i]; if(a===this.drag) continue;
       for(let j=0;j<ns.length;j++){
@@ -1083,7 +1088,8 @@ const GraphViz = {
       a.vx+=(this.W/2-a.x)*0.002; a.vy+=(this.H/2-a.y)*0.002;
     }
     for(const e of this.edges){
-      const a=ns.find(n=>n.id===e.source), b=ns.find(n=>n.id===e.target); if(!a||!b) continue;
+      const a=all.find(n=>n.id===e.source), b=all.find(n=>n.id===e.target); if(!a||!b) continue;
+      if(!this._vis(a)||!this._vis(b)) continue;
       let dx=b.x-a.x, dy=b.y-a.y; let d=Math.sqrt(dx*dx+dy*dy)||1; const L=80;
       const f=(d-L)*0.02; a.vx+=(dx/d)*f; a.vy+=(dy/d)*f; b.vx-=(dx/d)*f; b.vy-=(dy/d)*f;
     }
@@ -1100,11 +1106,13 @@ const GraphViz = {
     const focus=this.focus; const fneigh=this._neighbors(focus);
     for(const e of this.edges){
       const a=this.nodes.find(n=>n.id===e.source), b=this.nodes.find(n=>n.id===e.target); if(!a||!b) continue;
+      if(!this._vis(a)||!this._vis(b)) continue;
       if(focus && !(a.id===focus||b.id===focus)){ ctx.strokeStyle='rgba(148,163,184,.08)'; } else { ctx.strokeStyle='rgba(100,116,139,.32)'; }
       ctx.beginPath(); ctx.moveTo(a.x,a.y); ctx.lineTo(b.x,b.y); ctx.stroke();
     }
     const fs=Math.max(9,11/s), off=12/s;
     for(const n of this.nodes){
+      if(!this._vis(n)) continue;
       const r=this._radius(n)/s;
       const dim = focus && n.id!==focus && !fneigh.has(n.id);
       ctx.globalAlpha = dim?0.2:1;
@@ -1136,12 +1144,13 @@ async function loadGraph(){
 }
 function buildGraphStatic(dept,cat,concept){
   const nodes={}, edges=[];
-  const node=(id,label,type,w)=>{ if(!nodes[id]) nodes[id]={id,label,type,weight:0}; nodes[id].weight+=(w||1); return nodes[id]; };
-  // 聚合：部门 / 分类 / 地域 中心节点 + 关键概念节点，边表示共同出现关系
+  const node=(id,label,type,w,minS)=>{ if(!nodes[id]) nodes[id]={id,label,type,weight:0,minS:minS||0}; nodes[id].weight+=(w||1); if(minS!=null&&minS<nodes[id].minS) nodes[id].minS=minS; return nodes[id]; };
+  // 聚合：部门 / 分类 / 地域 中心节点（始终显示）+ 分层概念 + 记录节点（放大后显现）
   const deptCnt={}, catCnt={}, regCnt={}, cmap={};
-  const dc={}; // 部门-分类共现
-  App.kb.forEach(r=>{
+  const dc={}; const rows=[];
+  App.kb.forEach((r,gi)=>{
     if(dept && r.department!==dept) return; if(cat && r.category!==cat) return;
+    rows.push({r,gi});
     if(r.department) deptCnt[r.department]=(deptCnt[r.department]||0)+1;
     if(r.category) catCnt[r.category]=(catCnt[r.category]||0)+1;
     if(r.region) regCnt[r.region]=(regCnt[r.region]||0)+1;
@@ -1152,19 +1161,29 @@ function buildGraphStatic(dept,cat,concept){
       if(r.category) c.cats.add(r.category); if(r.department) c.depts.add(r.department); if(r.region) c.regs.add(r.region);
     });
   });
-  Object.entries(deptCnt).forEach(([k,v])=>node('dept:'+k,k,'dept',v));
-  Object.entries(catCnt).forEach(([k,v])=>node('cat:'+k,CAT_LABELS[k]||k,'cat',v));
-  Object.entries(regCnt).forEach(([k,v])=>node('region:'+k,k,'region',v));
-  // 部门—分类共现边（取最强的若干条，避免全连接过密）
-  Object.entries(dc).sort((a,b)=>b[1]-a[1]).slice(0,50).forEach(([k,v])=>{ const [d,c]=k.split('|'); if(nodes['dept:'+d]&&nodes['cat:'+c]) edges.push({source:'dept:'+d,target:'cat:'+c,w:v}); });
+  Object.entries(deptCnt).forEach(([k,v])=>node('dept:'+k,k,'dept',v,0));
+  Object.entries(catCnt).forEach(([k,v])=>node('cat:'+k,CAT_LABELS[k]||k,'cat',v,0));
+  Object.entries(regCnt).forEach(([k,v])=>node('region:'+k,k,'region',v,0));
+  Object.entries(dc).sort((a,b)=>b[1]-a[1]).slice(0,80).forEach(([k,v])=>{ const [d,c]=k.split('|'); if(nodes['dept:'+d]&&nodes['cat:'+c]) edges.push({source:'dept:'+d,target:'cat:'+c,w:v}); });
   if(concept){
-    Object.keys(cmap).filter(t=>cmap[t].count>=2).sort((a,b)=>cmap[b].count-cmap[a].count).slice(0,60).forEach(t=>{
-      const id='concept:'+t; node(id,t,'concept',cmap[t].count);
+    // 概念分层：越常见越早出现；放大滚轮时逐层展开更多概念
+    const sorted=Object.keys(cmap).filter(t=>cmap[t].count>=2).sort((a,b)=>cmap[b].count-cmap[a].count).slice(0,180);
+    sorted.forEach((t,i)=>{
+      const minS = i<30?0 : i<70?1.5 : i<120?2.2 : 2.8;
+      const id='concept:'+t; node(id,t,'concept',cmap[t].count,minS);
       cmap[t].cats.forEach(c=>{ if(nodes['cat:'+c]) edges.push({source:id,target:'cat:'+c}); });
       cmap[t].depts.forEach(d=>{ if(nodes['dept:'+d]) edges.push({source:id,target:'dept:'+d}); });
       cmap[t].regs.forEach(rg=>{ if(nodes['region:'+rg]) edges.push({source:id,target:'region:'+rg}); });
     });
   }
+  // 记录节点：按重要性取前若干，放大到较大倍数后显现（点击可看详情）
+  rows.sort((a,b)=>(Number(b.r.importance)||0)-(Number(a.r.importance)||0));
+  rows.slice(0,220).forEach(({r,gi},i)=>{
+    const minS = i<40?2.4 : i<120?3.0 : 3.4;
+    const id='rec:'+gi; node(id,String(r.title||'').slice(0,16),'record',3,minS); nodes[id]._id=gi;
+    if(r.department&&nodes['dept:'+r.department]) edges.push({source:id,target:'dept:'+r.department});
+    else if(r.category&&nodes['cat:'+r.category]) edges.push({source:id,target:'cat:'+r.category});
+  });
   return {nodes:Object.values(nodes), edges};
 }
 
@@ -1345,6 +1364,146 @@ async function ingestFile(){
   finally{ btn.disabled=false; btn.textContent='解析并入库'; }
 }
 
+/* ===================== 可视化分析 ===================== */
+function _dOf(r){ return String(r.added_at||r.date||'').slice(0,10); }
+function loadViz(){
+  const kb=App.kb||[];
+  $('#vizStat').innerHTML='<span class="chip">共 <b>'+kb.length+'</b> 条 · 多维度可视化分析（趋势 / 分布 / 词云 / 热度）</span>';
+  renderTrend(kb); renderStack(kb); renderYear(kb); renderCloud(kb); renderHeat(kb);
+}
+function renderTrend(kb){
+  const m={}; kb.forEach(r=>{const d=_dOf(r); if(d){const k=d.slice(0,7); m[k]=(m[k]||0)+1;}});
+  const keys=Object.keys(m).sort().slice(-24);
+  if(!keys.length){$('#vizTrend').innerHTML='<div class="muted">暂无入库日期数据</div>';return;}
+  const max=Math.max(...keys.map(k=>m[k]));
+  const W=Math.max(680,keys.length*32), H=200, slot=(W-40)/keys.length, bw=Math.max(9,slot-8);
+  let bars='',labels='';
+  keys.forEach((k,i)=>{const x=20+i*slot; const h=Math.max(2,(m[k]/max)*(H-46));
+    bars+='<rect class="trend-bar" x="'+x.toFixed(1)+'" y="'+(H-20-h).toFixed(1)+'" width="'+bw.toFixed(1)+'" height="'+h.toFixed(1)+'" rx="2"><title>'+k+'：'+m[k]+' 条</title></rect>';
+    bars+='<text x="'+(x+bw/2).toFixed(1)+'" y="'+(H-24-h).toFixed(1)+'" text-anchor="middle" font-size="10" fill="#475569">'+m[k]+'</text>';
+    if(keys.length<=14||i%2===0) labels+='<text x="'+(x+bw/2).toFixed(1)+'" y="'+(H-5)+'" text-anchor="middle" font-size="9" fill="#94a3b8">'+k.slice(2)+'</text>';
+  });
+  $('#vizTrend').innerHTML='<svg class="trend-svg" viewBox="0 0 '+W+' '+H+'" preserveAspectRatio="xMinYMid meet">'+bars+labels+'</svg>';
+}
+function renderStack(kb){
+  const depts={}; kb.forEach(r=>{const d=r.department||'其他',c=r.category||'other'; depts[d]=depts[d]||{}; depts[d][c]=(depts[d][c]||0)+1;});
+  const order=Object.entries(depts).map(([d,cs])=>[d,Object.values(cs).reduce((a,b)=>a+b,0)]).sort((a,b)=>b[1]-a[1]);
+  const max=Math.max(1,...order.map(o=>o[1]));
+  let html=order.map(([d,tot])=>{const cs=depts[d]; let segs='';
+    CATS.forEach(c=>{ if(cs[c]){ segs+='<span class="vseg" style="width:'+(cs[c]/max*100).toFixed(2)+'%;background:'+(CAT_COLORS[c]||'#64748b')+'" title="'+(CAT_LABELS[c]||c)+'：'+cs[c]+'"></span>'; }});
+    return '<div class="vbar-row"><span class="vlab">'+esc(d)+'</span><span class="vtrack">'+segs+'</span><span class="vval">'+tot+'</span></div>';
+  }).join('');
+  html+='<div class="stack-legend">'+CATS.map(c=>'<span><i style="background:'+(CAT_COLORS[c]||'#64748b')+'"></i>'+(CAT_LABELS[c]||c)+'</span>').join('')+'</div>';
+  $('#vizStack').innerHTML=html;
+}
+function renderYear(kb){
+  const m={}; kb.forEach(r=>{const y=String(r.date||'').slice(0,4); if(/^\d{4}$/.test(y)) m[y]=(m[y]||0)+1;});
+  const keys=Object.keys(m).sort(); const max=Math.max(1,...keys.map(k=>m[k]));
+  $('#vizYear').innerHTML=keys.map(k=>'<div class="vbar-row"><span class="vlab">'+k+' 年</span><span class="vtrack"><span class="vseg" style="width:'+(m[k]/max*100).toFixed(2)+'%;background:#1a7f5a"></span></span><span class="vval">'+m[k]+'</span></div>').join('')||'<div class="muted">无发布年份数据</div>';
+}
+function renderCloud(kb){
+  const m={}; kb.forEach(r=>(r.kg_terms||[]).forEach(t=>{ if(t&&t.length>=2) m[t]=(m[t]||0)+1; }));
+  const top=Object.entries(m).sort((a,b)=>b[1]-a[1]).slice(0,80);
+  if(!top.length){$('#vizCloud').innerHTML='<div class="muted">暂无概念词（知识图谱抽取后可见）</div>';return;}
+  const max=top[0][1], min=top[top.length-1][1], pal=['#0f766e','#1a7f5a','#2563eb','#b45309','#7c3aed','#0891b2','#db2777','#475569'];
+  $('#vizCloud').innerHTML=top.map(([t,c],i)=>{const fs=(13+(max>min?(c-min)/(max-min):0)*24).toFixed(1);
+    return '<span class="cw" style="font-size:'+fs+'px;color:'+pal[i%pal.length]+'" title="'+esc(t)+'：'+c+' 次" onclick="vizCloudClick(this)" data-t="'+esc(t)+'">'+esc(t)+'</span>';}).join('');
+}
+function vizCloudClick(el){ $('#kbQ').value=el.getAttribute('data-t')||''; switchTab('kb'); loadKB(); }
+function renderHeat(kb){
+  const m={}; kb.forEach(r=>{const c=r.category||'other'; m[c]=m[c]||{n:0,imp:0}; m[c].n++; m[c].imp+=(Number(r.importance)||0);});
+  const arr=Object.entries(m).map(([c,v])=>[c,v.imp,v.n]).sort((a,b)=>b[1]-a[1]); const max=Math.max(1,...arr.map(a=>a[1]));
+  $('#vizHeat').innerHTML=arr.map(([c,imp,n])=>'<div class="vbar-row"><span class="vlab">'+(CAT_LABELS[c]||c)+'</span><span class="vtrack"><span class="vseg" style="width:'+(imp/max*100).toFixed(2)+'%;background:'+(CAT_COLORS[c]||'#64748b')+'"></span></span><span class="vval" title="'+n+' 条 · 累计重要度">'+Math.round(imp)+'</span></div>').join('');
+}
+
+/* ===================== 情报推送（日/周/月/季/年简报） ===================== */
+function isoWeek(dt){
+  const d=new Date(Date.UTC(dt.getFullYear(),dt.getMonth(),dt.getDate()));
+  const day=(d.getUTCDay()+6)%7; d.setUTCDate(d.getUTCDate()-day+3);
+  const firstThu=new Date(Date.UTC(d.getUTCFullYear(),0,4));
+  const wk=1+Math.round(((d-firstThu)/86400000-3+((firstThu.getUTCDay()+6)%7))/7);
+  return [d.getUTCFullYear(), wk];
+}
+function bucketKey(dstr, period){
+  if(!dstr) return ''; const p=dstr.split('-').map(Number); const y=p[0],m=p[1]||1,dd=p[2]||1;
+  if(period==='day') return dstr;
+  if(period==='month') return y+'-'+String(m).padStart(2,'0');
+  if(period==='quarter') return y+'-Q'+(Math.floor((m-1)/3)+1);
+  if(period==='year') return String(y);
+  if(period==='week'){ const w=isoWeek(new Date(y,m-1,dd)); return w[0]+'-W'+String(w[1]).padStart(2,'0'); }
+  return dstr;
+}
+function periodLabel(key,period){
+  if(period==='week') return key.replace('-W',' 年第 ')+' 周';
+  if(period==='month') return key.replace('-',' 年 ')+' 月';
+  if(period==='quarter') return key.replace('-Q',' 年第 ')+' 季度';
+  if(period==='year') return key+' 年';
+  return key;
+}
+const PERIOD_NAME={day:'每日',week:'本周',month:'本月',quarter:'本季度',year:'本年度'};
+function curBriefPeriod(){ const on=$('#briefPeriod').querySelector('.on'); return on?on.dataset.p:'day'; }
+let _briefSel=null;
+function loadBrief(key){
+  const period=curBriefPeriod(); const kb=App.kb||[];
+  const groups={}; kb.forEach(r=>{ const k=bucketKey(_dOf(r),period); if(!k) return; (groups[k]=groups[k]||[]).push(r); });
+  const keys=Object.keys(groups).sort().reverse();
+  if(!keys.length){ $('#briefBody').innerHTML='<div class="empty">暂无带日期的记录</div>'; $('#briefHistory').innerHTML=''; renderDelivery(); return; }
+  const sel=(key&&groups[key])?key:keys[0]; _briefSel=sel;
+  const recs=groups[sel].slice().sort((a,b)=>(Number(b.importance)||0)-(Number(a.importance)||0));
+  const idx=keys.indexOf(sel); const prevCnt=keys[idx+1]?groups[keys[idx+1]].length:0; const delta=recs.length-prevCnt;
+  const depts=new Set(recs.map(r=>r.department).filter(Boolean));
+  const hiRel=recs.filter(r=>(r.carbon_rel==null||r.carbon_rel>=0.7)).length;
+  // 分类分布
+  const catCnt={}; recs.forEach(r=>{const c=r.category||'other'; catCnt[c]=(catCnt[c]||0)+1;});
+  const catChips=Object.entries(catCnt).sort((a,b)=>b[1]-a[1]).map(([c,n])=>'<span class="brief-cat-chip">'+(CAT_LABELS[c]||c)+' <b>'+n+'</b></span>').join('');
+  // 部门分布
+  const deptCnt={}; recs.forEach(r=>{const d=r.department||'其他'; deptCnt[d]=(deptCnt[d]||0)+1;});
+  const deptChips=Object.entries(deptCnt).sort((a,b)=>b[1]-a[1]).slice(0,8).map(([d,n])=>'<span class="brief-cat-chip">'+esc(d)+' <b>'+n+'</b></span>').join('');
+  // 重点条目
+  const items=recs.slice(0,10).map(r=>{const gi=App.kb.indexOf(r);
+    return '<div class="brief-item" onclick="openDetail('+gi+')"><div class="bt">'+esc(r.title)+'</div>'
+      +'<div class="bm">'+(r.department?esc(r.department)+' · ':'')+(r.category?(CAT_LABELS[r.category]||r.category)+' · ':'')
+      +(r.quality?'质量'+esc(r.quality)+' · ':'')+'★'+(Number(r.importance)||0).toFixed(1)+' · 收录 '+esc(_dOf(r))+'</div></div>';}).join('');
+  const deltaTxt = delta>0?('<span style="color:#fff">▲ 较上期 +'+delta+'</span>'):(delta<0?('▼ 较上期 '+delta):'与上期持平');
+  $('#briefBody').innerHTML=
+    '<h2 style="margin:14px 0 2px;font-size:17px">'+PERIOD_NAME[period]+'情报 · '+esc(periodLabel(sel,period))+'</h2>'
+    +'<div class="brief-hero">'
+    +'<div class="brief-kpi"><div class="k">'+recs.length+'</div><div class="t">本期新增知识（条）<br>'+deltaTxt+'</div></div>'
+    +'<div class="brief-kpi alt"><div class="k">'+depts.size+'</div><div class="t">涉及部门 / 条线</div></div>'
+    +'<div class="brief-kpi alt2"><div class="k">'+hiRel+'</div><div class="t">高碳相关条目</div></div>'
+    +'<div class="brief-kpi alt3"><div class="k">'+Object.keys(catCnt).length+'</div><div class="t">覆盖分类维度</div></div>'
+    +'</div>'
+    +'<div class="brief-sec"><h3 style="font-size:14px;margin:12px 0 4px">📂 分类分布</h3>'+catChips+'</div>'
+    +'<div class="brief-sec"><h3 style="font-size:14px;margin:12px 0 4px">🏛️ 部门分布</h3>'+(deptChips||'<span class="muted">—</span>')+'</div>'
+    +'<div class="brief-sec"><h3 style="font-size:14px;margin:14px 0 4px">⭐ 重点条目（按重要性 Top 10）</h3>'+(items||'<span class="muted">无</span>')+'</div>';
+  // 历史
+  const hist=keys.slice(0,20).map(k=>'<span class="hist-pill'+(k===sel?' on" style="border-color:#1a7f5a;color:#1a7f5a':'')+'" onclick="loadBrief(\''+k+'\')">'+esc(periodLabel(k,period))+' <b>'+groups[k].length+'</b></span>').join('');
+  $('#briefHistory').innerHTML='<h3 style="margin:0 0 8px;font-size:14px">🕘 历史'+PERIOD_NAME[period]+'情报（点击查看）</h3>'+hist;
+  renderDelivery();
+}
+function renderDelivery(){
+  $('#briefDelivery').innerHTML='<h3 style="margin:0 0 8px;font-size:14px">📬 定时推送与分享</h3>'
+    +'<p class="muted" style="font-size:12.8px;margin:4px 0">• <b>分享链接</b>：本站为公开静态站点，点击上方「复制分享链接」即可把当前情报页发给他人浏览（无需登录）。</p>'
+    +'<p class="muted" style="font-size:12.8px;margin:4px 0">• <b>每日邮件推送</b>：可配置自动化每日定时把「每日情报」摘要发送到指定邮箱（需你提供收件邮箱并授权邮件发送工具）。</p>'
+    +'<p class="muted" style="font-size:12.8px;margin:4px 0">• <b>微信/企业微信推送</b>：可通过企业微信机器人 Webhook 或公众号模板消息定时下发（需相应账号与密钥授权）。</p>'
+    +'<p class="muted" style="font-size:12.8px;margin:4px 0">如需开通邮件或微信定时推送，请告知助手你的收件邮箱 / 机器人 Webhook，我会为你配置定时任务。</p>';
+}
+function copyBriefLink(){
+  const period=curBriefPeriod(); const url=location.origin+location.pathname+'#brief='+period+(_briefSel?':'+_briefSel:'');
+  const done=()=>toast('分享链接已复制：'+url);
+  if(navigator.clipboard&&navigator.clipboard.writeText){ navigator.clipboard.writeText(url).then(done,()=>prompt('复制此链接分享：',url)); }
+  else prompt('复制此链接分享：',url);
+}
+function printBrief(){ window.print(); }
+function applyBriefHash(){
+  const m=location.hash.match(/#brief=([a-z]+)(?::([^&]+))?/);
+  if(!m) return false;
+  const period=m[1], key=m[2]?decodeURIComponent(m[2]):null;
+  switchTab('brief');
+  $('#briefPeriod').querySelectorAll('button').forEach(b=>b.classList.toggle('on',b.dataset.p===period));
+  loadBrief(key); return true;
+}
+
 /* ===================== 通用 ===================== */
 function closeMask(){ $('#mask').classList.remove('on'); if(GraphViz.canvas && GraphViz.canvas.id==='localCanvas'){ cancelAnimationFrame(GraphViz.raf); } }
 function openImg(src){ $('#imgBig').src=src; $('#imgMask').classList.add('on'); }
@@ -1399,7 +1558,8 @@ async function boot(){
   $('#imgMask').addEventListener('click',()=>$('#imgMask').classList.remove('on'));
 
   updateAuthUI();
-  switchTab('feed');
+  if(!applyBriefHash()) switchTab('feed');
+  window.addEventListener('hashchange',applyBriefHash);
 }
 boot();
 </script>
