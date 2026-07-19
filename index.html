@@ -161,6 +161,9 @@
   .graph-legend i{display:inline-block;width:11px;height:11px;border-radius:50%;margin-right:5px;vertical-align:-1px}
   .ggrid{display:grid;grid-template-columns:1fr 320px;gap:14px}
   @media(max-width:880px){.ggrid{grid-template-columns:1fr}.graph-canvas{height:420px}}
+  .graph-full .graph-canvas{height:min(68vh,680px)}
+  .graph-info-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:12px}
+  @media(max-width:760px){.graph-info-row{grid-template-columns:1fr}}
   .sub-card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px;box-shadow:var(--shadow)}
   .kw{display:inline-block;background:#f1ecfe;color:#6d28d9;border:1px solid #e4d6fb;
       border-radius:20px;padding:2px 10px;font-size:11.5px;margin:3px 4px 0 0}
@@ -195,18 +198,28 @@
   .cat-h .dot{width:11px;height:11px;border-radius:50%}
   .cat-h h2{font-size:16px;margin:0;padding-bottom:6px;border-bottom:2px solid var(--green);color:var(--green-d)}
   .cat-h .cnt{font-size:12.5px;color:var(--sub)}
-  .cat-grid.collapsed > .card:nth-child(n+16){display:none}
-  .more-row{margin-top:8px}
+  .cat-grid{grid-template-columns:repeat(3,1fr)}
+  @media(max-width:1100px){.cat-grid{grid-template-columns:repeat(2,1fr)}}
+  @media(max-width:680px){.cat-grid{grid-template-columns:1fr}}
+  .cat-grid[data-collapsed="1"] > .card:nth-child(n+16){display:none}
+  .more-row{margin-top:10px;text-align:center}
+  .more-row button{padding:6px 18px}
   /* 思维导图 */
-  .mmap-card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px;box-shadow:var(--shadow);margin-top:14px}
-  .mmap{display:flex;gap:18px;align-items:flex-start;flex-wrap:wrap}
-  .mm-root{flex:0 0 auto;min-width:120px;background:#0f172a;color:#fff;border-radius:12px;padding:12px 16px;text-align:center;box-shadow:0 2px 8px rgba(15,23,42,.18)}
-  .mm-rt{font-size:11px;color:#94a3b8;margin-bottom:4px}
-  .mm-rx{font-size:14px;font-weight:700;line-height:1.4;word-break:break-all}
-  .mm-branches{flex:1 1 360px;display:flex;flex-direction:column;gap:10px;border-left:2px solid #e2e8f0;padding-left:16px}
-  .mm-branch{display:flex;align-items:flex-start;gap:10px}
-  .mm-gh{flex:0 0 84px;font-size:12px;font-weight:700;color:#fff;background:var(--c);border-radius:8px;padding:5px 8px;text-align:center}
-  .mm-chips{display:flex;flex-wrap:wrap;gap:6px;padding-top:3px}
+  .mmap-card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px;box-shadow:var(--shadow);margin-top:14px}
+  .mmap{display:flex;gap:20px;align-items:stretch}
+  .mm-root{flex:0 0 168px;align-self:center;background:linear-gradient(135deg,#0f766e,#0f172a);color:#fff;border-radius:14px;padding:14px 16px;box-shadow:0 4px 14px rgba(15,23,42,.22)}
+  .mm-rt{font-size:11px;color:#c7f0e6;margin-bottom:5px}
+  .mm-rx{font-size:14px;font-weight:700;line-height:1.45;word-break:break-word}
+  .mm-branches{flex:1 1 auto;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;position:relative;padding-left:18px}
+  .mm-branches:before{content:"";position:absolute;left:0;top:8px;bottom:8px;width:2px;background:linear-gradient(#cbd5e1,#e2e8f0)}
+  @media(max-width:820px){.mmap{flex-direction:column}.mm-root{flex:none;align-self:flex-start}.mm-branches{grid-template-columns:1fr;padding-left:0}.mm-branches:before{display:none}}
+  .mm-branch{position:relative;border:1px solid var(--line);border-left:4px solid var(--c);border-radius:10px;padding:9px 12px;background:#fcfdfd}
+  .mm-branch:before{content:"";position:absolute;left:-18px;top:16px;width:16px;height:2px;background:#cbd5e1;display:none}
+  .mm-gh{font-size:12.5px;font-weight:700;color:var(--c);margin-bottom:6px}
+  .mm-points{margin:0;padding-left:16px;list-style:none}
+  .mm-points li{position:relative;font-size:12.5px;color:#334155;line-height:1.55;margin:3px 0;padding-left:2px}
+  .mm-points li:before{content:"";position:absolute;left:-12px;top:8px;width:6px;height:6px;border-radius:50%;background:var(--c)}
+  .mm-chips{display:flex;flex-wrap:wrap;gap:6px}
   .mm-chip{font-size:12px;color:#334155;background:color-mix(in srgb,var(--c) 12%,#fff);border:1px solid color-mix(in srgb,var(--c) 35%,#fff);border-radius:20px;padding:3px 10px}
   /* 知识图谱工具条 */
   .graph-tools{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-top:10px}
@@ -277,46 +290,42 @@
 
   <!-- 知识图谱 -->
   <section class="view" id="v-graph">
-    <div class="ggrid">
-      <div>
-        <div class="graph-legend" id="graphLegend">
-          <span><i style="background:#0f766e"></i>知识</span>
-          <span><i style="background:#1a7f5a"></i>部门</span>
-          <span><i style="background:#2563eb"></i>分类</span>
-          <span><i style="background:#64748b"></i>地域</span>
-          <span><i style="background:#7c3aed"></i>标签</span>
-          <span><i style="background:#b45309"></i>概念</span>
-        </div>
-        <div class="graph-wrap">
-          <canvas class="graph-canvas" id="graphCanvas"></canvas>
-          <div class="graph-tip" id="graphTip"></div>
-        </div>
-        <div class="graph-tools">
-          <select id="graphDept"><option value="">全部部门</option></select>
-          <select id="graphCat"><option value="">全部分类</option></select>
-          <label class="chk"><input type="checkbox" id="graphConcept"> 含实体概念节点</label>
-          <button onclick="loadGraph()">重新聚合</button>
-          <button class="ghost" onclick="GraphViz.relayout()">重新布局</button>
-          <span class="sp"></span>
-          <button class="zm" title="放大" onclick="GraphViz.zoom(1.2)">＋</button>
-          <button class="zm" title="缩小" onclick="GraphViz.zoom(1/1.2)">－</button>
-          <button class="ghost" onclick="GraphViz.resetView()">重置视图</button>
-        </div>
-        <div class="muted" id="graphMeta" style="margin-top:8px"></div>
+    <div class="graph-legend" id="graphLegend">
+      <span><i style="background:#0f766e"></i>知识</span>
+      <span><i style="background:#1a7f5a"></i>部门</span>
+      <span><i style="background:#2563eb"></i>分类</span>
+      <span><i style="background:#64748b"></i>地域</span>
+      <span><i style="background:#7c3aed"></i>标签</span>
+      <span><i style="background:#b45309"></i>概念</span>
+    </div>
+    <div class="graph-wrap graph-full">
+      <canvas class="graph-canvas" id="graphCanvas"></canvas>
+      <div class="graph-tip" id="graphTip"></div>
+    </div>
+    <div class="graph-tools">
+      <select id="graphDept"><option value="">全部部门</option></select>
+      <select id="graphCat"><option value="">全部分类</option></select>
+      <label class="chk"><input type="checkbox" id="graphConcept"> 含实体概念节点</label>
+      <button onclick="loadGraph()">重新聚合</button>
+      <button class="ghost" onclick="GraphViz.relayout()">重新布局</button>
+      <span class="sp"></span>
+      <button class="zm" title="放大" onclick="GraphViz.zoom(1.2)">＋</button>
+      <button class="zm" title="缩小" onclick="GraphViz.zoom(1/1.2)">－</button>
+      <button class="ghost" onclick="GraphViz.resetView()">重置视图</button>
+    </div>
+    <div class="muted" id="graphMeta" style="margin-top:8px"></div>
+    <div class="graph-info-row">
+      <div class="sub-card">
+        <h2 style="margin-top:0;font-size:15px">图谱说明</h2>
+        <p class="muted" style="font-size:12.8px;margin:6px 0">
+          节点大小代表关联强度，连线表示「知识 — 部门 / 分类 / 地域 / 标签 / 概念」的归属与涉及关系。
+          支持 <b>滚轮缩放 · 拖拽平移 · 点击聚焦</b>，缩放时节点尺寸保持恒定。
+        </p>
+        <p class="muted" style="font-size:12.8px;margin:0">点击「知识」节点查看详情；点击其它节点按该维度筛选知识库。</p>
       </div>
-      <div>
-        <div class="sub-card">
-          <h2 style="margin-top:0;font-size:15px">图谱说明</h2>
-          <p class="muted" style="font-size:12.8px;margin:6px 0">
-            每条知识在入库时自动完成 <b>切片 → 向量化 → 元数据标注 → 知识图谱概念抽取 → 质量检查</b>。
-            节点大小代表关联强度，连线表示「知识—部门/分类/地域/标签/概念」的归属与涉及关系。
-          </p>
-          <p class="muted" style="font-size:12.8px">点击「知识」节点可查看详情；点击其它节点可按该维度筛选。</p>
-        </div>
-        <div class="sub-card" id="graphInfo" style="margin-top:12px">
-          <h2 style="margin-top:0;font-size:15px">选中节点</h2>
-          <p class="muted" id="graphSelInfo" style="font-size:12.8px">未选中节点。</p>
-        </div>
+      <div class="sub-card" id="graphInfo">
+        <h2 style="margin-top:0;font-size:15px">选中节点</h2>
+        <p class="muted" id="graphSelInfo" style="font-size:12.8px">未选中节点。</p>
       </div>
     </div>
   </section>
@@ -753,8 +762,12 @@ function loadDetailStatic(idx){
   const localNodes=[{id:'r',label:(r.title||'').slice(0,18),type:'record',weight:5}]; const localEdges=[];
   [['department','dept',r.department],['category','cat',r.category?CAT_LABELS[r.category]:null],['region','region',r.region]].forEach(([f,t,v])=>{
     if(v){localNodes.push({id:f,label:v,type:t,weight:3});localEdges.push({source:'r',target:f});}});
+  const _seen=new Set((r.tags||[]));
   (r.tags||[]).forEach(t=>{localNodes.push({id:'t'+t,label:t,type:'tag',weight:2});localEdges.push({source:'r',target:'t'+t});});
-  (r.kg_terms||[]).slice(0,16).forEach((t,i)=>{localNodes.push({id:'k'+i,label:t,type:'concept',weight:1});localEdges.push({source:'r',target:'k'+i});});
+  (r.kg_terms||[]).forEach((t,i)=>{ if(_seen.has(t)) return; _seen.add(t); localNodes.push({id:'k'+i,label:t,type:'concept',weight:2});localEdges.push({source:'r',target:'k'+i});
+    // 概念挂到最相关的元数据节点上，形成二级关联，图谱更丰富
+    if(r.department && (t.indexOf(r.department)>=0)) localEdges.push({source:'department',target:'k'+i});
+  });
   $('#modal').innerHTML=`
     <button class="x" onclick="closeMask()">×</button>
     <h2>${esc(r.title)}</h2>
@@ -770,26 +783,69 @@ function loadDetailStatic(idx){
       <div>
         <div class="sub-card" style="margin-bottom:12px"><h3 style="font-size:13.5px;margin:0 0 6px">标签</h3><div>${tags||'<span class="muted">无</span>'}</div>
           <h3 style="font-size:13.5px;margin:10px 0 6px">本条目知识图谱</h3>
-          <div class="graph-wrap" style="border:none;box-shadow:none"><canvas class="graph-canvas" id="localCanvas" style="height:240px"></canvas></div></div>
+          <div class="graph-wrap" style="border:none;box-shadow:none"><canvas class="graph-canvas" id="localCanvas" style="height:320px"></canvas></div>
+          <p class="muted" style="font-size:11.5px;margin:6px 0 0">滚轮缩放 · 拖拽平移 · 点击节点查看</p></div>
       </div>
     </div>
     <div class="mmap-card"><h3 style="font-size:13.5px;margin:0 0 8px">思维导图 · 实体与关系</h3>${buildMindMapHtml(r)}</div>`;
   $('#mask').classList.add('on');
   GraphViz.mount('localCanvas', localNodes, localEdges);
 }
-function buildMindMapHtml(r){
-  const groups=[];
-  if(r.department) groups.push({t:'部门', c:(DEPT_COLORS[r.department]||'#1a7f5a'), items:[r.department]});
-  if(r.category) groups.push({t:'分类', c:(CAT_COLORS[r.category]||'#2563eb'), items:[CAT_LABELS[r.category]||r.category]});
-  if(r.region) groups.push({t:'地域', c:'#0891b2', items:[r.region]});
-  if((r.tags||[]).length) groups.push({t:'关键词标签', c:'#7c3aed', items:r.tags.slice(0,14)});
+/* 把正文切成句子（用于思维导图内容提炼） */
+function _sentences(text){
+  return String(text||'').replace(/\s+/g,' ')
+    .split(/[。！？；;!?]+|\n+/).map(s=>s.trim())
+    .filter(s=>s.length>=6 && s.length<=140);
+}
+function _trim(s,n){ n=n||46; return s.length>n?s.slice(0,n)+'…':s; }
+/* 从全文提炼各主题要点，形成思维导图分支 */
+function analyzeContent(r){
+  const content=String(r.content||r.content_fetched||r.summary||'');
+  const sents=_sentences(content);
+  const pick=(re,max)=>{ const out=[],seen=new Set();
+    for(const s of sents){ if(re.test(s)){ const key=s.slice(0,16); if(seen.has(key))continue; seen.add(key); out.push(_trim(s)); if(out.length>=max)break; } }
+    return out; };
+  const branches=[];
+  // 一句话概述
+  const overview = (r.summary && r.summary.length>10) ? _trim(r.summary,60) : (sents[0]?_trim(sents[0],60):'');
+  if(overview) branches.push({t:'内容概述', c:'#0f766e', kind:'text', items:[overview]});
+  // 主要目标 / 量化指标
+  const goals=pick(/(目标|力争|到20\d{2}|20\d{2}年|达到|实现|降低|下降|提升|提高|不低于|不超过|占比|比重|翻番)/,5)
+    .filter(s=>/\d|%|百分|万吨|亿|千瓦|吨|倍|个|km|公里/.test(s));
+  if(goals.length) branches.push({t:'主要目标 · 指标', c:'#1a7f5a', kind:'text', items:goals});
+  // 重点任务 / 措施
+  const tasks=pick(/(推进|推动|加强|加快|建设|实施|开展|完善|健全|构建|优化|培育|发展|严格|落实|鼓励|支持|强化|探索|建立|打造|部署|统筹)/,6);
+  if(tasks.length) branches.push({t:'重点任务 · 举措', c:'#2563eb', kind:'text', items:tasks});
+  // 责任主体 / 涉及部门（从实体中识别机构专名）
   const kg=(r.kg_terms||[]);
-  if(kg.length) groups.push({t:'实体概念', c:'#b45309', items:kg.slice(0,18)});
-  if(!groups.length) return '<div class="muted">暂无可用结构信息</div>';
-  const root=(r.title||'知识条目').slice(0,16);
-  let html='<div class="mmap"><div class="mm-root"><div class="mm-rt">知识条目</div><div class="mm-rx">'+esc(root)+'</div></div><div class="mm-branches">';
-  groups.forEach(g=>{
-    html+='<div class="mm-branch" style="--c:'+g.c+'"><div class="mm-gh">'+esc(g.t)+'</div><div class="mm-chips">'+g.items.map(it=>'<span class="mm-chip">'+esc(String(it))+'</span>').join('')+'</div></div>';
+  const orgs=kg.filter(t=>/部$|委$|局$|银行|证监会|总局|人民银行|国资委|林草局/.test(t));
+  if(r.department && orgs.indexOf(r.department)<0) orgs.unshift(r.department);
+  if(orgs.length) branches.push({t:'责任主体 · 部门', c:'#7c3aed', kind:'chip', items:Array.from(new Set(orgs)).slice(0,10)});
+  // 涉及领域 / 关键概念（其余实体）
+  const concepts=kg.filter(t=>orgs.indexOf(t)<0);
+  if(concepts.length) branches.push({t:'涉及领域 · 关键概念', c:'#b45309', kind:'chip', items:concepts.slice(0,20)});
+  // 分类 / 地域 / 质量
+  const meta=[];
+  if(r.category) meta.push((CAT_LABELS[r.category]||r.category));
+  if(r.region) meta.push(r.region);
+  if(r.quality) meta.push('质量'+r.quality);
+  if(r.date) meta.push('发布 '+r.date);
+  if(meta.length) branches.push({t:'分类属性', c:'#64748b', kind:'chip', items:meta});
+  return branches;
+}
+function buildMindMapHtml(r){
+  const branches=analyzeContent(r);
+  if(!branches.length) return '<div class="muted">暂无可提炼的正文内容（该条目可能仅有摘要）。</div>';
+  const root=(r.title||'知识条目');
+  let html='<div class="mmap"><div class="mm-root"><div class="mm-rt">📄 知识条目</div><div class="mm-rx">'+esc(_trim(root,34))+'</div></div><div class="mm-branches">';
+  branches.forEach(g=>{
+    let leaves;
+    if(g.kind==='text'){
+      leaves='<ul class="mm-points">'+g.items.map(it=>'<li>'+esc(String(it))+'</li>').join('')+'</ul>';
+    } else {
+      leaves='<div class="mm-chips">'+g.items.map(it=>'<span class="mm-chip">'+esc(String(it))+'</span>').join('')+'</div>';
+    }
+    html+='<div class="mm-branch" style="--c:'+g.c+'"><div class="mm-gh">'+esc(g.t)+'</div><div class="mm-body">'+leaves+'</div></div>';
   });
   html+='</div></div>';
   return html;
@@ -845,7 +901,7 @@ const GraphViz = {
     this.scale=s2; this.tx=mx-wx*s2; this.ty=my-wy*s2; this.alpha=Math.max(this.alpha,0.5); this._loop();
   },
   resetView(){ this.scale=1; this.tx=0; this.ty=0; this.focus=null; this.alpha=1; this._loop(); },
-  _pick(mx,my){ const wx=(mx-this.tx)/this.scale, wy=(my-this.ty)/this.scale; for(const n of this.nodes){ const r=this._radius(n)+5; if((wx-n.x)**2+(wy-n.y)**2<=r*r) return n; } return null; },
+  _pick(mx,my){ const wx=(mx-this.tx)/this.scale, wy=(my-this.ty)/this.scale; for(const n of this.nodes){ const r=(this._radius(n)+6)/this.scale; if((wx-n.x)**2+(wy-n.y)**2<=r*r) return n; } return null; },
   _radius(n){ return n.type==='record'?14:6+Math.min(n.weight||1,8); },
   _click(n){
     $('#graphSelInfo').innerHTML='<b>'+esc(n.label)+'</b><br><span class="muted">类型：'+(n.type==='record'?'知识条目':n.type)+' · 关联度 '+(n.weight||0)+'</span>';
@@ -889,24 +945,26 @@ const GraphViz = {
     this.alpha*=0.985;
   },
   _draw(){
-    const ctx=this.ctx;
+    const ctx=this.ctx; const s=this.scale;
     ctx.setTransform(1,0,0,1,0,0); ctx.clearRect(0,0,this.canvas.width,this.canvas.height);
-    ctx.setTransform(this.dpr*this.scale,0,0,this.dpr*this.scale, this.dpr*this.tx, this.dpr*this.ty);
-    ctx.lineWidth=1;
+    ctx.setTransform(this.dpr*s,0,0,this.dpr*s, this.dpr*this.tx, this.dpr*this.ty);
+    // 线宽/半径/字号按 1/scale 补偿：缩放时节点视觉尺寸恒定，只有间距变化
+    ctx.lineWidth=1/s;
     const focus=this.focus; const fneigh=this._neighbors(focus);
     for(const e of this.edges){
       const a=this.nodes.find(n=>n.id===e.source), b=this.nodes.find(n=>n.id===e.target); if(!a||!b) continue;
       if(focus && !(a.id===focus||b.id===focus)){ ctx.strokeStyle='rgba(148,163,184,.08)'; } else { ctx.strokeStyle='rgba(100,116,139,.32)'; }
       ctx.beginPath(); ctx.moveTo(a.x,a.y); ctx.lineTo(b.x,b.y); ctx.stroke();
     }
+    const fs=Math.max(9,11/s), off=12/s;
     for(const n of this.nodes){
-      const r=this._radius(n);
+      const r=this._radius(n)/s;
       const dim = focus && n.id!==focus && !fneigh.has(n.id);
       ctx.globalAlpha = dim?0.2:1;
       ctx.beginPath(); ctx.arc(n.x,n.y,r,0,Math.PI*2); ctx.fillStyle=GCOLORS[n.type]||'#94a3b8'; ctx.fill();
-      if(n===this.hover){ ctx.lineWidth=2; ctx.strokeStyle='#0f172a'; ctx.stroke(); }
-      if(n.id===focus){ ctx.lineWidth=3; ctx.strokeStyle='#f59e0b'; ctx.stroke(); }
-      if((r>=9 || this.hover===n) && !dim){ ctx.fillStyle='#1e2b25'; ctx.font='11px sans-serif'; ctx.textAlign='center'; ctx.fillText(n.label.length>10?n.label.slice(0,10)+'…':n.label, n.x, n.y+r+12); }
+      if(n===this.hover){ ctx.lineWidth=2/s; ctx.strokeStyle='#0f172a'; ctx.stroke(); ctx.lineWidth=1/s; }
+      if(n.id===focus){ ctx.lineWidth=3/s; ctx.strokeStyle='#f59e0b'; ctx.stroke(); ctx.lineWidth=1/s; }
+      if((this._radius(n)>=9 || this.hover===n) && !dim){ ctx.fillStyle='#1e2b25'; ctx.font=fs+'px sans-serif'; ctx.textAlign='center'; ctx.fillText(n.label.length>10?n.label.slice(0,10)+'…':n.label, n.x, n.y+r+off); }
       ctx.globalAlpha=1;
     }
   },
@@ -1035,7 +1093,8 @@ async function loadManage(){
     $('#mAdmin').innerHTML='<div class="note">🌐 静态只读模式：用户 / 团队 / 质量扫描需在部署后端后使用。</div>';
   }
 }
-function qualColor(q){ q=Number(q)||0; if(q>=80) return '#16a34a'; if(q>=60) return '#2563eb'; if(q>=40) return '#d97706'; return '#94a3b8'; }
+const QUAL_COLORS={'A':'#16a34a','B':'#2563eb','C':'#d97706','未知':'#94a3b8'};
+function qualColor(q){ if(QUAL_COLORS[q]) return QUAL_COLORS[q]; const n=Number(q); if(!isNaN(n)){ if(n>=80) return '#16a34a'; if(n>=60) return '#2563eb'; if(n>=40) return '#d97706'; } return '#94a3b8'; }
 function bars(id, map, labelFn, colorFn){
   const el=$('#'+id); const entries=Object.entries(map).sort((a,b)=>b[1]-a[1]); const max=Math.max(1,...entries.map(e=>e[1]));
   el.innerHTML='<h2 style="margin-top:0">'+el.querySelector('h2').textContent+'</h2>'+entries.map(([k,v])=>{
