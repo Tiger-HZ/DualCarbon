@@ -3,7 +3,7 @@
 OpenAlex 为完全开放的学术图谱 API（无需密钥），可按关键词/概念检索、带摘要与机构国家。
 用法：python crawl_academic.py [额外关键词 ...]   环境变量 PAGES 控制每词翻页数(默认6)
 """
-import os, sys, json, time, ssl, urllib.request, urllib.parse, re
+import os, sys, json, time, ssl, urllib.request, urllib.parse, re, datetime
 BASE = os.path.dirname(os.path.abspath(__file__))
 INBOX = os.path.join(BASE, "kb", "inbox.json")
 CTX = ssl.create_default_context(); CTX.check_hostname = False; CTX.verify_mode = ssl.CERT_NONE
@@ -100,7 +100,7 @@ def main():
                     "tags": concepts[:5],
                     "content": abs[:3000] if abs else "",
                     "content_fetched": bool(abs),
-                    "added_at": date or "2026-07-19",
+                    "added_at": datetime.date.today().isoformat(),
                 }
                 inbox.append(rec); existing.add(title.strip().lower())
                 if link: existing.add(norm_url(link))

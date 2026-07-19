@@ -19,3 +19,6 @@ fetch_log.txt
 
 # 本地部署令牌（不提交）
 .deploy_token
+
+push_config.json
+push_config.json.example
