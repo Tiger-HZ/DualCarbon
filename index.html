@@ -204,23 +204,26 @@
   .cat-grid[data-collapsed="1"] > .card:nth-child(n+16){display:none}
   .more-row{margin-top:10px;text-align:center}
   .more-row button{padding:6px 18px}
-  /* 思维导图 */
-  .mmap-card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px;box-shadow:var(--shadow);margin-top:14px}
-  .mmap{display:flex;gap:20px;align-items:stretch}
-  .mm-root{flex:0 0 168px;align-self:center;background:linear-gradient(135deg,#0f766e,#0f172a);color:#fff;border-radius:14px;padding:14px 16px;box-shadow:0 4px 14px rgba(15,23,42,.22)}
-  .mm-rt{font-size:11px;color:#c7f0e6;margin-bottom:5px}
-  .mm-rx{font-size:14px;font-weight:700;line-height:1.45;word-break:break-word}
-  .mm-branches{flex:1 1 auto;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;position:relative;padding-left:18px}
-  .mm-branches:before{content:"";position:absolute;left:0;top:8px;bottom:8px;width:2px;background:linear-gradient(#cbd5e1,#e2e8f0)}
-  @media(max-width:820px){.mmap{flex-direction:column}.mm-root{flex:none;align-self:flex-start}.mm-branches{grid-template-columns:1fr;padding-left:0}.mm-branches:before{display:none}}
-  .mm-branch{position:relative;border:1px solid var(--line);border-left:4px solid var(--c);border-radius:10px;padding:9px 12px;background:#fcfdfd}
-  .mm-branch:before{content:"";position:absolute;left:-18px;top:16px;width:16px;height:2px;background:#cbd5e1;display:none}
-  .mm-gh{font-size:12.5px;font-weight:700;color:var(--c);margin-bottom:6px}
-  .mm-points{margin:0;padding-left:16px;list-style:none}
-  .mm-points li{position:relative;font-size:12.5px;color:#334155;line-height:1.55;margin:3px 0;padding-left:2px}
-  .mm-points li:before{content:"";position:absolute;left:-12px;top:8px;width:6px;height:6px;border-radius:50%;background:var(--c)}
-  .mm-chips{display:flex;flex-wrap:wrap;gap:6px}
-  .mm-chip{font-size:12px;color:#334155;background:color-mix(in srgb,var(--c) 12%,#fff);border:1px solid color-mix(in srgb,var(--c) 35%,#fff);border-radius:20px;padding:3px 10px}
+  /* 思维导图（专业层级树） */
+  .mmap-card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:18px;box-shadow:var(--shadow);margin-top:14px}
+  .mmtree{font-size:13px;line-height:1.5}
+  .mm-root{display:inline-block;background:linear-gradient(135deg,#0f766e,#0f172a);color:#fff;border-radius:12px;padding:11px 18px;font-weight:700;font-size:14.5px;box-shadow:0 6px 18px rgba(15,23,42,.18);max-width:440px;word-break:break-word}
+  .mm-level1{margin-top:16px;display:flex;flex-direction:column;gap:12px}
+  .mm-branch{position:relative;border:1px solid var(--line);border-left:5px solid var(--c);border-radius:10px;padding:9px 13px;background:var(--card);box-shadow:0 1px 3px rgba(15,23,42,.04)}
+  .mm-gh{font-weight:700;font-size:13.5px;color:var(--c);display:flex;align-items:center;gap:7px}
+  .mm-gh.toggle{cursor:pointer;user-select:none}
+  .mm-caret{display:inline-block;width:13px;color:#94a3b8;font-size:10px;transition:transform .15s}
+  .mm-caret.open{transform:rotate(90deg)}
+  .mm-cnt{margin-left:auto;font-size:11px;color:#64748b;background:#f1f5f9;border-radius:10px;padding:1px 8px;font-weight:600}
+  .mm-children{margin:9px 0 3px 14px;padding-left:16px;border-left:2px dashed #e2e8f0;display:flex;flex-direction:column;gap:7px}
+  .mm-leaf{position:relative;font-size:12.5px;color:#334155;padding:2px 0;line-height:1.55}
+  .mm-leaf:before{content:"";position:absolute;left:-16px;top:11px;width:12px;height:2px;background:#cbd5e1}
+  .mm-leaf .txt{display:inline-block;vertical-align:top}
+  .mm-chiprow{display:flex;flex-wrap:wrap;gap:7px;margin:9px 0 3px 14px}
+  .mm-chip{font-size:12px;color:#1e293b;background:color-mix(in srgb,var(--c) 12%,#fff);border:1px solid color-mix(in srgb,var(--c) 38%,#fff);border-radius:20px;padding:3px 11px;transition:.12s}
+  .mm-chip:hover{background:color-mix(in srgb,var(--c) 22%,#fff)}
+  .mm-empty{color:#94a3b8;font-size:12.5px}
+  @media(max-width:820px){.mm-children{margin-left:8px;padding-left:12px}}
   /* 知识图谱工具条 */
   .graph-tools{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-top:10px}
   .graph-tools button{padding:6px 11px;font-size:12.5px}
@@ -764,10 +767,15 @@ function loadDetailStatic(idx){
     if(v){localNodes.push({id:f,label:v,type:t,weight:3});localEdges.push({source:'r',target:f});}});
   const _seen=new Set((r.tags||[]));
   (r.tags||[]).forEach(t=>{localNodes.push({id:'t'+t,label:t,type:'tag',weight:2});localEdges.push({source:'r',target:'t'+t});});
-  (r.kg_terms||[]).forEach((t,i)=>{ if(_seen.has(t)) return; _seen.add(t); localNodes.push({id:'k'+i,label:t,type:'concept',weight:2});localEdges.push({source:'r',target:'k'+i});
+  const _ck=[]; // 去重后的概念节点 id 列表，用于构建概念间互联
+  (r.kg_terms||[]).forEach((t,i)=>{ if(_seen.has(t)) return; _seen.add(t); const cid='k'+localNodes.length; _ck.push(cid);
+    localNodes.push({id:cid,label:t,type:'concept',weight:2});localEdges.push({source:'r',target:cid});
     // 概念挂到最相关的元数据节点上，形成二级关联，图谱更丰富
-    if(r.department && (t.indexOf(r.department)>=0)) localEdges.push({source:'department',target:'k'+i});
+    if(r.department && (t.indexOf(r.department)>=0)) localEdges.push({source:'department',target:cid});
+    if(r.category && (t.indexOf(CAT_LABELS[r.category]||'')>=0)) localEdges.push({source:'category',target:cid});
   });
+  // 概念之间按出现顺序连成链，形成网状结构而非单星，图谱更有层次
+  for(let i=1;i<_ck.length;i++) localEdges.push({source:_ck[i-1],target:_ck[i]});
   $('#modal').innerHTML=`
     <button class="x" onclick="closeMask()">×</button>
     <h2>${esc(r.title)}</h2>
@@ -795,60 +803,114 @@ function loadDetailStatic(idx){
 function _sentences(text){
   return String(text||'').replace(/\s+/g,' ')
     .split(/[。！？；;!?]+|\n+/).map(s=>s.trim())
-    .filter(s=>s.length>=6 && s.length<=140);
+    .filter(s=>s.length>=5 && s.length<=170);
 }
 function _trim(s,n){ n=n||46; return s.length>n?s.slice(0,n)+'…':s; }
-/* 从全文提炼各主题要点，形成思维导图分支 */
-function analyzeContent(r){
+/* 思维导图配色（分支层级） */
+const MM_COLORS={overview:'#0f766e',bg:'#0e7490',goal:'#1a7f5a',task:'#2563eb',concept:'#b45309',org:'#7c3aed',meta:'#64748b'};
+/* 检测中文/数字枚举项：一、二、三 / （一）（二） / 1. 2. / 一是… */
+function _enumRe(){ return /^(第?[一二三四五六七八九十]+[、.．]|[（(][一二三四五六七八九十\d]+[)）]|^\d+[、.．]|^[一二三四五六七八九十]+、)/; }
+function _enumItems(sents){ const re=_enumRe(); return sents.filter(s=>re.test(s)); }
+function _enumHead(sents){
+  const re=_enumRe(); let fi=-1;
+  for(let i=0;i<sents.length;i++){ if(re.test(sents[i])){ fi=i; break; } }
+  if(fi<=0) return null;
+  const h=sents[fi-1];
+  return re.test(h)?null:h;
+}
+function _verbSentences(sents,max){
+  const re=/(推进|推动|加强|加快|建设|实施|开展|完善|健全|构建|优化|培育|发展|严格|落实|鼓励|支持|强化|探索|建立|打造|部署|统筹|深化|促进|提升|开展)/;
+  const out=[],seen=new Set();
+  for(const s of sents){ if(re.test(s)){ const k=s.slice(0,14); if(seen.has(k))continue; seen.add(k); out.push(s); if(out.length>=max)break; } }
+  return out;
+}
+function _goalSentences(sents,max){
+  const re=/(目标|力争|到20\d{2}|20\d{2}年|达到|实现|降低|下降|提升|提高|不低于|不超过|占比|比重|翻番|控制在|削减|减排|新增|装机|累计|年均)/;
+  const num=/\d|%|百分|万吨|亿|千瓦|吨|倍|个|公里|km|GW|MW|亿元/;
+  return sents.filter(s=>re.test(s)&&num.test(s)).slice(0,max);
+}
+/* 从全文/摘要递归提炼层级结构，形成专业思维导图树 */
+function analyzeMindmap(r){
   const content=String(r.content||r.content_fetched||r.summary||'');
+  const summary=String(r.summary||'');
   const sents=_sentences(content);
-  const pick=(re,max)=>{ const out=[],seen=new Set();
-    for(const s of sents){ if(re.test(s)){ const key=s.slice(0,16); if(seen.has(key))continue; seen.add(key); out.push(_trim(s)); if(out.length>=max)break; } }
-    return out; };
-  const branches=[];
-  // 一句话概述
-  const overview = (r.summary && r.summary.length>10) ? _trim(r.summary,60) : (sents[0]?_trim(sents[0],60):'');
-  if(overview) branches.push({t:'内容概述', c:'#0f766e', kind:'text', items:[overview]});
-  // 主要目标 / 量化指标
-  const goals=pick(/(目标|力争|到20\d{2}|20\d{2}年|达到|实现|降低|下降|提升|提高|不低于|不超过|占比|比重|翻番)/,5)
-    .filter(s=>/\d|%|百分|万吨|亿|千瓦|吨|倍|个|km|公里/.test(s));
-  if(goals.length) branches.push({t:'主要目标 · 指标', c:'#1a7f5a', kind:'text', items:goals});
-  // 重点任务 / 措施
-  const tasks=pick(/(推进|推动|加强|加快|建设|实施|开展|完善|健全|构建|优化|培育|发展|严格|落实|鼓励|支持|强化|探索|建立|打造|部署|统筹)/,6);
-  if(tasks.length) branches.push({t:'重点任务 · 举措', c:'#2563eb', kind:'text', items:tasks});
-  // 责任主体 / 涉及部门（从实体中识别机构专名）
-  const kg=(r.kg_terms||[]);
-  const orgs=kg.filter(t=>/部$|委$|局$|银行|证监会|总局|人民银行|国资委|林草局/.test(t));
-  if(r.department && orgs.indexOf(r.department)<0) orgs.unshift(r.department);
-  if(orgs.length) branches.push({t:'责任主体 · 部门', c:'#7c3aed', kind:'chip', items:Array.from(new Set(orgs)).slice(0,10)});
-  // 涉及领域 / 关键概念（其余实体）
-  const concepts=kg.filter(t=>orgs.indexOf(t)<0);
-  if(concepts.length) branches.push({t:'涉及领域 · 关键概念', c:'#b45309', kind:'chip', items:concepts.slice(0,20)});
-  // 分类 / 地域 / 质量
+  const sumSent=_sentences(summary);
+  const tree={id:'root',label:r.title||'知识条目',children:[]};
+  // 一、内容概述
+  const ov=(sumSent.length?sumSent:sents).slice(0,3);
+  if(ov.length) tree.children.push({label:'一、内容概述',color:MM_COLORS.overview,children:ov.map(s=>({text:s}))});
+  // 二、背景与意义
+  const bg=sents.filter(s=>/(背景|意义|为贯彻|为贯彻落实|为深入|为落实|根据|依据|按照|旨在|有利于|旨在|围绕|紧扣)/.test(s)).slice(0,3);
+  if(bg.length) tree.children.push({label:'二、背景与意义',color:MM_COLORS.bg,children:bg.map(s=>({text:s}))});
+  // 三、目标 · 量化指标
+  const goals=_goalSentences(sents,6);
+  if(goals.length) tree.children.push({label:'三、目标 · 量化指标',color:MM_COLORS.goal,children:goals.map(s=>({text:s}))});
+  // 四、主要任务 · 举措（枚举结构 → 真实层级）
+  const items=_enumItems(sents);
+  const head=_enumHead(sents);
+  if(items.length>=2){
+    const node={label:'四、主要任务 · 举措',color:MM_COLORS.task,children:[]};
+    if(head) node.children.push({text:head});
+    items.forEach(s=>node.children.push({text:s}));
+    tree.children.push(node);
+  } else {
+    const vb=_verbSentences(sents,6);
+    if(vb.length) tree.children.push({label:'四、主要任务 · 举措',color:MM_COLORS.task,children:vb.map(s=>({text:s}))});
+  }
+  // 五、关键概念 · 术语
+  const kg=(r.kg_terms||[]).slice(0,30);
+  if(kg.length) tree.children.push({label:'五、关键概念 · 术语',color:MM_COLORS.concept,chips:kg});
+  // 六、涉及主体 · 部门
+  const orgs=[];
+  if(r.department) orgs.push(r.department);
+  (r.kg_terms||[]).forEach(t=>{ if(/部$|委$|局$|银行|证监会|总局|人民银行|国资委|林草局|省政府|市政府|协会|中心/.test(t)&&orgs.indexOf(t)<0) orgs.push(t); });
+  if(orgs.length) tree.children.push({label:'六、涉及主体 · 部门',color:MM_COLORS.org,chips:Array.from(new Set(orgs)).slice(0,12)});
+  // 七、分类属性
   const meta=[];
-  if(r.category) meta.push((CAT_LABELS[r.category]||r.category));
-  if(r.region) meta.push(r.region);
-  if(r.quality) meta.push('质量'+r.quality);
-  if(r.date) meta.push('发布 '+r.date);
-  if(meta.length) branches.push({t:'分类属性', c:'#64748b', kind:'chip', items:meta});
-  return branches;
+  if(r.category) meta.push('分类：'+(CAT_LABELS[r.category]||r.category));
+  if(r.region) meta.push('地域：'+r.region);
+  if(r.quality) meta.push('质量：'+r.quality);
+  if(r.date) meta.push('发布：'+r.date);
+  if(r.tags&&r.tags.length) meta.push('标签：'+r.tags.join('、'));
+  if(meta.length) tree.children.push({label:'七、分类属性',color:MM_COLORS.meta,chips:meta});
+  return tree;
+}
+/* 递归渲染思维导图树 */
+function _mmRender(node,depth){
+  if(node.text!=null) return '<div class="mm-leaf"><span class="txt">'+esc(node.text)+'</span></div>';
+  if(node.chips){
+    const chips=node.chips.map(c=>'<span class="mm-chip">'+esc(c)+'</span>').join('');
+    return '<div class="mm-branch" style="--c:'+node.color+'">'
+      +'<div class="mm-gh">'+esc(node.label)+'<span class="mm-cnt">'+node.chips.length+'</span></div>'
+      +'<div class="mm-chiprow">'+chips+'</div></div>';
+  }
+  const kids=(node.children||[]);
+  const hasKids=kids.length>0;
+  let html='<div class="mm-branch" style="--c:'+node.color+'">';
+  html+='<div class="mm-gh'+(hasKids?' toggle':'')+'" '+(hasKids?'onclick="mmToggle(this)"':'')+'>'
+    +(hasKids?'<span class="mm-caret open">▶</span>':'')
+    +esc(node.label)
+    +(hasKids?'<span class="mm-cnt">'+kids.length+'</span>':'')
+    +'</div>';
+  if(hasKids) html+='<div class="mm-children">'+kids.map(c=>_mmRender(c,depth+1)).join('')+'</div>';
+  html+='</div>';
+  return html;
+}
+function mmToggle(el){
+  const kids=el.parentNode.querySelector('.mm-children');
+  if(!kids) return;
+  const open=kids.style.display!=='none';
+  kids.style.display=open?'none':'';
+  const caret=el.querySelector('.mm-caret');
+  if(caret) caret.classList.toggle('open',!open);
 }
 function buildMindMapHtml(r){
-  const branches=analyzeContent(r);
-  if(!branches.length) return '<div class="muted">暂无可提炼的正文内容（该条目可能仅有摘要）。</div>';
-  const root=(r.title||'知识条目');
-  let html='<div class="mmap"><div class="mm-root"><div class="mm-rt">📄 知识条目</div><div class="mm-rx">'+esc(_trim(root,34))+'</div></div><div class="mm-branches">';
-  branches.forEach(g=>{
-    let leaves;
-    if(g.kind==='text'){
-      leaves='<ul class="mm-points">'+g.items.map(it=>'<li>'+esc(String(it))+'</li>').join('')+'</ul>';
-    } else {
-      leaves='<div class="mm-chips">'+g.items.map(it=>'<span class="mm-chip">'+esc(String(it))+'</span>').join('')+'</div>';
-    }
-    html+='<div class="mm-branch" style="--c:'+g.c+'"><div class="mm-gh">'+esc(g.t)+'</div><div class="mm-body">'+leaves+'</div></div>';
-  });
-  html+='</div></div>';
-  return html;
+  const tree=analyzeMindmap(r);
+  if(!tree.children.length) return '<div class="mm-empty">暂无可提炼的正文内容（该条目可能仅有标题/摘要）。</div>';
+  return '<div class="mmtree">'
+    +'<div class="mm-root">'+esc(_trim(tree.label,60))+'</div>'
+    +'<div class="mm-level1">'+tree.children.map(c=>_mmRender(c,1)).join('')+'</div>'
+    +'</div>';
 }
 
 /* ===================== 知识图谱（全局） ===================== */
@@ -989,20 +1051,33 @@ async function loadGraph(){
 }
 function buildGraphStatic(dept,cat,concept){
   const nodes={}, edges=[];
-  const node=(id,label,type)=>{ if(!nodes[id]) nodes[id]={id,label,type,weight:0}; nodes[id].weight++; return nodes[id]; };
-  App.kb.forEach((r,i)=>{
+  const node=(id,label,type,w)=>{ if(!nodes[id]) nodes[id]={id,label,type,weight:0}; nodes[id].weight+=(w||1); return nodes[id]; };
+  // 聚合：部门 / 分类 / 地域 中心节点 + 关键概念节点，边表示共同出现关系
+  const deptCnt={}, catCnt={}, regCnt={}, cmap={};
+  const dc={}; // 部门-分类共现
+  App.kb.forEach(r=>{
     if(dept && r.department!==dept) return; if(cat && r.category!==cat) return;
-    const rid='r'+i; const rn=node(rid,(r.title||'').slice(0,20),'record'); rn._id=i;
-    [['department','dept',r.department],['category','cat',r.category?CAT_LABELS[r.category]:null],['region','region',r.region]].forEach(([f,t,v])=>{ if(v){ const id=f+':'+v; node(id,v,t); edges.push({source:rid,target:id}); }});
-    (r.tags||[]).forEach(t=>{ if(t){ const id='tag:'+t; node(id,t,'tag'); edges.push({source:rid,target:id}); }});
+    if(r.department) deptCnt[r.department]=(deptCnt[r.department]||0)+1;
+    if(r.category) catCnt[r.category]=(catCnt[r.category]||0)+1;
+    if(r.region) regCnt[r.region]=(regCnt[r.region]||0)+1;
+    if(r.department&&r.category){ const k=r.department+'|'+r.category; dc[k]=(dc[k]||0)+1; }
+    (r.kg_terms||[]).forEach(t=>{
+      if(!cmap[t]) cmap[t]={count:0,cats:new Set(),depts:new Set(),regs:new Set()};
+      const c=cmap[t]; c.count++;
+      if(r.category) c.cats.add(r.category); if(r.department) c.depts.add(r.department); if(r.region) c.regs.add(r.region);
+    });
   });
+  Object.entries(deptCnt).forEach(([k,v])=>node('dept:'+k,k,'dept',v));
+  Object.entries(catCnt).forEach(([k,v])=>node('cat:'+k,CAT_LABELS[k]||k,'cat',v));
+  Object.entries(regCnt).forEach(([k,v])=>node('region:'+k,k,'region',v));
+  // 部门—分类共现边（取最强的若干条，避免全连接过密）
+  Object.entries(dc).sort((a,b)=>b[1]-a[1]).slice(0,50).forEach(([k,v])=>{ const [d,c]=k.split('|'); if(nodes['dept:'+d]&&nodes['cat:'+c]) edges.push({source:'dept:'+d,target:'cat:'+c,w:v}); });
   if(concept){
-    const cmap={};
-    App.kb.forEach((r)=>{ if(dept&&r.department!==dept)return; if(cat&&r.category!==cat)return;
-      (r.kg_terms||[]).forEach(t=>{ if(!cmap[t]) cmap[t]={count:0,cats:new Set()}; cmap[t].count++; if(r.category) cmap[t].cats.add(r.category); }); });
-    Object.keys(cmap).filter(t=>cmap[t].count>=2).sort((a,b)=>cmap[b].count-cmap[a].count).slice(0,120).forEach(t=>{
-      const id='concept:'+t; node(id,t,'concept');
-      cmap[t].cats.forEach(c=>{ const cid='category:'+c; if(nodes[cid]) edges.push({source:id,target:cid}); });
+    Object.keys(cmap).filter(t=>cmap[t].count>=2).sort((a,b)=>cmap[b].count-cmap[a].count).slice(0,60).forEach(t=>{
+      const id='concept:'+t; node(id,t,'concept',cmap[t].count);
+      cmap[t].cats.forEach(c=>{ if(nodes['cat:'+c]) edges.push({source:id,target:'cat:'+c}); });
+      cmap[t].depts.forEach(d=>{ if(nodes['dept:'+d]) edges.push({source:id,target:'dept:'+d}); });
+      cmap[t].regs.forEach(rg=>{ if(nodes['region:'+rg]) edges.push({source:id,target:'region:'+rg}); });
     });
   }
   return {nodes:Object.values(nodes), edges};

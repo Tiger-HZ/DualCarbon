@@ -333,6 +333,9 @@ def build_index(kb, days):
 
 def build_push_day(day, items, days):
     depts, regions = dept_region_options(items)
+    is_year = len(day) == 4
+    label = ("%s 年度" % day) if is_year else day
+    sub_text = ("该年度收录的知识" if is_year else "该日新增 / 入库的知识")
     sections = ""
     for cid, cname, _ in CATS:
         sub = sorted([i for i in items if i.get("category") == cid],
@@ -343,21 +346,21 @@ def build_push_day(day, items, days):
         sections += ('<section class="block"><h2>%s<span class="cnt">%d 条</span></h2>'
                      '<div class="grid">%s</div></section>') % (cname, len(sub), "".join(card(i) for i in sub))
     body = (
-        '<div class="statbar"><span class="chip">本日推送 <b>%d</b> 条</span>'
-        '<span class="chip">分类 <b>%d</b> 类</span></div>' % (len(items), len(CATS))
+        '<div class="statbar"><span class="chip">本%s <b>%d</b> 条</span>'
+        '<span class="chip">分类 <b>%d</b> 类</span></div>' % ("年度收录" if is_year else "日推送", len(items), len(CATS))
         + '<div class="bar"><div class="inner">%s'
           '<a href="index.html" style="margin-left:auto;font-size:13px">← 返回每日推送</a>'
           '</div></div>' % build_filters(with_window=False, with_cat=True)
         + '<div class="count" id="count"></div>'
-        + '<div class="phead"><h2>每日推送 · %s</h2><span class="sub">该日新增 / 入库的知识</span></div>'
-          % esc(day)
+        + '<div class="phead"><h2>推送 · %s</h2><span class="sub">%s</span></div>'
+          % (esc(label), esc(sub_text))
         + pager(days, day)
-        + (sections or '<div class="empty">当日无内容</div>')
-        + '<div class="note">本页为 <b>%s</b> 的推送内容。回看其它日期请使用上方翻页或'
+        + (sections or '<div class="empty">暂无内容</div>')
+        + '<div class="note">本页为 <b>%s</b> 的推送内容。回看其它日期/年度请使用上方翻页或'
           '<a href="index.html">首页历史推送</a>。</div>'
-          % esc(day)
+          % esc(label)
     )
-    return shell("每日推送 · " + day, body)
+    return shell("推送 · " + label, body)
 
 
 def build_archive(kb):
@@ -416,12 +419,21 @@ def main():
         print("no kb")
         return
     DEPTS, REGIONS = dept_region_options(kb)
-    # 按收录日(added_at)分组，形成"每日推送"
-    PUSHES = {}
+    # 按收录日(added_at)分组；近期(默认180天)出"每日推送"单日页，
+    # 更早的历史聚合为"年度页"(push-YYYY.html)，避免历史回填产生上千个稀疏单日页。
+    RECENT_DAYS = 180
+    cutoff = (datetime.date.today() - datetime.timedelta(days=RECENT_DAYS)).isoformat()
+    raw_days = {}
     for i in kb:
         raw = i.get("added_at") or i.get("date") or ""
         key = raw if re.match(r"^\d{4}-\d{2}-\d{2}$", raw or "") else "unknown"
-        PUSHES.setdefault(key, []).append(i)
+        raw_days.setdefault(key, []).append(i)
+    PUSHES = {}
+    for day, items in raw_days.items():
+        if day == "unknown" or day >= cutoff:
+            PUSHES[day] = items                      # 近期：单日页
+        else:
+            PUSHES.setdefault(day[:4], []).extend(items)   # 更早：年度聚合页
     days = sorted(PUSHES.keys(), reverse=True)
     # index.html 现为一体化门户 SPA（手写、运行时读取 kb/kb.json），render 不再覆盖它。
     # 服务端渲染的静态首页写入 feed.html，作为无 JS 环境/深链回退。
@@ -430,7 +442,7 @@ def main():
         open(os.path.join(BASE, "push-%s.html" % day), "w", encoding="utf-8").write(
             build_push_day(day, PUSHES[day], days))
     open(os.path.join(BASE, "archive.html"), "w", encoding="utf-8").write(build_archive(kb))
-    print("rendered: feed.html (fallback), %d push pages, archive.html (kb total=%d) | index.html=SPA门户(未覆盖)" % (len(days), len(kb)))
+    print("rendered: feed.html (fallback), %d push pages (recent day + year), archive.html (kb total=%d) | index.html=SPA门户(未覆盖)" % (len(days), len(kb)))
 
 
 if __name__ == "__main__":
