@@ -257,7 +257,49 @@ def run_batch(only=None, mode="images", recent=0):
     return done
 
 
+def _acquire_lock():
+    """互斥锁：防止多个 fetch_fulltext 实例并发写 kb.json（曾因并发覆盖导致数据丢失）。
+    基于 PID 的锁文件：若锁存在且持有者进程仍存活，则本实例直接退出；否则清理失效锁后占位。"""
+    LOCK = os.path.join(BASE, "kb", ".fetch_lock")
+    try:
+        if os.path.exists(LOCK):
+            pid = 0
+            try:
+                with open(LOCK) as f:
+                    pid = int((f.read() or "0").strip() or 0)
+            except Exception:
+                pid = 0
+            if pid:
+                try:
+                    os.kill(pid, 0)  # 进程存活则不抛异常
+                    print("[lock] fetch_fulltext 已在运行 (pid %d)，本实例退出以避免并发写 kb.json" % pid)
+                    sys.exit(0)
+                except Exception:
+                    pass  # 进程已死 -> 锁失效，清理后继续
+            try:
+                os.remove(LOCK)
+            except Exception:
+                pass
+        fd = os.open(LOCK, os.O_CREAT | os.O_EXCL | os.O_WRONLY)
+        os.write(fd, str(os.getpid()).encode())
+        os.close(fd)
+    except FileExistsError:
+        print("[lock] fetch_fulltext 锁文件竞争，本实例退出")
+        sys.exit(0)
+    import atexit
+    atexit.register(_release_lock, LOCK)
+    return LOCK
+
+
+def _release_lock(LOCK):
+    try:
+        os.remove(LOCK)
+    except Exception:
+        pass
+
+
 if __name__ == "__main__":
+    _acquire_lock()
     args = sys.argv[1:]
     if args and args[0] == "--test":
         u = args[1]
