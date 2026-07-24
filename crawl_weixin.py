@@ -8,6 +8,8 @@ BASE = os.path.dirname(os.path.abspath(__file__))
 INBOX = os.path.join(BASE, "kb", "inbox.json")
 CTX = ssl.create_default_context(); CTX.check_hostname = False; CTX.verify_mode = ssl.CERT_NONE
 UA = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"}
+sys.path.insert(0, BASE)
+import weixin  # 微信采集辅助：会话/反爬识别/真实 URL 解析/正文抽取
 QUERIES = ["碳中和", "碳达峰", "碳排放权交易", "绿色低碳", "节能降碳", "碳足迹",
            "新型电力系统", "零碳园区", "绿色金融 碳", "碳市场"]
 PAGES = int(os.environ.get("PAGES", "3"))
@@ -25,15 +27,10 @@ def norm_url(u):
     u = re.split(r"[?#]", u)[0]
     return u.rstrip("/").lower()
 
-def resolve(url):
-    """跟随搜狗 /link?url= 重定向，取真实 mp.weixin.qq.com 文章地址。"""
-    try:
-        req = urllib.request.Request(url, headers=UA)
-        req.get_method = lambda: "HEAD"
-        with urllib.request.urlopen(req, timeout=15, context=CTX) as r:
-            return r.geturl()
-    except Exception:
-        return url
+def resolve(url, session):
+    """用搜狗 cookie 会话尽量解析真实 mp.weixin.qq.com 文章地址。
+    解析不到（被反爬）返回 None——调用方应保留 sogou 链接且不声称已拿到全文。"""
+    return session.resolve(url)
 
 def main():
     existing = set()
@@ -48,6 +45,9 @@ def main():
 
     extra = sys.argv[1:]
     queries = QUERIES + extra
+    # 复用同一会话：先 seed 一次搜索拿 cookie，再反复解析链接（降低被反爬概率）
+    session = weixin.WeixinSession()
+    session.seed()
     ITEM_RE = re.compile(
         r'<h3>\s*<a[^>]*href="(/link\?url=[^"]+)"[^>]*>(.*?)</a>\s*</h3>'
         r'.*?class="txt-info"[^>]*>(.*?)</p>'
@@ -69,15 +69,17 @@ def main():
                 if title.strip().lower() in existing:
                     continue
                 full = "https://weixin.sogou.com" + link
-                real = resolve(full)
-                # 搜狗 /link?url= 用 meta 刷新跳转，HEAD 拿不到真实 mp 地址；
-                # 以「完整 sogou 链接(含唯一 token)」作为去重键与可用 url，避免互相判重。
-                if "mp.weixin.qq.com" in real:
+                real = resolve(full, session)
+                # 尽量解析真实 mp 文章地址；解析不到（被反爬）则保留 sogou 链接，
+                # 但 content_fetched 保持 False，绝不把验证码页当正文写入。
+                if real and "mp.weixin.qq.com" in real:
                     dedup_key = norm_url(real)
                     url = real
+                    resolved = True
                 else:
                     dedup_key = full
                     url = full
+                    resolved = False
                 if dedup_key in existing:
                     continue
                 summary = re.sub(r"<[^>]+>", "", rawsum).strip()
@@ -103,6 +105,7 @@ def main():
                     "tags": [q],
                     "content": summary,
                     "content_fetched": False,
+                    "weixin_resolved": resolved,
                     "added_at": date or "2026-07-19",
                 }
                 inbox.append(rec); existing.add(title.strip().lower()); existing.add(dedup_key); added += 1

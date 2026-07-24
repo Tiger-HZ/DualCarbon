@@ -10,6 +10,8 @@ import json, os, re, sys, time, html, datetime, urllib.request, urllib.error, ur
 from urllib.parse import urljoin
 
 BASE = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, BASE)
+import weixin  # 微信采集辅助：反爬识别 / 真实 URL 解析 / js_content 正文抽取
 KB = os.path.join(BASE, "kb", "kb.json")
 UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36"
 
@@ -188,15 +190,37 @@ def extract_images(html, base_url=""):
     return out
 
 
-def fetch_one(url):
+def fetch_one(url, session=None):
+    """返回 (text, imgs, final_url)。final_url 为实际抓取用的地址（微信可能被解析为 mp）。
+    被反爬拦截时返回 (None, [], url)。"""
+    # ---- 微信公众号处理 ----
+    if "weixin.sogou.com" in url:
+        # 搜狗跳转链接：先解析真实 mp 文章地址；被反爬则返回 None（绝不写验证码）
+        if session is None:
+            session = weixin.WeixinSession(); session.seed()
+        real = session.resolve(url)
+        if not real:
+            return None, [], url
+        url = real
+    if "mp.weixin.qq.com" in url:
+        if session is None:
+            session = weixin.WeixinSession(); session.seed()
+        html, final, st = session.fetch_article(url)
+        if not html or weixin.is_antispider(html):
+            return None, [], url  # 反爬/环境异常页，跳过
+        text = weixin.extract_weixin_text(html)
+        text = "\n".join(l for l in text.split("\n") if len(l) >= 4)
+        imgs = extract_images(html, url)
+        return (text if len(text) >= 120 else None), imgs, url
+    # ---- 其它站点：原逻辑 ----
     html = download(url)
     if not html:
-        return None, []
+        return None, [], url
     text = extract_main_text(html)
     # 去除与正文无关的超短噪声
     text = "\n".join(l for l in text.split("\n") if len(l) >= 4)
     imgs = extract_images(html, url)
-    return (text if len(text) >= 120 else None), imgs
+    return (text if len(text) >= 120 else None), imgs, url
 
 
 def run_batch(only=None, mode="images", recent=0):
@@ -213,12 +237,18 @@ def run_batch(only=None, mode="images", recent=0):
     if recent > 0:
         cut = (datetime.date.today() - datetime.timedelta(days=recent)).isoformat()
         todo = [r for r in todo if (r.get("added_at") or "") >= cut]
+    # LIMIT：单次处理上限（分摊存量补全文到多次运行，避免单次过重/超时）
+    limit = int(os.environ.get("LIMIT", "0"))
+    if limit > 0 and len(todo) > limit:
+        todo = todo[:limit]
     if only:
         rx = re.compile(only)
         todo = [r for r in todo if rx.search(r.get("title", ""))]
     done = 0
     fail = 0
     saved = 0
+    # 复用同一微信会话（仅当本批存在微信记录时按需创建）
+    wx_session = None
     for r in todo:
         url = r.get("url", "")
         if not url or not url.startswith("http"):
@@ -227,11 +257,18 @@ def run_batch(only=None, mode="images", recent=0):
                                   ".pdf", "wulanchabu", "qpic.cn")):
             # 这些镜像/聚合/PDF 站点正文或图片抽取不稳定，跳过（留待人工或后续补）
             continue
+        if "weixin" in url and wx_session is None:
+            wx_session = weixin.WeixinSession(); wx_session.seed()
         try:
-            txt, imgs = fetch_one(url)
+            txt, imgs, final_url = fetch_one(url, wx_session)
         except Exception:
-            txt, imgs = None, []
+            txt, imgs, final_url = None, [], url
         changed = False
+        # 微信 sogou 链接被成功解析为真实 mp 地址时，写回 url，避免下次重复解析
+        if final_url and final_url != url and ("mp.weixin.qq.com" in final_url):
+            r["url"] = final_url
+            r["weixin_resolved"] = True
+            changed = True
         if txt and not r.get("content_fetched"):
             r["content"] = txt
             r["content_fetched"] = True
@@ -303,7 +340,7 @@ if __name__ == "__main__":
     args = sys.argv[1:]
     if args and args[0] == "--test":
         u = args[1]
-        t, imgs = fetch_one(u)
+        t, imgs, _ = fetch_one(u)
         print("TEXT_LEN", len(t) if t else 0)
         print(t[:1500] if t else "(none)")
         print("IMAGES", len(imgs), imgs[:5])

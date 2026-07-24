@@ -71,11 +71,25 @@ def main():
                 if not title or len(title) < 8: continue
                 if title.strip().lower() in existing: continue
                 doi = w.get("doi") or ""
-                link = ("https://doi.org/" + doi) if doi else (w.get("id") or "")
+                # OpenAlex 的 doi 字段本身是完整 URL（https://doi.org/10.xxxx），
+                # 若已是 http 开头则直接用，避免拼成双重前缀。
+                if doi.startswith("http"):
+                    link = doi
+                else:
+                    link = ("https://doi.org/" + doi) if doi else (w.get("id") or "")
                 if link and norm_url(link) in existing: continue
                 # 保留真实发表年（含未来预发表年份，如 2027）；统计时间由前端按 effDate 回退到入库日
                 date = w.get("publication_date") or ""
                 abs = abstract_text(w.get("abstract_inverted_index"))
+                # 捕获 OA 论文 PDF 链接（供 fetch_pdfs 下载原文、抽取全文）
+                _pl = (w.get("primary_location") or {}) or {}
+                _bl = (w.get("best_oa_location") or {}) or {}
+                _oa = w.get("open_access") or {}
+                pdf_url = (_pl.get("pdf_url") or _bl.get("pdf_url") or "").strip()
+                if not pdf_url and _oa.get("oa_status") in ("open", "gold", "green"):
+                    _ou = (_oa.get("oa_url") or "").strip()
+                    if _ou.endswith(".pdf") or "arxiv.org" in _ou:
+                        pdf_url = _ou
                 concepts = [c["display_name"] for c in (w.get("concepts") or [])[:6] if c.get("display_name")]
                 # 机构国家 → 地域
                 cn = False
@@ -101,6 +115,7 @@ def main():
                     "tags": concepts[:5],
                     "content": abs[:3000] if abs else "",
                     "content_fetched": bool(abs),
+                    "pdf_url": pdf_url,
                     "added_at": datetime.date.today().isoformat(),
                 }
                 inbox.append(rec); existing.add(title.strip().lower())
