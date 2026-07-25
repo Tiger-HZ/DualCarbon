@@ -34,7 +34,10 @@ for f in sorted(os.listdir(BASE)):
 API = "https://api.github.com/repos/%s" % REPO
 
 
-def req(method, url, data=None):
+_RETRIABLE = {403, 422, 429, 500, 502, 503}
+
+
+def req(method, url, data=None, retries=6):
     r = urllib.request.Request(url, headers={
         "Authorization": "Bearer %s" % TOKEN,
         "Accept": "application/vnd.github+json",
@@ -44,7 +47,34 @@ def req(method, url, data=None):
     r.get_method = lambda: method
     if data is not None:
         r.data = data.encode("utf-8")
-    return urllib.request.urlopen(r, timeout=180)
+    last = None
+    for attempt in range(retries):
+        try:
+            return urllib.request.urlopen(r, timeout=180)
+        except urllib.error.HTTPError as e:
+            body = ""
+            try:
+                body = e.read().decode("utf-8", "ignore")
+            except Exception:
+                pass
+            last = "HTTP %d %s" % (e.code, body[:200])
+            # GitHub 二级限流/瞬时错误：422 多见于短时间大量创建 blob 后的 commit/tree 调用
+            if e.code in _RETRIABLE and attempt < retries - 1:
+                ra = e.headers.get("Retry-After")
+                wait = int(ra) if (ra and str(ra).isdigit()) else (4 * (attempt + 1))
+                print("  [retry %d/%d] %s -> sleep %ds" % (attempt + 1, retries, last, wait))
+                time.sleep(wait)
+                continue
+            print("  [req FAIL] %s" % last)
+            raise
+        except Exception as e:
+            last = "%s %s" % (type(e).__name__, str(e)[:120])
+            if attempt < retries - 1:
+                print("  [retry %d/%d] %s -> sleep 4s" % (attempt + 1, retries, last))
+                time.sleep(4)
+                continue
+            print("  [req FAIL] %s" % last)
+            raise
 
 
 def get_base_commit():

@@ -352,8 +352,11 @@ if __name__ == "__main__":
         # 全量补正文+图片（耗时较长，建议后台运行）
         run_batch(mode="all")
     elif args and args[0] == "--recent":
+        # 仅补「最近 N 天且尚未抓取正文」的记录全文+配图；已含摘要/正文但仅缺配图的
+        # 学术等记录属“历史存量图片回填”，交由一次性后台任务处理，本增量步骤不重复
+        # （避免对成千上万条仅缺配图的记录空等下载，拖垮整点增量与部署）。
         n = int(args[1]) if len(args) > 1 and args[1].isdigit() else 2
-        run_batch(mode="all", recent=n)
+        run_batch(mode="text", recent=n)
     else:
         # 默认：为已有正文的存量记录补图片（快速、不空等不可达站点）
         run_batch()
