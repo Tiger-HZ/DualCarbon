@@ -20,8 +20,11 @@ if not TOKEN:
 if not TOKEN:
     raise SystemExit("未找到 GitHub Token：请设置环境变量 GH_TOKEN 或在 .deploy_token 中写入。")
 
+# 注意：kb.json 已超过 Git Database API 单 blob 体积上限（~40MB+ 触发 422 "too large to process"），
+# 改为拆分为 kb/kb_part_NNN.json 分片上传；前端 SPA(index.html) 运行时按顺序拼接分片。
+# 本地仍保留单体 kb/kb.json 供 render.py 构建使用（不进仓库）。
+SHARD_TARGET = 8 * 1024 * 1024  # 每分片原始体积上限 ~8MB（base64 后 ~10.7MB，安全低于 API 限制）
 FILES = [
-    "kb/kb.json",
     "rag.html", "rag.py", "rag_cli.py", "fetch_fulltext.py", "ingest_url.py", "README_RAG.md",
     ".gitignore", "update.py", "render.py", "enrich_importance.py", "enrich_kg.py",
     "config.json", "gh_deploy.py", "crawl_gov.py", "crawl_weixin.py", "crawl_academic.py",
@@ -115,6 +118,22 @@ def create_blob(text):
     raise SystemExit("blob 创建失败（文件过大或被限流）")
 
 
+def split_kb_shards(text, target=SHARD_TARGET):
+    """将 kb.json 文本按体积拆分为多个分片（返回每片 JSON 字符串列表）。"""
+    try:
+        arr = json.loads(text)
+    except Exception:
+        return []
+    if not isinstance(arr, list) or not arr:
+        return []
+    n = max(1, -(-len(text.encode("utf-8")) // target))
+    per = max(1, -(-len(arr) // n))
+    out = []
+    for i in range(0, len(arr), per):
+        out.append(json.dumps(arr[i:i + per], ensure_ascii=False))
+    return out
+
+
 def main():
     csha, tsha = get_base_commit()
     remote = list_tree_recursive(tsha)
@@ -135,11 +154,30 @@ def main():
         n_new += 1
         print("blob %5d KB  %s" % (len(text) // 1024, p))
         time.sleep(0.15)
+
+    # 1.5) kb.json 分片上传（规避单 blob 体积上限 ~40MB+ 触发 422）
+    kbp = os.path.join(BASE, "kb", "kb.json")
+    if os.path.exists(kbp):
+        with open(kbp, "r", encoding="utf-8", errors="replace") as f:
+            kb_text = f.read()
+        for idx, stext in enumerate(split_kb_shards(kb_text)):
+            sp = "kb/kb_part_%03d.json" % idx
+            sha = create_blob(stext)
+            entries.append({"path": sp, "mode": "100644", "type": "blob", "sha": sha})
+            local_set.add(sp)
+            n_new += 1
+            print("blob %5d KB  %s" % (len(stext) // 1024, sp))
+            time.sleep(0.15)
+
     # 2) 远程仍存在、但本地未列出的文件：保留；稀疏旧 push 页删除
     n_keep = 0
     n_del = 0
+    KB_PART_RE = re.compile(r"^kb/kb_part_\d+\.json$")
     for path, sha in remote.items():
         if path in local_set:
+            continue
+        if path == "kb/kb.json" or KB_PART_RE.match(path):
+            n_del += 1  # 删除单体 kb.json 与过期分片（新版分片已在 entries 中）
             continue
         if re.match(r"^push-.*\.html$", path):
             n_del += 1  # 不加入 tree = 删除
@@ -156,14 +194,14 @@ def main():
         n_kb = len(json.load(open(os.path.join(BASE, "kb/kb.json"), encoding="utf-8")))
     except Exception:
         pass
-    msg = "deploy: %d changed + %d kept, deleted %d stale push pages; kb=%d records" % (n_new, n_keep, n_del, n_kb)
+    msg = "deploy: %d changed + %d kept, deleted %d stale (push/kb.json/parts); kb=%d records" % (n_new, n_keep, n_del, n_kb)
     with req("POST", API + "/git/commits", json.dumps({"message": msg, "tree": new_tree, "parents": [csha]})) as r:
         new_commit = json.load(r)["sha"]
     # 5) 更新分支引用（触发 GitHub Pages 构建）
     with req("PATCH", API + "/git/refs/heads/%s" % BRANCH, json.dumps({"sha": new_commit})) as r:
         print("ref update HTTP %d" % r.status)
 
-    print("\n=== 部署完成：本地 %d 文件已提交，保留 %d，删除陈旧推送页 %d，知识库 %d 条 ===" % (n_new, n_keep, n_del, n_kb))
+    print("\n=== 部署完成：本地 %d 文件已提交，保留 %d，删除陈旧 %d（推送页/单体kb.json/过期分片），知识库 %d 条 ===" % (n_new, n_keep, n_del, n_kb))
 
 
 if __name__ == "__main__":

@@ -1759,6 +1759,29 @@ function switchTab(t){
   else if(t==='ingest') updateAuthUI();
 }
 
+/* ===================== 知识库加载（分片拼接） ===================== */
+// kb.json 已拆分为 kb/kb_part_NNN.json 分片上传（规避大文件单请求体积限制）。
+// 按顺序拉取分片并拼接，直到某分片返回非 200；最后兜底尝试旧版单体 kb/kb.json。
+async function loadKB(){
+  let arr=[];
+  for(let i=0;i<500;i++){
+    const name='kb/kb_part_'+String(i).padStart(3,'0')+'.json';
+    try{
+      const r=await fetch(SITE_BASE+name,{cache:'no-store'});
+      if(!r.ok) break;
+      const part=await r.json();
+      if(!Array.isArray(part)) break;
+      arr=arr.concat(part);
+    }catch(e){ break; }
+  }
+  if(arr.length) return arr;
+  try{
+    const r=await fetch(SITE_BASE+'kb/kb.json',{cache:'no-store'});
+    if(r.ok){ const m=await r.json(); if(Array.isArray(m)) return m; }
+  }catch(e){}
+  return [];
+}
+
 /* ===================== 启动 ===================== */
 async function boot(){
   // 下拉填充
@@ -1774,7 +1797,7 @@ async function boot(){
   if(App.token){ try{ App.user=await api('/api/auth/me'); }catch(e){ App.token=''; localStorage.removeItem('dc_token'); } }
 
   // 静态回退数据
-  if(App.mode==='static'){ try{ App.kb=await (await fetch(SITE_BASE+'kb/kb.json',{cache:'no-store'})).json(); App.kb.forEach((r,i)=>r.id=i); }catch(e){ App.kb=[]; console.warn('kb.json 加载失败', e); } }
+  if(App.mode==='static'){ try{ App.kb=await loadKB(); App.kb.forEach((r,i)=>r.id=i); }catch(e){ App.kb=[]; console.warn('kb 加载失败', e); } }
 
   // 顶部模式 & 横幅
   const mp=$('#modePill');
