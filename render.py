@@ -363,29 +363,64 @@ def build_push_day(day, items, days):
     return shell("推送 · " + label, body)
 
 
+# 归档时间轴分页：单页原始体积上限（base64 后约 33MB，安全低于 GitHub Git Database API 单 blob ~44MB 硬限制）。
+# 避免 archive.html 随 KB 增长越线导致整轮部署失败（2026-08-13 kb.json 43.9MB 曾触发 422）。
+ARCHIVE_PAGE_BYTES = 25 * 1024 * 1024
+
+
+def _archive_nav(page_no, n):
+    prev = "archive.html" if page_no == 2 else ("archive%d.html" % (page_no - 1))
+    nxt = "archive%d.html" % (page_no + 1)
+    parts = []
+    if page_no > 1:
+        parts.append('<a class="pday" href="%s">← 上一页</a>' % prev)
+    parts.append('<span class="pday cur">第 %d / %d 页</span>' % (page_no, n))
+    if page_no < n:
+        parts.append('<a class="pday" href="%s">下一页 →</a>' % nxt)
+    return '<div class="pushnav" style="margin-top:16px">%s</div>' % "".join(parts)
+
+
 def build_archive(kb):
+    """返回 {文件名: html}：archive.html 为首页，超限自动分页为 archive2.html / archive3.html…"""
     items = sorted(kb, key=lambda x: x.get("date", ""), reverse=True)
     depts, regions = dept_region_options(items)
     by_date = {}
     for i in items:
         by_date.setdefault(i.get("date") or i.get("added_at") or "未知日期", []).append(i)
     dates = sorted(by_date.keys(), reverse=True)
-    sections = ""
+    # 先逐日期生成 section 块（分页只在日期之间切分，不破坏单日块完整性）
+    blocks = []
     for dt in dates:
         sub = sorted(by_date[dt], key=lambda x: (CAT_ORDER.get(x.get("category"), 99), priority_rank(x.get("department", ""))))
-        sections += ('<section class="block"><h2>%s<span class="cnt">%d 条</span></h2>'
-                     '<div class="grid">%s</div></section>') % (dt, len(sub), "".join(card(i) for i in sub))
-    body = (
-        '<div class="statbar"><span class="chip">历史累计 <b>%d</b> 条</span>'
-        '<span class="chip">覆盖 <b>%d</b> 个发布日期</span></div>' % (len(items), len(dates))
-        + '<div class="bar"><div class="inner">%s'
-          '<a href="index.html" style="margin-left:auto;font-size:13px">← 返回每日推送</a>'
-          '</div></div>' % build_filters(with_window=True, with_cat=True)
-        + '<div class="bar"><div class="inner" style="top:64px"></div></div>'
-        + '<div class="count" id="count"></div>'
-        + sections
-    )
-    return shell("全部知识库 · 时间轴", body)
+        blocks.append(('<section class="block"><h2>%s<span class="cnt">%d 条</span></h2>'
+                       '<div class="grid">%s</div></section>') % (dt, len(sub), "".join(card(i) for i in sub)))
+    pages, cur = [], ""
+    for s in blocks:
+        if cur and (len(cur.encode("utf-8")) + len(s.encode("utf-8"))) > ARCHIVE_PAGE_BYTES:
+            pages.append(cur)
+            cur = ""
+        cur += s
+    if cur or not pages:
+        pages.append(cur)
+    n = len(pages)
+    out = {}
+    for idx, body_sections in enumerate(pages):
+        page_no = idx + 1
+        body = (
+            '<div class="statbar"><span class="chip">历史累计 <b>%d</b> 条</span>'
+            '<span class="chip">覆盖 <b>%d</b> 个发布日期</span>'
+            '<span class="chip">时间轴（第 %d / %d 页）</span></div>' % (len(items), len(dates), page_no, n)
+            + '<div class="bar"><div class="inner">%s'
+              '<a href="index.html" style="margin-left:auto;font-size:13px">← 返回每日推送</a>'
+              '</div></div>' % build_filters(with_window=True, with_cat=True)
+            + '<div class="bar"><div class="inner" style="top:64px"></div></div>'
+            + '<div class="count" id="count"></div>'
+            + body_sections
+            + _archive_nav(page_no, n)
+        )
+        fname = "archive.html" if idx == 0 else "archive%d.html" % (idx + 1)
+        out[fname] = shell("全部知识库 · 时间轴（第 %d/%d 页）" % (page_no, n), body)
+    return out
 
 
 def shell(subtitle, body):
@@ -441,8 +476,17 @@ def main():
     for day in days:
         open(os.path.join(BASE, "push-%s.html" % day), "w", encoding="utf-8").write(
             build_push_day(day, PUSHES[day], days))
-    open(os.path.join(BASE, "archive.html"), "w", encoding="utf-8").write(build_archive(kb))
-    print("rendered: feed.html (fallback), %d push pages (recent day + year), archive.html (kb total=%d) | index.html=SPA门户(未覆盖)" % (len(days), len(kb)))
+    # 归档时间轴分页：先清理旧分页残留，再按当前体量写出 archive.html + archiveN.html
+    for _f in os.listdir(BASE):
+        if re.match(r"^archive\d+\.html$", _f):
+            try:
+                os.remove(os.path.join(BASE, _f))
+            except OSError:
+                pass
+    arc = build_archive(kb)
+    for _fn, _html in arc.items():
+        open(os.path.join(BASE, _fn), "w", encoding="utf-8").write(_html)
+    print("rendered: feed.html (fallback), %d push pages (recent day + year), archive.html(%d 页, total kb=%d) | index.html=SPA门户(未覆盖)" % (len(days), len(arc), len(kb)))
 
 
 if __name__ == "__main__":

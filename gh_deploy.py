@@ -33,11 +33,13 @@ FILES = [
 for f in sorted(os.listdir(BASE)):
     if f.startswith("push-") and f.endswith(".html"):
         FILES.append(f)
+    elif re.match(r"^archive\d+\.html$", f):   # 归档时间轴分页页（archive.html 已在静态列表）
+        FILES.append(f)
 
 API = "https://api.github.com/repos/%s" % REPO
 
 
-_RETRIABLE = {403, 422, 429, 500, 502, 503}
+_RETRIABLE = {401, 403, 422, 429, 500, 502, 503}
 
 
 def req(method, url, data=None, retries=6):
@@ -115,7 +117,8 @@ def create_blob(text):
         except Exception as e:
             print("  blob err %s %s" % (type(e).__name__, str(e)[:80]))
             time.sleep(3)
-    raise SystemExit("blob 创建失败（文件过大或被限流）")
+    print("  blob FAIL: 6 次重试后仍失败")
+    return None
 
 
 def split_kb_shards(text, target=SHARD_TARGET):
@@ -150,6 +153,10 @@ def main():
         with open(lp, "r", encoding="utf-8", errors="replace") as f:
             text = f.read()
         sha = create_blob(text)
+        if sha is None:
+            # 非关键静态文件（如归档分页页）创建失败：跳过，避免单一文件阻断整轮部署
+            print("WARN skip blob (创建失败，已跳过) %s" % p)
+            continue
         entries.append({"path": p, "mode": "100644", "type": "blob", "sha": sha})
         n_new += 1
         print("blob %5d KB  %s" % (len(text) // 1024, p))
@@ -163,6 +170,8 @@ def main():
         for idx, stext in enumerate(split_kb_shards(kb_text)):
             sp = "kb/kb_part_%03d.json" % idx
             sha = create_blob(stext)
+            if sha is None:
+                raise SystemExit("kb 分片 %s 创建失败，终止部署（关键文件）" % sp)
             entries.append({"path": sp, "mode": "100644", "type": "blob", "sha": sha})
             local_set.add(sp)
             n_new += 1
