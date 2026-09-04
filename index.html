@@ -1770,7 +1770,7 @@ function switchTab(t){
 // 按顺序拉取分片并拼接，直到某分片返回非 200；最后兜底尝试旧版单体 kb/kb.json。
 // 注意：本函数名不可与「知识库栏目渲染函数 loadKB()」重名——重名会被后者覆盖，
 // 导致点击知识库栏目时只下载分片而不渲染（表现为空白）。2026-09-04 修复。
-async function fetchKBShards(){
+async function fetchKBShards(onProgress){
   let arr=[];
   for(let i=0;i<500;i++){
     const name='kb/kb_part_'+String(i).padStart(3,'0')+'.json';
@@ -1780,6 +1780,8 @@ async function fetchKBShards(){
       const part=await r.json();
       if(!Array.isArray(part)) break;
       arr=arr.concat(part);
+      // 分片体积大（合计数十 MB），回调进度，避免长时间无反馈被误认为空白/卡死
+      if(onProgress) { try{ onProgress(i+1, arr.length); }catch(e){} }
     }catch(e){ break; }
   }
   if(arr.length) return arr;
@@ -1806,7 +1808,10 @@ async function boot(){
 
   // 静态回退数据（分片合计较大，保留 Promise，便于知识库栏目在加载完成前被点击时等待）
   if(App.mode==='static'){
-    App.kbReady = fetchKBShards();
+    const _bh=$('#bannerHost');
+    App.kbReady = fetchKBShards((n,tot)=>{
+      if(_bh) _bh.innerHTML='<div class="banner ok">📚 双碳领域知识库 · 正在载入分片数据… 已载入 '+n+' 片 / '+tot+' 条</div>';
+    });
     try{ App.kb=await App.kbReady; App.kb.forEach((r,i)=>r.id=i); }catch(e){ App.kb=[]; console.warn('kb 加载失败', e); }
   }
 
