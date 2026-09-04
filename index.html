@@ -775,6 +775,12 @@ async function loadKB(){
       renderKbNav(data.items);
     }catch(e){ $('#kbGrid').innerHTML='<div class="empty">加载失败：'+esc(e.message)+'</div>'; }
   } else {
+    // 分片尚未下载完成时点击栏目：显式等待并显示加载提示，避免渲染成空白
+    if(!App.kb.length && App.kbReady){
+      const _g=$('#kbGrid');
+      if(_g) _g.innerHTML='<div class="empty">知识库加载中…（首次访问需下载分片数据，请稍候）</div>';
+      try{ App.kb=(await App.kbReady)||[]; App.kb.forEach((r,i)=>r.id=i); }catch(e){ App.kb=[]; }
+    }
     App.kbSort=App.kbSort||'importance'; App.kbBrowse=App.kbBrowse||'category';
     App.kbRange=App.kbRange||''; App.kbFrom=App.kbFrom||''; App.kbTo=App.kbTo||'';
     const sort=App.kbSort;
@@ -1762,7 +1768,9 @@ function switchTab(t){
 /* ===================== 知识库加载（分片拼接） ===================== */
 // kb.json 已拆分为 kb/kb_part_NNN.json 分片上传（规避大文件单请求体积限制）。
 // 按顺序拉取分片并拼接，直到某分片返回非 200；最后兜底尝试旧版单体 kb/kb.json。
-async function loadKB(){
+// 注意：本函数名不可与「知识库栏目渲染函数 loadKB()」重名——重名会被后者覆盖，
+// 导致点击知识库栏目时只下载分片而不渲染（表现为空白）。2026-09-04 修复。
+async function fetchKBShards(){
   let arr=[];
   for(let i=0;i<500;i++){
     const name='kb/kb_part_'+String(i).padStart(3,'0')+'.json';
@@ -1796,8 +1804,11 @@ async function boot(){
   // 鉴权回放
   if(App.token){ try{ App.user=await api('/api/auth/me'); }catch(e){ App.token=''; localStorage.removeItem('dc_token'); } }
 
-  // 静态回退数据
-  if(App.mode==='static'){ try{ App.kb=await loadKB(); App.kb.forEach((r,i)=>r.id=i); }catch(e){ App.kb=[]; console.warn('kb 加载失败', e); } }
+  // 静态回退数据（分片合计较大，保留 Promise，便于知识库栏目在加载完成前被点击时等待）
+  if(App.mode==='static'){
+    App.kbReady = fetchKBShards();
+    try{ App.kb=await App.kbReady; App.kb.forEach((r,i)=>r.id=i); }catch(e){ App.kb=[]; console.warn('kb 加载失败', e); }
+  }
 
   // 顶部模式 & 横幅
   const mp=$('#modePill');
