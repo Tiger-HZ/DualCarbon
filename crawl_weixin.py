@@ -60,7 +60,7 @@ def main():
             try:
                 html = get(su)
             except Exception as e:
-                print("FAIL %s %s" % (q, str(e)[:50])); break
+                print("FAIL %s %s" % (q, str(e)[:50]), flush=True); break
             for link, rawtitle, rawsum, acct, ts in ITEM_RE.findall(html):
                 link = link.replace("&amp;", "&")
                 title = re.sub(r"<[^>]+>", "", rawtitle).strip()
@@ -110,9 +110,11 @@ def main():
                 }
                 inbox.append(rec); existing.add(title.strip().lower()); existing.add(dedup_key); added += 1
             time.sleep(1.2)
-        print("q=%s done, cumulative added=%d" % (q, added))
+        # 韧性：每关键词落盘 inbox
+        json.dump(inbox, open(INBOX, "w", encoding="utf-8"), ensure_ascii=False, indent=1)
+        print("q=%s done, cumulative added=%d (flushed inbox=%d)" % (q, added, len(inbox)), flush=True)
     json.dump(inbox, open(INBOX, "w", encoding="utf-8"), ensure_ascii=False, indent=1)
-    print("crawl_weixin: added=%d, inbox_total=%d" % (added, len(inbox)))
+    print("crawl_weixin: added=%d, inbox_total=%d" % (added, len(inbox)), flush=True)
 
 if __name__ == "__main__":
     main()

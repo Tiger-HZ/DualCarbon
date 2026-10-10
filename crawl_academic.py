@@ -122,9 +122,11 @@ def main():
                 if link: existing.add(norm_url(link))
                 added += 1
             time.sleep(0.5)
-        print("q=%s done, cumulative added=%d" % (q, added))
+        # 韧性：每关键词落盘 inbox
+        json.dump(inbox, open(INBOX, "w", encoding="utf-8"), ensure_ascii=False, indent=1)
+        print("q=%s done, cumulative added=%d (flushed inbox=%d)" % (q, added, len(inbox)), flush=True)
     json.dump(inbox, open(INBOX, "w", encoding="utf-8"), ensure_ascii=False, indent=1)
-    print("crawl_academic: added=%d, inbox_total=%d" % (added, len(inbox)))
+    print("crawl_academic: added=%d, inbox_total=%d" % (added, len(inbox)), flush=True)
 
 if __name__ == "__main__":
     main()

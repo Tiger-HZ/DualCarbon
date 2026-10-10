@@ -222,7 +222,7 @@ def main():
                 raw = get(API % (qq, pg))
                 d = json.loads(raw)
             except Exception as e:
-                print("  [warn] q=%s p=%d %s" % (q, pg, type(e).__name__))
+                print("  [warn] q=%s p=%d %s" % (q, pg, type(e).__name__), flush=True)
                 break
             cm = (d.get("searchVO") or {}).get("catMap") or {}
             got_any = False
@@ -247,7 +247,9 @@ def main():
             if not got_any:
                 break
             time.sleep(0.25)
-        print("q=%s done, cumulative added=%d" % (q, added))
+        # 韧性：每个关键词完成后即落盘 inbox，避免被环境中断时整轮采集成果丢失（下一轮按 inbox 去重续跑）
+        json.dump(inbox, open(INBOX, "w", encoding="utf-8"), ensure_ascii=False, indent=1)
+        print("q=%s done, cumulative added=%d (flushed inbox=%d)" % (q, added, len(inbox)), flush=True)
 
     json.dump(inbox, open(INBOX, "w", encoding="utf-8"), ensure_ascii=False, indent=1)
     print("=" * 50)
